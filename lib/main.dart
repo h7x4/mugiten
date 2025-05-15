@@ -1,5 +1,6 @@
-
 import 'package:flutter/material.dart';
+import 'package:mugiten/services/jadb.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'bloc/theme/theme_bloc.dart';
 import 'routing/router.dart';
@@ -11,7 +12,10 @@ import 'settings.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  databaseFactory = databaseFactoryFfi;
+
   await Future.wait([
+    setupJadb(),
     setupDatabase(),
     setupSharedPreferences(),
   ]);
@@ -22,10 +26,10 @@ Future<void> main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
@@ -34,12 +38,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -47,7 +51,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void didChangePlatformBrightness() {
     if (autoThemeEnabled) {
       final themeIsDark =
-          WidgetsBinding.instance?.window.platformBrightness == Brightness.dark;
+          WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
       themeBloc.add(SetTheme(themeIsDark: themeIsDark));
     }
     super.didChangePlatformBrightness();
@@ -61,7 +65,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) => MaterialApp(
-          title: 'Jisho Study Tool',
+          title: '麦典',
           theme: themeState.theme.getMaterialTheme(),
           initialRoute: '/',
           onGenerateRoute: generateRoute,

@@ -6,10 +6,10 @@ import '../../models/themes/theme.dart';
 import '../../settings.dart';
 
 class LanguageSelector extends StatefulWidget {
-  const LanguageSelector({Key? key}) : super(key: key);
+  const LanguageSelector({super.key});
 
   @override
-  _LanguageSelectorState createState() => _LanguageSelectorState();
+  State<LanguageSelector> createState() => _LanguageSelectorState();
 }
 
 class _LanguageSelectorState extends State<LanguageSelector> {
@@ -32,7 +32,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
       ?.map((s) => s == '1')
       .toList();
 
-  Widget _languageOption(String language, {TextStyle? style}) => 
+  Widget _languageOption(String language, {TextStyle? style}) =>
     Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),

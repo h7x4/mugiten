@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mdi/mdi.dart';
+import 'package:mugiten/screens/search/kanji_search_view.dart';
+import 'package:mugiten/screens/search/word_search_view.dart';
 
 import '../bloc/theme/theme_bloc.dart';
 import '../components/common/denshi_jisho_background.dart';
 import 'debug.dart';
 import 'history.dart';
-import 'search/kanji_view.dart';
-import 'search/search_view.dart';
 import 'settings.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   State<StatefulWidget> createState() => _HomeState();
@@ -50,7 +50,7 @@ class _HomeState extends State<Home> {
 
   List<_Page> get pages => [
         const _Page(
-          content: SearchView(),
+          content: WordSearchView(),
           titleBar: Text('Search'),
           item: BottomNavigationBarItem(
             label: 'Search',
@@ -58,7 +58,7 @@ class _HomeState extends State<Home> {
           ),
         ),
         const _Page(
-          content: KanjiView(),
+          content: KanjiSearchView(),
           titleBar: Text('Kanji Search'),
           item: BottomNavigationBarItem(
             label: 'Kanji',

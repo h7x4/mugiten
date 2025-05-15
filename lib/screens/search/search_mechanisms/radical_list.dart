@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:jadb/const_data/radicals.dart';
+import 'package:jadb/search.dart';
 
 import '../../../../bloc/theme/theme_bloc.dart';
-import '../../../../data/radicals.dart';
 import '../../../../routing/routes.dart';
-import '../../../../services/jisho_api/radicals_search.dart';
 import '../../../settings.dart';
 
 class KanjiRadicalSearch extends StatefulWidget {
   final String? prechosenRadical;
 
-  const KanjiRadicalSearch({Key? key, this.prechosenRadical}) : super(key: key);
+  const KanjiRadicalSearch({super.key, this.prechosenRadical});
 
   @override
-  _KanjiRadicalSearchState createState() => _KanjiRadicalSearchState();
+  State<KanjiRadicalSearch> createState() => _KanjiRadicalSearchState();
 }
 
 class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
@@ -21,18 +22,19 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
   List<String> suggestions = [];
 
   Map<String, bool> radicalToggles = {
-    for (final String r in radicals.values.expand((l) => l)) r: false
+    for (final String r in RADICALS.values.expand((l) => l)) r: false
   };
 
   Map<String, bool> allowedToggles = {
-    for (final String r in radicals.values.expand((l) => l)) r: true
+    for (final String r in RADICALS.values.expand((l) => l)) r: true
   };
 
   @override
   void initState() {
     if (widget.prechosenRadical != null &&
-        radicalToggles.containsKey(widget.prechosenRadical))
+        radicalToggles.containsKey(widget.prechosenRadical)) {
       radicalToggles[widget.prechosenRadical!] = true;
+    }
     updateSuggestions();
     super.initState();
   }
@@ -55,19 +57,26 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
       return;
     }
 
-    final newSuggestions = await searchKanjiByRadicals(toggledRadicals);
+    final jadbConnection = GetIt.instance.get<JaDBConnection>();
+    late final List<String> newSuggestions;
+    late final List<String> newRadicals;
+    await Future.wait([
+      jadbConnection.searchKanjiByRadicals(toggledRadicals).then((value) {
+        newSuggestions = value;
+      }),
+      jadbConnection.searchRemainingRadicals(toggledRadicals).then((value) {
+        newRadicals = value;
+      }),
+    ]);
 
     setState(() {
       allowedToggles.forEach((key, value) {
         allowedToggles[key] = false;
       });
-      for (final r in newSuggestions.validRadicals) {
+      for (final r in newRadicals) {
         allowedToggles[r] = true;
       }
-      suggestions = (newSuggestions.kanji
-            ..sort((a, b) => a.strokes.compareTo(b.strokes)))
-          .map((k) => k.kanji)
-          .toList();
+      suggestions = newSuggestions;
     });
   }
 
@@ -114,7 +123,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
           color: AppTheme.jishoGreen.background,
           iconSize: fontSize * 1.3,
         ),
-        ...radicals
+        ...RADICALS
             .map(
               (key, value) => MapEntry(
                 key,
@@ -131,7 +140,6 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
             .values
             .where((element) => element.length != 1)
             .expand((l) => l)
-            .toList()
       ];
 
   Widget kanjiGridElement(String kanji) {

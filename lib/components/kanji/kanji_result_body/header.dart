@@ -8,8 +8,8 @@ class Header extends StatelessWidget {
 
   const Header({
     required this.kanji,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => AspectRatio(

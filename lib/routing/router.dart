@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/screens/search/kanji_search_result_page.dart';
+import 'package:mugiten/screens/search/word_search_result_page.dart';
 
 import '../screens/home.dart';
-import '../screens/info/about.dart';
 import '../screens/info/licenses.dart';
-import '../screens/search/result_page.dart';
 import '../screens/search/search_mechanisms/drawing.dart';
 import '../screens/search/search_mechanisms/grade_list.dart';
 import '../screens/search/search_mechanisms/radical_list.dart';
@@ -19,13 +19,15 @@ Route<Widget> generateRoute(RouteSettings settings) {
     case Routes.search:
       final searchTerm = args! as String;
       return MaterialPageRoute(
-        builder: (_) => ResultPage(searchTerm: searchTerm, isKanji: false),
+        builder: (_) => WordSearchResultPage(searchTerm: searchTerm),
       );
 
     case Routes.kanjiSearch:
       final searchTerm = args! as String;
       return MaterialPageRoute(
-        builder: (_) => ResultPage(searchTerm: searchTerm, isKanji: true),
+        builder: (_) => KanjiSearchResultPage(
+          kanji: searchTerm,
+        ),
       );
 
     case Routes.kanjiSearchDraw:
@@ -40,8 +42,6 @@ Route<Widget> generateRoute(RouteSettings settings) {
         builder: (_) => KanjiRadicalSearch(prechosenRadical: prechosenRadical),
       );
 
-    case Routes.about:
-      return MaterialPageRoute(builder: (_) => const AboutView());
     case Routes.aboutLicenses:
       return MaterialPageRoute(builder: (_) => const LicensesView());
 

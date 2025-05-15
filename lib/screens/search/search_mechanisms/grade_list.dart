@@ -1,24 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jadb/const_data/kanji_grades.dart';
 
-import '../../../../data/grades.dart';
+// import '../../../../data/grades.dart';
 import '../../../../models/themes/theme.dart';
 import '../../../../routing/routes.dart';
 import '../../../components/common/loading.dart';
 import '../../../settings.dart';
 
 class KanjiGradeSearch extends StatefulWidget {
-  const KanjiGradeSearch({Key? key}) : super(key: key);
+  const KanjiGradeSearch({super.key});
 
   @override
-  _KanjiGradeSearchState createState() => _KanjiGradeSearchState();
+  State<KanjiGradeSearch> createState() => _KanjiGradeSearchState();
 }
 
 class _GridItem extends StatelessWidget {
   final bool isNumber;
   final String text;
-  const _GridItem({Key? key, required this.text, this.isNumber = false})
-      : super(key: key);
+  const _GridItem({required this.text, this.isNumber = false});
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +67,19 @@ class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
                 strokeCount,
                 [
                   _GridItem(text: strokeCount.toString(), isNumber: true),
-                  ...kanji.map((k) => _GridItem(text: k)).toList(),
+                  ...kanji.map((k) => _GridItem(text: k)),
                 ],
               ),
             ),
           ),
         ),
-        grades,
+        JOUYOU_KANJI_BY_GRADE_AND_STROKE_COUNT,
       );
 
   Future<Widget> get makeGrids async => SingleChildScrollView(
         child: Column(
           children: (await Future.wait(
-            grades.keys.map(
+            JOUYOU_KANJI_BY_GRADE_AND_STROKE_COUNT.keys.map(
               (grade) async => ExpansionTile(
                 title: Text(grade == 7 ? 'Junior Highschool' : 'Grade $grade'),
                 maintainState: true,

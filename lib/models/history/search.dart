@@ -4,7 +4,6 @@ import 'package:sembast/sembast.dart';
 import './kanji_query.dart';
 import './word_query.dart';
 
-export 'package:get_it/get_it.dart';
 export 'package:sembast/sembast.dart';
 
 class Search {
@@ -30,26 +29,31 @@ class Search {
 
   Map<String, Object?> toJson() => {
         'timestamps': [for (final ts in timestamps) ts.millisecondsSinceEpoch],
-        'lastTimestamp': timestamps.last.millisecondsSinceEpoch,
-        'wordQuery': wordQuery?.toJson(),
-        'kanjiQuery': kanjiQuery?.toJson(),
+        'word': wordQuery?.toJson(),
+        'kanji': kanjiQuery?.toJson(),
       };
 
-  factory Search.fromJson(Map<String, dynamic> json) {
+  factory Search.fromJson(Map<String, Object?> json) {
     final List<DateTime> timestamps = [
       for (final ts in json['timestamps'] as List<dynamic>)
         DateTime.fromMillisecondsSinceEpoch(ts as int)
     ];
 
-    return json['wordQuery'] != null
-        ? Search.fromWordQuery(
-            wordQuery: WordQuery.fromJson(json['wordQuery']),
-            timestamps: timestamps,
-          )
-        : Search.fromKanjiQuery(
-            kanjiQuery: KanjiQuery.fromJson(json['kanjiQuery']),
-            timestamps: timestamps,
-          );
+    if (json['word'] == null && json['kanji'] == null) {
+      throw Exception('Search.fromJson: No word or kanji found');
+    }
+
+    if (json['word'] == null) {
+      return Search.fromKanjiQuery(
+        kanjiQuery: KanjiQuery.fromJson(json['kanji'] as Map<String, Object?>),
+        timestamps: timestamps,
+      );
+    } else {
+      return Search.fromWordQuery(
+        wordQuery: WordQuery.fromJson(json['word'] as Map<String, Object?>),
+        timestamps: timestamps,
+      );
+    }
   }
 
   static StoreRef<int, Object?> get store => intMapStoreFactory.store('search');

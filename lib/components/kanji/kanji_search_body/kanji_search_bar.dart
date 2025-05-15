@@ -6,7 +6,7 @@ import '../../../settings.dart';
 class KanjiSearchBar extends StatefulWidget {
   final Function(String)? onChanged;
 
-  const KanjiSearchBar({this.onChanged, Key? key}) : super(key: key);
+  const KanjiSearchBar({this.onChanged, super.key});
 
   @override
   KanjiSearchBarState createState() => KanjiSearchBarState();

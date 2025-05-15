@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:jisho_study_tool/services/kanji_regex.dart';
-import 'package:unofficial_jisho_api/api.dart';
+import 'package:jadb/util/romaji_transliteration.dart';
+// import 'package:jadic/services/kanji_regex.dart';
+// import 'package:unofficial_jisho_api/api.dart';
 
 import '../../../../models/themes/theme.dart';
-import '../../../../services/romaji_transliteration.dart';
 import '../../../../settings.dart';
 
 class KanjiKanaBox extends StatelessWidget {
-  final JishoJapaneseWord word;
+  final String baseWord;
+  final String? furigana;
+  // final JishoJapaneseWord word;
   final bool showRomajiBelow;
   final ColorSet colors;
   final bool autoTransliterateRomaji;
@@ -18,8 +20,9 @@ class KanjiKanaBox extends StatelessWidget {
   final EdgeInsets padding;
 
   const KanjiKanaBox({
-    Key? key,
-    required this.word,
+    super.key,
+    required this.baseWord,
+    required this.furigana,
     this.showRomajiBelow = false,
     this.colors = LightTheme.defaultMenuGreyNormal,
     this.autoTransliterateRomaji = true,
@@ -31,21 +34,10 @@ class KanjiKanaBox extends StatelessWidget {
       vertical: 5.0,
     ),
     this.padding = const EdgeInsets.all(5.0),
-  }) : super(key: key);
-
-  bool get hasFurigana => word.reading != null;
-
-  String get kana =>
-      '${word.reading ?? ""}${word.word ?? ""}'.replaceAll(kanjiRegex, '');
+  });
 
   @override
   Widget build(BuildContext context) {
-    final String? wordReading = word.reading == null
-        ? null
-        : (romajiEnabled && autoTransliterateRomaji
-            ? transliterateKanaToLatin(word.reading!)
-            : word.reading!);
-
     final fFontsize = furiganaFontsize ??
         ((kanjiFontsize != null) ? 0.8 * kanjiFontsize! : null);
 
@@ -59,10 +51,11 @@ class KanjiKanaBox extends StatelessWidget {
               ? CrossAxisAlignment.center
               : CrossAxisAlignment.start,
           children: [
-            // See header.dart for more details about this logic
-            hasFurigana
+            (furigana != null)
                 ? Text(
-                    wordReading!,
+                    romajiEnabled
+                        ? transliterateKanaToLatin(furigana!)
+                        : furigana!,
                     style: TextStyle(
                       fontSize: fFontsize,
                       color: colors.foreground,
@@ -81,15 +74,13 @@ class KanjiKanaBox extends StatelessWidget {
                   ),
 
             DefaultTextStyle.merge(
-              child: hasFurigana
-                  ? Text(word.word ?? word.reading!)
-                  : Text(wordReading ?? word.word!),
+              child: Text(baseWord),
               style: TextStyle(fontSize: kanjiFontsize)
                   .merge(japaneseFont.textStyle),
             ),
             if (romajiEnabled && showRomajiBelow)
               Text(
-                transliterateKanaToLatin(kana),
+                transliterateKanaToLatin(furigana ?? baseWord),
               )
           ],
         ),

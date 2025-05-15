@@ -7,8 +7,9 @@ abstract class AppTheme {
   const AppTheme();
 
   static const ColorSet jishoGreen = ColorSet(
-    foreground: Colors.white,
-    background: Color(0xFF3EDD00),
+    foreground: Colors.black,
+    // background: Color(0xFF3EDD00),
+    background: Color(0xFFFFE680),
   );
 
   static const Color jishoGrey = Color(0xFF5A5A5B);

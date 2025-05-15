@@ -8,10 +8,10 @@ class EnglishDefinitions extends StatelessWidget {
   final ColorSet colors;
 
   const EnglishDefinitions({
-    Key? key,
+    super.key,
     required this.englishDefinitions,
     this.colors = LightTheme.defaultMenuGreyNormal,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Wrap(

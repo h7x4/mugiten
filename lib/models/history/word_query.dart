@@ -11,6 +11,6 @@ class WordQuery {
 
   Map<String, Object?> toJson() => {'query': query};
 
-  factory WordQuery.fromJson(Map<String, dynamic> json) =>
+  factory WordQuery.fromJson(Map<String, Object?> json) =>
       WordQuery(query: json['query'] as String);
 }

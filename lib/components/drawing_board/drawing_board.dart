@@ -20,11 +20,11 @@ class DrawingBoard extends StatefulWidget {
     this.allowHiragana = false,
     this.allowKatakana = false,
     this.allowOther = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
-  _DrawingBoardState createState() => _DrawingBoardState();
+  State<DrawingBoard> createState() => _DrawingBoardState();
 }
 
 class _DrawingBoardState extends State<DrawingBoard> {

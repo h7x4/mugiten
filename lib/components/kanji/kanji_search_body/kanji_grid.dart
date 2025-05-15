@@ -7,7 +7,7 @@ import '../../../settings.dart';
 class KanjiGrid extends StatelessWidget {
   final List<String> suggestions;
 
-  const KanjiGrid({required this.suggestions, Key? key}) : super(key: key);
+  const KanjiGrid({required this.suggestions, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +39,10 @@ class _GridItem extends StatelessWidget {
       },
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
-          final _menuColors = state.theme.menuGreyLight;
+          final menuColors = state.theme.menuGreyLight;
           return Container(
             decoration: BoxDecoration(
-              color: _menuColors.background,
+              color: menuColors.background,
               borderRadius: BorderRadius.circular(20.0),
             ),
             child: Container(
@@ -51,7 +51,7 @@ class _GridItem extends StatelessWidget {
                 child: Text(
                   kanji,
                   style: japaneseFont.textStyle.merge(
-                    TextStyle(color: _menuColors.foreground),
+                    TextStyle(color: menuColors.foreground),
                   ),
                 ),
               ),

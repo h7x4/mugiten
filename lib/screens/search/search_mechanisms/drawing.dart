@@ -4,7 +4,7 @@ import '../../../components/drawing_board/drawing_board.dart';
 import '../../../routing/routes.dart';
 
 class KanjiDrawingSearch extends StatelessWidget {
-  const KanjiDrawingSearch({Key? key}) : super(key: key);
+  const KanjiDrawingSearch({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class KanjiDrawingSearch extends StatelessWidget {
       appBar: AppBar(title: const Text('Draw a kanji')),
       body: Column(
         children: [
-          Expanded(child: Column()),
+          const Expanded(child: Column()),
           DrawingBoard(
             onlyOneCharacterSuggestions: true,
             onSuggestionChosen: (suggestion) => Navigator.popAndPushNamed(

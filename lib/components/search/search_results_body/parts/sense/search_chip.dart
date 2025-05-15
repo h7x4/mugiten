@@ -8,11 +8,11 @@ class SearchChip extends StatelessWidget {
   final TextStyle? extraTextStyle;
 
   const SearchChip({
-    Key? key,
+    super.key,
     required this.text,
     this.colors = LightTheme.defaultMenuGreyNormal,
     this.extraTextStyle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Container(

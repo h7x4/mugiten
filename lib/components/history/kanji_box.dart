@@ -6,9 +6,9 @@ class KanjiBox extends StatelessWidget {
   final String kanji;
 
   const KanjiBox({
-    Key? key,
+    super.key,
     required this.kanji,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../models/history/search.dart';
 import '../../routing/routes.dart';
@@ -19,8 +20,8 @@ class SearchItem extends StatelessWidget {
     required this.objectKey,
     this.onDelete,
     this.onFavourite,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   Widget get _child => (search.isKanji)
       ? KanjiBox(kanji: search.kanjiQuery!.kanji)

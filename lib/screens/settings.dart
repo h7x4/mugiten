@@ -5,6 +5,7 @@ import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mdi/mdi.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
@@ -15,15 +16,14 @@ import '../components/common/denshi_jisho_background.dart';
 import '../models/history/search.dart';
 import '../routing/routes.dart';
 import '../services/database.dart';
-import '../services/open_webpage.dart';
 import '../services/snackbar.dart';
 import '../settings.dart';
 
 class SettingsView extends StatefulWidget {
-  const SettingsView({Key? key}) : super(key: key);
+  const SettingsView({super.key});
 
   @override
-  _SettingsViewState createState() => _SettingsViewState();
+  State<SettingsView> createState() => _SettingsViewState();
 }
 
 class _SettingsViewState extends State<SettingsView> {
@@ -42,7 +42,7 @@ class _SettingsViewState extends State<SettingsView> {
   // ignore: avoid_positional_boolean_parameters
   void toggleAutoTheme(bool b) {
     final bool newThemeIsDark = b
-        ? WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
+        ? WidgetsBinding.instance.window.platformBrightness == Brightness.dark
         : darkThemeEnabled;
 
     BlocProvider.of<ThemeBloc>(context)
@@ -56,10 +56,11 @@ class _SettingsViewState extends State<SettingsView> {
       list: [for (final font in JapaneseFont.values) font.name],
       chosen: japaneseFont.index,
     )(context);
-    if (i != null)
+    if (i != null) {
       setState(() {
         japaneseFont = JapaneseFont.values[i];
       });
+    }
   }
 
   /// Can assume Android for time being
@@ -92,11 +93,13 @@ class _SettingsViewState extends State<SettingsView> {
         .toList();
     late final List<Search> importedSearches;
     try {
-      importedSearches = ((((jsonDecode(await file.readAsString())
-                  as Map<String, Object?>)['stores']! as List)
-              .map((e) => e as Map)
-              .where((e) => e['name'] == 'search')
-              .first)['values'] as List)
+      importedSearches = (jsonDecode(await file.readAsString())
+              as List<dynamic>)
+          // importedSearches = (((jsonDecode(await file.readAsString())
+          //             as Map<String, Object?>)['stores']! as List<Object?>)
+          //         .map((e) => e! as Map<String, Object?>)
+          //         .where((e) => e['name'] == 'search')
+          //         .first['values'] as List<dynamic>)
           .map((item) => Search.fromJson(item))
           .toList();
     } catch (e) {
@@ -166,81 +169,80 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
-          final TextStyle _titleTextStyle = TextStyle(
+          final TextStyle titleTextStyle = TextStyle(
             color:
                 state is DarkThemeState ? AppTheme.jishoGreen.background : null,
           );
 
-          const SettingsTileTheme theme = SettingsTileTheme(
-            horizontalTitleGap: 0,
-          );
+          // const SettingsTileTheme theme = SettingsTileTheme(
+          //   horizontalTitleGap: 0,
+          // );
 
           return SettingsList(
-            backgroundColor: Colors.transparent,
+            // backgroundColor: Colors.transparent,
             contentPadding: const EdgeInsets.symmetric(vertical: 10),
             sections: <SettingsSection>[
               SettingsSection(
-                title: 'Dictionary',
-                titleTextStyle: _titleTextStyle,
+                title: Text('Dictionary', style: titleTextStyle),
+                // titleTextStyle: _titleTextStyle,
                 tiles: <SettingsTile>[
                   SettingsTile.switchTile(
-                    title: 'Use romaji',
+                    title: const Text('Use romaji'),
                     leading: const Icon(Mdi.alphabetical),
                     onToggle: (b) => setState(() => romajiEnabled = b),
-                    switchValue: romajiEnabled,
-                    theme: theme,
-                    switchActiveColor: AppTheme.jishoGreen.background,
+                    initialValue: romajiEnabled,
+                    // theme: theme,
+                    activeSwitchColor: AppTheme.jishoGreen.background,
                   ),
                   SettingsTile.switchTile(
-                    title: 'Extensive search',
+                    title: const Text('Extensive search'),
                     leading: const Icon(Icons.downloading),
                     onToggle: (b) => setState(() => extensiveSearchEnabled = b),
-                    switchValue: extensiveSearchEnabled,
-                    theme: theme,
-                    switchActiveColor: AppTheme.jishoGreen.background,
+                    initialValue: extensiveSearchEnabled,
+                    // theme: theme,
+                    activeSwitchColor: AppTheme.jishoGreen.background,
                     // subtitle:
                     //     'Gathers extra data when searching for words, at the expense of having to wait for extra word details.',
                     // subtitleWidget:
                     trailing: const Icon(Icons.info),
-                    subtitleMaxLines: 3,
+                    // subtitleMaxLines: 3,
                   ),
                   SettingsTile(
-                    title: 'Japanese font',
+                    title: const Text('Japanese font'),
                     leading: const Icon(Icons.format_size),
                     onPressed: changeFont,
-                    theme: theme,
+                    // theme: theme,
                     trailing: Text(japaneseFont.name),
                     // subtitle:
                     //     'Which font to use for japanese text. This might be useful if your phone shows kanji with a Chinese font.',
-                    subtitleMaxLines: 3,
+                    // subtitleMaxLines: 3,
                   ),
                 ],
               ),
 
               SettingsSection(
-                title: 'Theme',
-                titleTextStyle: _titleTextStyle,
+                title: Text('Theme', style: titleTextStyle),
                 tiles: <SettingsTile>[
                   SettingsTile.switchTile(
-                    title: 'Automatic theme',
+                    title: const Text('Automatic theme'),
                     leading: const Icon(Icons.brightness_auto),
                     onToggle: toggleAutoTheme,
-                    switchValue: autoThemeEnabled,
-                    theme: theme,
-                    switchActiveColor: AppTheme.jishoGreen.background,
+                    initialValue: autoThemeEnabled,
+                    // theme: theme,
+                    activeSwitchColor: AppTheme.jishoGreen.background,
                   ),
                   SettingsTile.switchTile(
-                    title: 'Dark Theme',
+                    title: const Text('Dark Theme'),
                     leading: const Icon(Icons.dark_mode),
                     onToggle: (b) {
                       BlocProvider.of<ThemeBloc>(context)
                           .add(SetTheme(themeIsDark: b));
                       setState(() => darkThemeEnabled = b);
                     },
-                    switchValue: darkThemeEnabled,
+                    initialValue: darkThemeEnabled,
                     enabled: !autoThemeEnabled,
-                    theme: theme,
-                    switchActiveColor: AppTheme.jishoGreen.background,
+                    // theme: theme,
+                    activeSwitchColor: AppTheme.jishoGreen.background,
                   ),
                 ],
               ),
@@ -282,72 +284,67 @@ class _SettingsViewState extends State<SettingsView> {
               // ),
 
               SettingsSection(
-                title: 'Data',
-                titleTextStyle: _titleTextStyle,
+                title: Text('Data', style: titleTextStyle),
                 tiles: <SettingsTile>[
                   SettingsTile(
                     leading: const Icon(Icons.file_upload),
-                    title: 'Import Data',
+                    title: const Text('Import Data'),
                     onPressed: importData,
                     enabled: Platform.isAndroid,
-                    subtitle:
-                        Platform.isAndroid ? null : 'Not available on iOS yet',
-                    subtitleWidget: dataImportIsLoading
+                    description: Platform.isAndroid
+                        ? null
+                        : Text('Not available on iOS yet'),
+                    value: dataImportIsLoading
                         ? const LinearProgressIndicator()
                         : null,
                   ),
                   SettingsTile(
                     leading: const Icon(Icons.file_download),
-                    title: 'Export Data',
+                    title: const Text('Export Data'),
                     enabled: Platform.isAndroid,
-                    subtitle:
-                        Platform.isAndroid ? null : 'Not available on iOS yet',
-                    subtitleWidget: dataExportIsLoading
+                    description: Platform.isAndroid
+                        ? null
+                        : Text('Not available on iOS yet'),
+                    value: dataExportIsLoading
                         ? const LinearProgressIndicator()
                         : null,
                   ),
                   SettingsTile(
                     leading: const Icon(Icons.delete),
-                    title: 'Clear History',
+                    title: const Text(
+                      'Clear History',
+                      style: TextStyle(color: Colors.red),
+                    ),
                     onPressed: clearHistory,
-                    titleTextStyle: const TextStyle(color: Colors.red),
                   ),
                   SettingsTile(
                     leading: const Icon(Icons.delete),
-                    title: 'Clear Favourites',
-                    onPressed: (c) {},
-                    titleTextStyle: const TextStyle(color: Colors.red),
+                    title: const Text(
+                      'Clear Favourites',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    onPressed: (c) {
+                      showSnackbar(
+                        context,
+                        'This feature is not implemented yet',
+                      );
+                    },
                     enabled: false,
-                  )
+                  ),
                 ],
               ),
 
               SettingsSection(
-                title: 'Info',
-                titleTextStyle: _titleTextStyle,
+                title: Text('Info', style: titleTextStyle),
                 tiles: <SettingsTile>[
                   SettingsTile(
-                    leading: const Icon(Icons.info),
-                    title: 'About',
-                    onPressed: (c) =>
-                        Navigator.pushNamed(context, Routes.about),
-                  ),
-                  SettingsTile(
-                    leading: Image.asset(
-                      'assets/images/logo/logo_icon_transparent_green.png',
-                      width: 30,
-                    ),
-                    title: 'Jisho',
-                    onPressed: (c) => open_webpage('https://jisho.org/about'),
-                  ),
-                  SettingsTile(
                     leading: const Icon(Icons.copyright),
-                    title: 'Licenses',
+                    title: const Text('Licenses'),
                     onPressed: (c) =>
                         Navigator.pushNamed(context, Routes.aboutLicenses),
                   ),
                 ],
-              )
+              ),
             ],
           );
         },

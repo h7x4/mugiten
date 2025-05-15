@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:unofficial_jisho_api/api.dart';
+import 'package:jadb/models/word_search/word_search_ruby.dart';
 
 import '../../../../bloc/theme/theme_bloc.dart';
 import 'kanji_kana_box.dart';
 
 class OtherForms extends StatelessWidget {
-  final List<JishoJapaneseWord> forms;
+  final List<WordSearchRuby> forms;
 
-  const OtherForms({required this.forms, Key? key}) : super(key: key);
+  const OtherForms({required this.forms, super.key});
 
   @override
   Widget build(BuildContext context) => Column(
@@ -24,7 +24,8 @@ class OtherForms extends StatelessWidget {
                       BlocBuilder<ThemeBloc, ThemeState>(
                         builder: (context, state) {
                           return KanjiKanaBox(
-                            word: form,
+                            baseWord: form.base,
+                            furigana: form.furigana,
                             colors: state.theme.menuGreyLight,
                           );
                         },

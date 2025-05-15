@@ -6,7 +6,7 @@ import '../../models/themes/theme.dart';
 import '../../settings.dart';
 
 export 'package:flutter_bloc/flutter_bloc.dart';
-export 'package:jisho_study_tool/models/themes/theme.dart';
+export 'package:mugiten/models/themes/theme.dart';
 
 part 'theme_event.dart';
 part 'theme_state.dart';
@@ -20,7 +20,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     );
 
     final bool autoThemeIsDark =
-        SchedulerBinding.instance!.window.platformBrightness == Brightness.dark;
+        SchedulerBinding.instance.window.platformBrightness == Brightness.dark;
 
     add(
       SetTheme(

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../settings.dart';
 
 class LicensesView extends StatelessWidget {
-  const LicensesView({Key? key}) : super(key: key);
+  const LicensesView({super.key});
 
   @override
   Widget build(BuildContext context) => LicensePage(
-        applicationName: 'Jisho Study Tool',
+        applicationName: '麦典',
         applicationVersion: 'Version: $appVersion',
         applicationIcon: Padding(
           padding: const EdgeInsets.symmetric(vertical: 30),
@@ -16,7 +16,7 @@ class LicensesView extends StatelessWidget {
               const Expanded(child: SizedBox()),
               Expanded(
                 child: Image.asset(
-                  'assets/images/logo/logo_icon_transparent_green.png',
+                  'assets/images/logo/mugi.png',
                 ),
               ),
               const Expanded(child: SizedBox()),

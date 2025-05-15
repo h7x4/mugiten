@@ -9,8 +9,8 @@ class Rank extends StatelessWidget {
   const Rank({
     required this.rank,
     this.ifNullChar = '⨉',
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(

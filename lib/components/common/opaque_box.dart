@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class OpaqueBox extends StatelessWidget {
   final Widget child;
 
-  const OpaqueBox({required this.child, Key? key,}) : super(key: key);
+  const OpaqueBox({required this.child, super.key,});
 
   @override
   Widget build(BuildContext context) {

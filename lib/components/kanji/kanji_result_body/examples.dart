@@ -1,20 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:unofficial_jisho_api/api.dart';
+import 'package:jadb/util/romaji_transliteration.dart';
+// import 'package:unofficial_jisho_api/api.dart';
 
 import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';
-import '../../../services/romaji_transliteration.dart';
 import '../../../settings.dart';
+
+/// An example of a word that contains the kanji in question.
+class YomiExample {
+  /// The original text of the example.
+  String example;
+
+  /// The reading of the example.
+  String reading;
+
+  /// The meaning of the example.
+  String meaning;
+
+  // ignore: public_member_api_docs
+  YomiExample({
+    required this.example,
+    required this.reading,
+    required this.meaning,
+  });
+
+  // ignore: public_member_api_docs
+  Map<String, String> toJson() => {
+        'example': example,
+        'reading': reading,
+        'meaning': meaning,
+      };
+}
 
 class Examples extends StatelessWidget {
   final List<YomiExample> onyomi;
   final List<YomiExample> kunyomi;
 
   const Examples({
-    Key? key,
+    super.key,
     required this.onyomi,
     required this.kunyomi,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -96,10 +122,9 @@ class _Kana extends StatelessWidget {
   final YomiExample example;
 
   const _Kana({
-    Key? key,
     required this.colors,
     required this.example,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -143,10 +168,9 @@ class _ExampleText extends StatelessWidget {
   final YomiExample example;
 
   const _ExampleText({
-    Key? key,
     required this.colors,
     required this.example,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

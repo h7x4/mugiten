@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/themes/theme.dart';
 
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +11,7 @@ class SplashScreen extends StatelessWidget {
       decoration: BoxDecoration(color: AppTheme.jishoGreen.background),
       child: const Center(
         child: Image(
-          image: AssetImage('assets/images/logo/logo_icon_transparent.png'),
+          image: AssetImage('assets/images/logo/mugi.png'),
         ),
       ),
     );

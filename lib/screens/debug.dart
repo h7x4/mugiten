@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../components/drawing_board/drawing_board.dart';
 
 class DebugView extends StatelessWidget {
-  const DebugView({Key? key}) : super(key: key);
+  const DebugView({super.key});
 
   @override
   Widget build(BuildContext context) {

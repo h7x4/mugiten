@@ -9,8 +9,8 @@ class JlptLevel extends StatelessWidget {
   const JlptLevel({
     required this.jlptLevel,
     this.ifNullChar = '⨉',
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(

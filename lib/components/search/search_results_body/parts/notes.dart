@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Notes extends StatelessWidget {
   final List<String> notes;
-  const Notes({Key? key, required this.notes}) : super(key: key);
+  const Notes({super.key, required this.notes});
 
   @override
   Widget build(BuildContext context) => Column(

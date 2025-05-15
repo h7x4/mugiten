@@ -7,8 +7,8 @@ class StrokeOrderGif extends StatelessWidget {
 
   const StrokeOrderGif({
     required this.uri,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(

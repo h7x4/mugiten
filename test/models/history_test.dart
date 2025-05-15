@@ -1,7 +1,7 @@
-import 'package:jisho_study_tool/models/history/kanji_query.dart';
-import 'package:jisho_study_tool/models/history/search.dart';
-import 'package:jisho_study_tool/models/history/word_query.dart';
-import 'package:test/test.dart';
+import 'package:mugiten/models/history/kanji_query.dart';
+import 'package:mugiten/models/history/search.dart';
+import 'package:mugiten/models/history/word_query.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Search', () {
@@ -14,6 +14,7 @@ void main() {
       Search.fromJson({'timestamps':[1649082072981],'lastTimestamp':1649082072981,'wordQuery':{'query':'感涙屋'},'kanjiQuery':null}),
       Search.fromJson({'timestamps':[1644951726777,1644951732749],'lastTimestamp':1644951732749,'wordQuery':{'query':'呑める'},'kanjiQuery':null}),
     ];
+
     test("mergeSearches with empty lists doesn't add data", () {
       final List<Search> merged1 = mergeSearches(searches, []);
       final List<Search> merged2 = mergeSearches([], searches);

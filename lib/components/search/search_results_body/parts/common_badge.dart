@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import './badge.dart';
+import 'circle_badge.dart';
 
 class CommonBadge extends StatelessWidget {
   final bool isCommon;
 
   const CommonBadge({
     required this.isCommon,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Badge(
+    return CircleBadge(
       color: isCommon ? Colors.green : Colors.transparent,
       child: Text(
         'C',

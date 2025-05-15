@@ -7,6 +7,6 @@ class KanjiQuery {
 
   Map<String, Object?> toJson() => {'kanji': kanji};
 
-  factory KanjiQuery.fromJson(Map<String, dynamic> json) =>
+  factory KanjiQuery.fromJson(Map<String, Object?> json) =>
       KanjiQuery(kanji: json['kanji'] as String);
 }

@@ -7,10 +7,10 @@ import 'kanji_search_body/kanji_search_bar.dart';
 import 'kanji_search_body/kanji_search_options_bar.dart';
 
 class KanjiSearchBody extends StatefulWidget {
-  const KanjiSearchBody({Key? key}) : super(key: key);
+  const KanjiSearchBody({super.key});
 
   @override
-  _KanjiSearchBodyState createState() => _KanjiSearchBodyState();
+  State<KanjiSearchBody> createState() => _KanjiSearchBodyState();
 }
 
 class _KanjiSearchBodyState extends State<KanjiSearchBody>
@@ -77,10 +77,11 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
                     Focus(
                       focusNode: focus,
                       onFocusChange: (hasFocus) {
-                        if (hasFocus)
+                        if (hasFocus) {
                           _controller.forward();
-                        else
+                        } else {
                           _controller.reverse();
+                        }
                       },
                       child: KanjiSearchBar(
                         key: _kanjiSearchBarState,

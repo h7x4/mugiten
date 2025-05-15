@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:jadb/util/romaji_transliteration.dart';
 
 import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';
-import '../../../services/romaji_transliteration.dart';
 import '../../../settings.dart';
 
 enum YomiType {
@@ -45,8 +45,8 @@ class YomiChips extends StatelessWidget {
   const YomiChips({
     required this.yomi,
     required this.type,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   bool get isExpandable => yomi.length > 6;
 
@@ -113,9 +113,9 @@ class YomiChips extends StatelessWidget {
       children: yomiCardsWithTitle,
     );
 
-    if (!isExpandable)
+    if (!isExpandable) {
       return wrap;
-    else
+    } else {
       return ExpansionTile(
         title: Center(
           child: yomiCard(
@@ -130,6 +130,7 @@ class YomiChips extends StatelessWidget {
           const SizedBox(height: 25.0),
         ],
       );
+    }
   }
 
   @override

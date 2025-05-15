@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:flutter/material.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
-Future<void> open_webpage(String url) async {
-  if (await canLaunch(url)) {
-    launch(url);
-  } else {
-    debugPrint('Could not open url: $url');
-  }
-}
+// Future<void> openWebpage(String url) async {
+//   final Uri uri = Uri.parse(url);
+//   if (await canLaunchUrl(uri)) {
+//     launchUrl(uri);
+//   } else {
+//     debugPrint('Could not open url: $url');
+//   }
+// }

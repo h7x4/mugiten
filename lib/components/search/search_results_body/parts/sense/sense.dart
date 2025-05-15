@@ -1,47 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:unofficial_jisho_api/api.dart';
+import 'package:jadb/models/word_search/word_search_sense.dart';
+// import 'package:unofficial_jisho_api/api.dart';
 
 import '../../../../../bloc/theme/theme_bloc.dart';
 import 'antonyms.dart';
-import 'definition_abstract.dart';
 import 'english_definitions.dart';
-import 'sentences.dart';
-import 'supplemental_info.dart';
 
 class Sense extends StatelessWidget {
   final int index;
-  final JishoWordSense sense;
-  final PhraseScrapeMeaning? meaning;
+  final WordSearchSense sense;
 
   const Sense({
-    Key? key,
+    super.key,
     required this.index,
     required this.sense,
-    this.meaning,
-  }) : super(key: key);
-
-  // TODO: This assumes that there is only one antonym. However, the
-  //         antonym system is made with the case of multiple antonyms
-  //         in mind.
-  List<String> _removeAntonyms(List<String> supplementalInfo) {
-    for (int i = 0; i < supplementalInfo.length; i++) {
-      if (RegExp(r'^Antonym: .*$').hasMatch(supplementalInfo[i])) {
-        supplementalInfo.removeAt(i);
-        break;
-      }
-    }
-    return supplementalInfo;
-  }
-
-  List<String>? get _supplementalWithoutAntonyms => meaning == null
-      ? null
-      : _removeAntonyms(List.from(meaning!.supplemental));
-
-  bool get hasSupplementalInfo =>
-      sense.info.isNotEmpty ||
-      sense.source.isNotEmpty ||
-      sense.tags.isNotEmpty ||
-      (_supplementalWithoutAntonyms?.isNotEmpty ?? false);
+    // this.meaning,
+  });
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
@@ -64,19 +38,7 @@ class Sense extends StatelessWidget {
                 englishDefinitions: sense.englishDefinitions,
                 colors: state.theme.menuGreyNormal,
               ),
-              if (hasSupplementalInfo)
-                SupplementalInfo(
-                  sense: sense,
-                  supplementalInfo: _supplementalWithoutAntonyms,
-                ),
-              if (meaning?.definitionAbstract != null)
-                DefinitionAbstract(
-                  text: meaning!.definitionAbstract!,
-                  color: state.theme.foreground,
-                ),
               if (sense.antonyms.isNotEmpty) Antonyms(antonyms: sense.antonyms),
-              if (meaning != null && meaning!.sentences.isNotEmpty)
-                Sentences(sentences: meaning!.sentences)
             ]
                 .map(
                   (e) => Container(

@@ -8,10 +8,10 @@ class KanjiRow extends StatelessWidget {
   final List<String> kanji;
   final double fontSize;
   const KanjiRow({
-    Key? key,
+    super.key,
     required this.kanji,
     this.fontSize = 20,
-  }) : super(key: key);
+  });
 
   Widget _kanjiBox(String kanji) => UnconstrainedBox(
         child: IntrinsicHeight(

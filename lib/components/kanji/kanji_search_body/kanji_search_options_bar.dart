@@ -4,7 +4,7 @@ import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';
 
 class KanjiSearchOptionsBar extends StatelessWidget {
-  const KanjiSearchOptionsBar({Key? key}) : super(key: key);
+  const KanjiSearchOptionsBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +42,7 @@ class _IconButton extends StatelessWidget {
   const _IconButton({
     required this.icon,
     required this.onPressed,
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(

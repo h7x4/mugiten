@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadb/models/word_search/word_search_xref_entry.dart';
 
 import '../../../../../models/themes/theme.dart';
 import '../../../../../routing/routes.dart';
@@ -6,17 +7,17 @@ import '../../../../../settings.dart';
 import 'search_chip.dart';
 
 class Antonyms extends StatelessWidget {
-  final List<String> antonyms;
+  final List<WordSearchXrefEntry> antonyms;
   final ColorSet colors;
 
   const Antonyms({
-    Key? key,
+    super.key,
     required this.antonyms,
     this.colors = const ColorSet(
       foreground: Colors.white,
       background: Colors.blue,
     ),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +41,7 @@ class Antonyms extends StatelessWidget {
                   arguments: antonym,
                 ),
                 child: SearchChip(
-                  text: antonym,
+                  text: antonym.baseWord,
                   colors: colors,
                   extraTextStyle: japaneseFont.textStyle,
                 ),
