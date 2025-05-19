@@ -194,19 +194,6 @@ class _SettingsViewState extends State<SettingsView> {
                     // theme: theme,
                     activeSwitchColor: AppTheme.jishoGreen.background,
                   ),
-                  SettingsTile.switchTile(
-                    title: const Text('Extensive search'),
-                    leading: const Icon(Icons.downloading),
-                    onToggle: (b) => setState(() => extensiveSearchEnabled = b),
-                    initialValue: extensiveSearchEnabled,
-                    // theme: theme,
-                    activeSwitchColor: AppTheme.jishoGreen.background,
-                    // subtitle:
-                    //     'Gathers extra data when searching for words, at the expense of having to wait for extra word details.',
-                    // subtitleWidget:
-                    trailing: const Icon(Icons.info),
-                    // subtitleMaxLines: 3,
-                  ),
                   SettingsTile(
                     title: const Text('Japanese font'),
                     leading: const Icon(Icons.format_size),
@@ -246,42 +233,6 @@ class _SettingsViewState extends State<SettingsView> {
                   ),
                 ],
               ),
-
-              // TODO: This will be left commented until caching is implemented
-              // SettingsSection(
-              //   title: 'Cache',
-              //   titleTextStyle: _titleTextStyle,
-              //   tiles: <SettingsTile>[
-              //     SettingsTile.switchTile(
-              //       title: 'Cache grade 1-7 kanji',
-              //       switchValue: false,
-              //       onToggle: (v) {},
-              //       enabled: false,
-              //       switchActiveColor: AppTheme.jishoGreen.background,
-              //     ),
-              //     SettingsTile.switchTile(
-              //       title: 'Cache grade standard kanji',
-              //       switchValue: false,
-              //       onToggle: (v) {},
-              //       enabled: false,
-              //       switchActiveColor: AppTheme.jishoGreen.background,
-              //     ),
-              //     SettingsTile.switchTile(
-              //       title: 'Cache all favourites',
-              //       switchValue: false,
-              //       onToggle: (v) {},
-              //       enabled: false,
-              //       switchActiveColor: AppTheme.jishoGreen.background,
-              //     ),
-              //     SettingsTile.switchTile(
-              //       title: 'Cache all searches',
-              //       switchValue: false,
-              //       onToggle: (v) {},
-              //       enabled: false,
-              //       switchActiveColor: AppTheme.jishoGreen.background,
-              //     ),
-              //   ],
-              // ),
 
               SettingsSection(
                 title: Text('Data', style: titleTextStyle),

@@ -7,11 +7,9 @@ import 'sense/sense.dart';
 
 class Senses extends StatelessWidget {
   final List<WordSearchSense> senses;
-  // final List<PhraseScrapeMeaning>? extraData;
 
   const Senses({
     required this.senses,
-    // this.extraData,
     super.key,
   });
 
@@ -20,9 +18,6 @@ class Senses extends StatelessWidget {
           Sense(
             index: i,
             sense: senses[i],
-            // meaning: extraData?.firstWhereOrNull(
-            //   (m) => m.definition == senses[i].englishDefinitions.join('; '),
-            // ),
           ),
       ];
 
