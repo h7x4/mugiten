@@ -14,8 +14,27 @@ class Sense extends StatelessWidget {
     super.key,
     required this.index,
     required this.sense,
-    // this.meaning,
   });
+
+  String _capitalize(String str) {
+    if (str.isEmpty) return str;
+    return str[0].toUpperCase() + str.substring(1);
+  }
+
+  List<String> _notes() {
+    return [
+      ...sense.restrictedToReading.map((e) => 'Restricted to $e'),
+      ...sense.restrictedToKanji.map((e) => 'Restricted to $e'),
+      ...sense.fields
+          .map((e) => 'Field: ${_capitalize(e.description)}'),
+      ...sense.misc.map((e) => e.description),
+      ...sense.languageSource
+          .where((e) => !e.fullyDescribesSense)
+          .map((e) => 'From ${e.language}, "${e.phrase}"'),
+      ...sense.seeAlso.map((e) => 'See also: ${e.baseWord}'),
+      ...sense.dialects.map((e) => '${_capitalize(e.description)} dialect'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
@@ -30,7 +49,7 @@ class Sense extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                '${index + 1}. ${sense.partsOfSpeech.join(', ')}',
+                '${index + 1}. ${sense.partsOfSpeech.map((pos) => _capitalize(pos.shortDescription)).join(', ')}',
                 style: const TextStyle(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.left,
               ),
@@ -38,6 +57,14 @@ class Sense extends StatelessWidget {
                 englishDefinitions: sense.englishDefinitions,
                 colors: state.theme.menuGreyNormal,
               ),
+              if (_notes().isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(top: 5),
+                  child: Text(
+                    _notes().join('\n'),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
               if (sense.antonyms.isNotEmpty) Antonyms(antonyms: sense.antonyms),
             ]
                 .map(
