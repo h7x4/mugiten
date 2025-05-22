@@ -8,7 +8,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: AppTheme.jishoGreen.background),
+      decoration: BoxDecoration(color: AppTheme.mugitenWheat.background),
       child: const Center(
         child: Image(
           image: AssetImage('assets/images/logo/mugi.png'),

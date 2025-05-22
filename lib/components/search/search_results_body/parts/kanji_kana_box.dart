@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
-// import 'package:jadic/services/kanji_regex.dart';
-// import 'package:unofficial_jisho_api/api.dart';
 
 import '../../../../models/themes/theme.dart';
 import '../../../../settings.dart';
@@ -9,7 +7,6 @@ import '../../../../settings.dart';
 class KanjiKanaBox extends StatelessWidget {
   final String baseWord;
   final String? furigana;
-  // final JishoJapaneseWord word;
   final bool showRomajiBelow;
   final ColorSet colors;
   final bool autoTransliterateRomaji;
@@ -72,7 +69,6 @@ class KanjiKanaBox extends StatelessWidget {
                       fontSize: fFontsize,
                     ),
                   ),
-
             DefaultTextStyle.merge(
               child: Text(baseWord),
               style: TextStyle(fontSize: kanjiFontsize)

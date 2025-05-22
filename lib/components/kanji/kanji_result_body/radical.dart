@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:unofficial_jisho_api/api.dart' as jisho;
 
 import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';

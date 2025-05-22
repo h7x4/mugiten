@@ -1,7 +1,5 @@
-// import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
-// import 'package:unofficial_jisho_api/api.dart';
 
 import 'sense/sense.dart';
 

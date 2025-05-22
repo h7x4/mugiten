@@ -28,12 +28,12 @@ class _HomeState extends State<Home> {
           appBar: AppBar(
             title: pages[pageNum].titleBar,
             centerTitle: true,
-            backgroundColor: AppTheme.jishoGreen.background,
-            foregroundColor: AppTheme.jishoGreen.foreground,
+            backgroundColor: AppTheme.mugitenWheat.background,
+            foregroundColor: AppTheme.mugitenWheat.foreground,
           ),
           body: DenshiJishoBackground(child: pages[pageNum].content),
           bottomNavigationBar: BottomNavigationBar(
-            fixedColor: AppTheme.jishoGreen.background,
+            fixedColor: AppTheme.mugitenWheat.background,
             currentIndex: pageNum,
             onTap: (index) => setState(() {
               pageNum = index;

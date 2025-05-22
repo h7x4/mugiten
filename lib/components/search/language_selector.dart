@@ -32,17 +32,19 @@ class _LanguageSelectorState extends State<LanguageSelector> {
       ?.map((s) => s == '1')
       .toList();
 
-  Widget _languageOption(String language, {TextStyle? style}) =>
-    Container(
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-      child: Text(language, style: style,),
-    );
+  Widget _languageOption(String language, {TextStyle? style}) => Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        child: Text(
+          language,
+          style: style,
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
     return ToggleButtons(
-      selectedColor: AppTheme.jishoGreen.background,
+      selectedColor: AppTheme.mugitenWheat.background,
       isSelected: isSelected,
       children: [
         _languageOption('Auto'),

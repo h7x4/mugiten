@@ -1,4 +1,3 @@
-
 class WordQuery {
   final String query;
 

@@ -6,20 +6,20 @@ part 'dark.dart';
 abstract class AppTheme {
   const AppTheme();
 
-  static const ColorSet jishoGreen = ColorSet(
+  static const ColorSet mugitenWheat = ColorSet(
     foreground: Colors.black,
     // background: Color(0xFF3EDD00),
     background: Color(0xFFFFE680),
   );
 
-  static const Color jishoGrey = Color(0xFF5A5A5B);
+  static const Color mugitenGrey = Color(0xFF5A5A5B);
 
-  static const ColorSet jishoLabel = ColorSet(
+  static const ColorSet mugitenLabel = ColorSet(
     foreground: Colors.white,
     background: Color(0xFF909DC0),
   );
 
-  static const ColorSet jishoCommon = ColorSet(
+  static const ColorSet mugitenCommonColor = ColorSet(
     foreground: Colors.white,
     background: Color(0xFF8ABC83),
   );

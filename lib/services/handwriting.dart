@@ -75,7 +75,7 @@ class HandwritingRequest {
           }
         ]
       };
-  
+
   Future<List<String>> fetch() async {
     device ??= HttpClient().userAgent;
     final response = await http.post(

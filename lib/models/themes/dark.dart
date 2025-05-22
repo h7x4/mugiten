@@ -61,7 +61,7 @@ class DarkTheme extends AppTheme {
   ThemeData getMaterialTheme() {
     return ThemeData(
       brightness: Brightness.dark,
-      primarySwatch: createMaterialColor(AppTheme.jishoGreen.background),
+      primarySwatch: createMaterialColor(AppTheme.mugitenWheat.background),
     );
   }
 }

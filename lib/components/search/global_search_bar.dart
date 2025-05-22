@@ -37,7 +37,7 @@ class GlobalSearchBar extends StatelessWidget {
                   topRight: Radius.circular(10.0),
                   bottomRight: Radius.circular(10.0),
                 ),
-                color: AppTheme.jishoGreen.background,
+                color: AppTheme.mugitenWheat.background,
                 child: IconButton(
                   onPressed: () {
                     if (controller.text.isNotEmpty) {

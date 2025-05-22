@@ -69,7 +69,7 @@ class _SettingsViewState extends State<SettingsView> {
 
     final path = (await getExternalStorageDirectory())!;
     final dbData = await exportDatabase(db);
-    final file = File('${path.path}/jisho_data.json');
+    final file = File('${path.path}/mugiten_data.json');
     file.createSync(recursive: true);
     await file.writeAsString(jsonEncode(dbData));
 
@@ -113,8 +113,6 @@ class _SettingsViewState extends State<SettingsView> {
 
     final List<Search> mergedSearches =
         mergeSearches(prevSearches, importedSearches);
-
-    // print(mergedSearches);
 
     await GetIt.instance.get<Database>().close();
     GetIt.instance.unregister<Database>();
@@ -170,13 +168,10 @@ class _SettingsViewState extends State<SettingsView> {
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
           final TextStyle titleTextStyle = TextStyle(
-            color:
-                state is DarkThemeState ? AppTheme.jishoGreen.background : null,
+            color: state is DarkThemeState
+                ? AppTheme.mugitenWheat.background
+                : null,
           );
-
-          // const SettingsTileTheme theme = SettingsTileTheme(
-          //   horizontalTitleGap: 0,
-          // );
 
           return SettingsList(
             // backgroundColor: Colors.transparent,
@@ -192,7 +187,7 @@ class _SettingsViewState extends State<SettingsView> {
                     onToggle: (b) => setState(() => romajiEnabled = b),
                     initialValue: romajiEnabled,
                     // theme: theme,
-                    activeSwitchColor: AppTheme.jishoGreen.background,
+                    activeSwitchColor: AppTheme.mugitenWheat.background,
                   ),
                   SettingsTile(
                     title: const Text('Japanese font'),
@@ -206,7 +201,6 @@ class _SettingsViewState extends State<SettingsView> {
                   ),
                 ],
               ),
-
               SettingsSection(
                 title: Text('Theme', style: titleTextStyle),
                 tiles: <SettingsTile>[
@@ -216,7 +210,7 @@ class _SettingsViewState extends State<SettingsView> {
                     onToggle: toggleAutoTheme,
                     initialValue: autoThemeEnabled,
                     // theme: theme,
-                    activeSwitchColor: AppTheme.jishoGreen.background,
+                    activeSwitchColor: AppTheme.mugitenWheat.background,
                   ),
                   SettingsTile.switchTile(
                     title: const Text('Dark Theme'),
@@ -229,11 +223,10 @@ class _SettingsViewState extends State<SettingsView> {
                     initialValue: darkThemeEnabled,
                     enabled: !autoThemeEnabled,
                     // theme: theme,
-                    activeSwitchColor: AppTheme.jishoGreen.background,
+                    activeSwitchColor: AppTheme.mugitenWheat.background,
                   ),
                 ],
               ),
-
               SettingsSection(
                 title: Text('Data', style: titleTextStyle),
                 tiles: <SettingsTile>[
@@ -284,7 +277,6 @@ class _SettingsViewState extends State<SettingsView> {
                   ),
                 ],
               ),
-
               SettingsSection(
                 title: Text('Info', style: titleTextStyle),
                 tiles: <SettingsTile>[

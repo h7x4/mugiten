@@ -24,8 +24,7 @@ class Sense extends StatelessWidget {
     return [
       ...sense.restrictedToReading.map((e) => 'Restricted to $e'),
       ...sense.restrictedToKanji.map((e) => 'Restricted to $e'),
-      ...sense.fields
-          .map((e) => 'Field: ${_capitalize(e.description)}'),
+      ...sense.fields.map((e) => 'Field: ${_capitalize(e.description)}'),
       ...sense.misc.map((e) => e.description),
       ...sense.languageSource
           .where((e) => !e.fullyDescribesSense)

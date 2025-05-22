@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
-// import 'package:unofficial_jisho_api/api.dart';
 
 import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';

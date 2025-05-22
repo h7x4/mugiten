@@ -60,7 +60,7 @@ class LightTheme extends AppTheme {
   ThemeData getMaterialTheme() {
     return ThemeData(
       brightness: Brightness.light,
-      primarySwatch: createMaterialColor(AppTheme.jishoGreen.background),
+      primarySwatch: createMaterialColor(AppTheme.mugitenWheat.background),
       // primarySwatch: Colors.green,
     );
   }

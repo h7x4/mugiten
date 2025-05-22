@@ -3,7 +3,6 @@ import 'package:get_it/get_it.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart';
 import 'package:mugiten/models/history/search.dart';
-// import 'package:unofficial_jisho_api/api.dart';
 
 import '../../components/search/search_results_body/search_card.dart';
 
@@ -29,9 +28,6 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
     return Scaffold(
       appBar: AppBar(),
       body: FutureBuilder(
-        // future:
-        //     GetIt.instance.get<JaDBConnection>().searchWord(widget.searchTerm),
-
         future: (() async {
           final jadbConnection = GetIt.instance.get<JaDBConnection>();
 

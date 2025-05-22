@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../components/kanji/kanji_search_body.dart';

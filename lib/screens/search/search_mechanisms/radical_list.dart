@@ -84,7 +84,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
     final color = isNumber
         ? LightTheme.defaultMenuGreyDark
         : radicalToggles[radical]!
-            ? AppTheme.jishoGreen
+            ? AppTheme.mugitenWheat
             : LightTheme.defaultMenuGreyNormal;
 
     return InkWell(
@@ -120,7 +120,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
             resetAllowedToggles();
           }),
           icon: const Icon(Icons.restore),
-          color: AppTheme.jishoGreen.background,
+          color: AppTheme.mugitenWheat.background,
           iconSize: fontSize * 1.3,
         ),
         ...RADICALS
@@ -198,7 +198,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
                     ),
             ),
             Divider(
-              color: AppTheme.jishoGreen.background,
+              color: AppTheme.mugitenWheat.background,
               thickness: 3,
               height: 30,
               indent: 5,

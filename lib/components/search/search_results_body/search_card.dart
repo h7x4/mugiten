@@ -8,7 +8,6 @@ import './parts/jlpt_badge.dart';
 import './parts/other_forms.dart';
 import './parts/senses.dart';
 import 'parts/kanji.dart';
-import 'parts/notes.dart';
 
 class SearchResultCard extends StatefulWidget {
   final WordSearchResult result;
