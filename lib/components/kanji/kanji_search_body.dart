@@ -1,7 +1,8 @@
 import 'package:animated_size_and_fade/animated_size_and_fade.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:jadb/search.dart';
 
-import '../../services/kanji_suggestions.dart';
 import 'kanji_search_body/kanji_grid.dart';
 import 'kanji_search_body/kanji_search_bar.dart';
 import 'kanji_search_body/kanji_search_options_bar.dart';
@@ -85,8 +86,10 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
                       },
                       child: KanjiSearchBar(
                         key: _kanjiSearchBarState,
-                        onChanged: (text) => setState(() {
-                          suggestions = kanjiSuggestions(text);
+                        onChanged: (text) => setState(() async {
+                          suggestions = await GetIt.instance
+                              .get<JaDBConnection>()
+                              .filterKanji(text.characters.toList());
                         }),
                       ),
                     ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
-// import 'package:unofficial_jisho_api/api.dart';
 
 import '../../../../../bloc/theme/theme_bloc.dart';
 import 'antonyms.dart';

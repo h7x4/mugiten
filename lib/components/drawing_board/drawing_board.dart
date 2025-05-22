@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:jadb/search.dart';
 import 'package:signature/signature.dart';
 
 import '../../bloc/theme/theme_bloc.dart';
@@ -68,28 +70,29 @@ class _DrawingBoardState extends State<DrawingBoard> {
     });
   }
 
-  List<String> get filteredSuggestions {
-    const kanjiR = r'\p{Script=Hani}';
+  Future<List<String>> filterSuggestions() async {
     const hiraganaR = r'\p{Script=Hiragana}';
     const katakanaR = r'\p{Script=Katakana}';
-    const otherR = '[^$kanjiR$hiraganaR$katakanaR]';
 
-    final x = widget.allowKanji ? kanjiR : '';
-    final y = widget.allowHiragana ? hiraganaR : '';
-    final z = widget.allowKatakana ? katakanaR : '';
+    final kanjiSuggestions =
+        await GetIt.instance.get<JaDBConnection>().filterKanji(
+              suggestions,
+              deduplicate: true,
+            );
+    final hiraganaSuggestions = suggestions
+        .where((s) => RegExp(hiraganaR).hasMatch(s))
+        .toSet()
+        .toList();
+    final katakanaSuggestions = suggestions
+        .where((s) => RegExp(katakanaR).hasMatch(s))
+        .toSet()
+        .toList();
 
-    late final RegExp combinedRegex;
-    if ((widget.allowKanji || widget.allowHiragana || widget.allowKatakana) &&
-        widget.allowOther) {
-      combinedRegex = RegExp('^(?:[$x$y$z]|$otherR)+\$', unicode: true);
-    } else if (widget.allowOther) {
-      combinedRegex = RegExp('^$otherR+\$', unicode: true);
-    } else {
-      combinedRegex = RegExp('^[$x$y$z]+\$', unicode: true);
+    return {
+      if (widget.allowKanji) ...kanjiSuggestions,
+      if (widget.allowHiragana) ...hiraganaSuggestions,
+      if (widget.allowKatakana) ...katakanaSuggestions,
     }
-
-    return suggestions
-        .where((s) => combinedRegex.hasMatch(s))
         .where((s) => !widget.onlyOneCharacterSuggestions || s.length == 1)
         .toList();
   }
@@ -124,26 +127,53 @@ class _DrawingBoardState extends State<DrawingBoard> {
   Widget suggestionBar() {
     const padding = EdgeInsets.symmetric(horizontal: 10, vertical: 5);
 
-    return Container(
-      key: suggestionBarW,
-      color: barColor.background,
-      alignment: Alignment.center,
-      padding: padding,
+    return FutureBuilder<List<String>>(
+      future: filterSuggestions(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            (!snapshot.hasError && (snapshot.data?.isEmpty ?? false))) {
+          return Container(
+            key: suggestionBarW,
+            color: barColor.background,
+            alignment: Alignment.center,
+            padding: padding,
+            child: const Text('No suggestions'),
+          );
+        }
 
-      // TODO: calculate dynamically
-      constraints: BoxConstraints(
-        minHeight: 8 +
-            suggestionCirclePadding * 2 +
-            fontSize +
-            (2 * 4) +
-            padding.vertical,
-      ),
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        }
 
-      child: Wrap(
-        spacing: 20,
-        runSpacing: 5,
-        children: filteredSuggestions.map((s) => kanjiChip(s)).toList(),
-      ),
+        final filteredSuggestions = snapshot.data!;
+
+        return Container(
+          key: suggestionBarW,
+          color: barColor.background,
+          alignment: Alignment.center,
+          padding: padding,
+
+          // TODO: calculate dynamically
+          constraints: BoxConstraints(
+            minHeight: 8 +
+                suggestionCirclePadding * 2 +
+                fontSize +
+                (2 * 4) +
+                padding.vertical,
+          ),
+
+          child: Wrap(
+            spacing: 20,
+            runSpacing: 5,
+            children: filteredSuggestions.map((s) => kanjiChip(s)).toList(),
+          ),
+        );
+      },
     );
   }
 
