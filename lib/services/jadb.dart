@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
-import 'package:jadb/search.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -33,7 +32,5 @@ Future<void> setupJadb() async {
     readOnly: true,
   );
 
-  final connection = JaDBConnection(db);
-
-  GetIt.instance.registerSingleton<JaDBConnection>(connection);
+  GetIt.instance.registerSingleton<Database>(db);
 }

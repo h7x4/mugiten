@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/search.dart';
 import 'package:mugiten/models/history/search.dart';
+import 'package:sqflite/sqflite.dart';
 
 // import './kanji_result_body/examples.dart';
 import '../../components/kanji/kanji_result_body/grade.dart';
@@ -132,7 +133,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     return Scaffold(
       appBar: AppBar(),
       body: FutureBuilder(
-        future: GetIt.instance.get<JaDBConnection>().searchKanji(widget.kanji),
+        future: GetIt.instance.get<Database>().jadbSearchKanji(widget.kanji),
         builder: (context, snapshot) {
           if (snapshot.hasError) return ErrorWidget(snapshot.error!);
           if (!snapshot.hasData) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/const_data/radicals.dart';
 import 'package:jadb/search.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../../../../bloc/theme/theme_bloc.dart';
 import '../../../../routing/routes.dart';
@@ -57,14 +58,14 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
       return;
     }
 
-    final jadbConnection = GetIt.instance.get<JaDBConnection>();
+    final jadbConnection = GetIt.instance.get<Database>();
     late final List<String> newSuggestions;
     late final List<String> newRadicals;
     await Future.wait([
-      jadbConnection.searchKanjiByRadicals(toggledRadicals).then((value) {
+      jadbConnection.jadbSearchKanjiByRadicals(toggledRadicals).then((value) {
         newSuggestions = value;
       }),
-      jadbConnection.searchRemainingRadicals(toggledRadicals).then((value) {
+      jadbConnection.jadbSearchRemainingRadicals(toggledRadicals).then((value) {
         newRadicals = value;
       }),
     ]);

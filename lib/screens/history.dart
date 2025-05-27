@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:sembast/sembast_io.dart';
 
 import '../components/common/loading.dart';
 import '../components/common/opaque_box.dart';

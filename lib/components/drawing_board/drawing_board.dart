@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
 import 'package:signature/signature.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../../bloc/theme/theme_bloc.dart';
 import '../../services/handwriting.dart';
@@ -74,11 +75,10 @@ class _DrawingBoardState extends State<DrawingBoard> {
     const hiraganaR = r'\p{Script=Hiragana}';
     const katakanaR = r'\p{Script=Katakana}';
 
-    final kanjiSuggestions =
-        await GetIt.instance.get<JaDBConnection>().filterKanji(
-              suggestions,
-              deduplicate: true,
-            );
+    final kanjiSuggestions = await GetIt.instance.get<Database>().filterKanji(
+          suggestions,
+          deduplicate: true,
+        );
     final hiraganaSuggestions = suggestions
         .where((s) => RegExp(hiraganaR).hasMatch(s))
         .toSet()

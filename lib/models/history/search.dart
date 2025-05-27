@@ -4,8 +4,6 @@ import 'package:sembast/sembast.dart';
 import './kanji_query.dart';
 import './word_query.dart';
 
-export 'package:sembast/sembast.dart';
-
 class Search {
   final WordQuery? wordQuery;
   final KanjiQuery? kanjiQuery;

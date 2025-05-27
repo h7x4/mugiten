@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
+import 'package:sembast/sembast.dart';
 
 import '../../models/history/search.dart';
 import '../../routing/routes.dart';
