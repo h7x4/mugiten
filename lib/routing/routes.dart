@@ -9,4 +9,5 @@ abstract class Routes {
   static const String errorNotFound = '/error/404';
   static const String errorNetwork = '/error/network';
   static const String errorOther = '/error/other';
+  static const String library = '/library';
 }

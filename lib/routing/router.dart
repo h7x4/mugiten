@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/screens/library/library_content_view.dart';
 import 'package:mugiten/screens/search/kanji_search_result_page.dart';
 import 'package:mugiten/screens/search/word_search_result_page.dart';
 
@@ -40,6 +42,12 @@ Route<Widget> generateRoute(RouteSettings settings) {
       final prechosenRadical = args as String?;
       return MaterialPageRoute(
         builder: (_) => KanjiRadicalSearch(prechosenRadical: prechosenRadical),
+      );
+
+    case Routes.library:
+      final library = args! as LibraryList;
+      return MaterialPageRoute(
+        builder: (_) => LibraryContentView(library: library),
       );
 
     case Routes.aboutLicenses:

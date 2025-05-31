@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/util/text_filtering.dart';
+import 'package:mugiten/components/library/add_to_library_dialog.dart';
+import 'package:mugiten/models/library/library_list.dart';
 
 import './parts/common_badge.dart';
 import './parts/header.dart';
@@ -84,12 +87,36 @@ class _SearchResultCardState extends State<SearchResultCard> {
   Widget build(BuildContext context) {
     final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
 
-    return ExpansionTile(
-      collapsedBackgroundColor: backgroundColor,
-      backgroundColor: backgroundColor,
-      // onExpansionChanged: (b) async { },
-      title: _header,
-      children: [_body()],
+    return Slidable(
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            backgroundColor: Colors.yellow,
+            icon: Icons.star,
+            onPressed: (_) => LibraryList.favourites.toggleEntry(
+              jmdictEntryId: widget.result.entryId,
+              kanji: null,
+            ),
+          ),
+          SlidableAction(
+            backgroundColor: Colors.blue,
+            icon: Icons.bookmark,
+            onPressed: (context) => showAddToLibraryDialog(
+              context: context,
+              jmdictEntryId: widget.result.entryId,
+              kanji: null,
+            ),
+          ),
+        ],
+      ),
+      child: ExpansionTile(
+        collapsedBackgroundColor: backgroundColor,
+        backgroundColor: backgroundColor,
+        // onExpansionChanged: (b) async { },
+        title: _header,
+        children: [_body()],
+      ),
     );
   }
 }

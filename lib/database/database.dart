@@ -25,9 +25,28 @@ Future<String> databasePath() async {
   return join((await _databaseDir()).path, 'mugiten.sqlite');
 }
 
-/// Migrates the database from version [oldVersion] to [newVersion].
-Future<void> migrate(Database db, int oldVersion, int newVersion) async {
-  log('Migrating database from v$oldVersion to v$newVersion...');
+class DatabaseMigration {
+  final String path;
+  final String content;
+
+  const DatabaseMigration({
+    required this.path,
+    required this.content,
+  });
+
+  int get version {
+    final String fileName = basenameWithoutExtension(path);
+    return int.parse(fileName.split('_')[0]);
+  }
+
+  @override
+  String toString() {
+    return 'DatabaseMigration(path: $path, content: ${content.length} chars)';
+  }
+}
+
+Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
+  log('Reading migrations from assets...');
 
   final String assetManifest =
       await rootBundle.loadString('AssetManifest.json');
@@ -41,21 +60,28 @@ Future<void> migrate(Database db, int oldVersion, int newVersion) async {
           )
           .toList();
 
+  migrations.sort();
+
   log('Found ${migrations.length} migration files:');
   for (final migration in migrations) {
     log(' - $migration');
   }
 
-  migrations.sort();
+  return Future.wait(
+    migrations.map(
+      (migration) async {
+        final content = await rootBundle.loadString(migration, cache: false);
+        return DatabaseMigration(path: migration, content: content);
+      },
+    ),
+  );
+}
 
-  for (int i = oldVersion + 1; i <= newVersion; i++) {
-    log(
-      'Migrating database from v$i to v${i + 1} with File(${migrations[i - 1]})',
-    );
-    final migrationContent =
-        await rootBundle.loadString(migrations[i - 1], cache: false);
-
-    migrationContent
+/// Migrates the database from version [oldVersion] to [newVersion].
+Future<void> migrate(Database db, List<DatabaseMigration> migrations) async {
+  for (final migration in migrations) {
+    log('Running migration ${migration.version} from ${migration.path}');
+    migration.content
         .split(';')
         .map(
           (s) => s
@@ -67,6 +93,39 @@ Future<void> migrate(Database db, int oldVersion, int newVersion) async {
         .where((s) => s != '')
         .forEach(db.execute);
   }
+}
+
+Future<Database> openAndMigrateDatabase(
+  String dbPath,
+  List<DatabaseMigration> migrations,
+) async {
+  log('Opening database at $dbPath');
+  final Database database = await openDatabase(
+    dbPath,
+    version: 2,
+    readOnly: false,
+    onUpgrade: (db, oldVersion, newVersion) async {
+      log('Migrating database from v$oldVersion to v$newVersion...');
+      final migrationsToRun = migrations
+          .where((migration) =>
+              migration.version > oldVersion && migration.version <= newVersion)
+          .toList();
+
+      await migrate(db, migrationsToRun);
+    },
+    onConfigure: (db) async {
+      // Enable foreign key constraints
+      await db.execute('PRAGMA foreign_keys=ON');
+    },
+    onOpen: (db) async {
+      log('Verifying jadb tables...');
+
+      db.jadbVerifyTables();
+
+      log('jadb opened successfully');
+    },
+  );
+  return database;
 }
 
 /// Sets up the database, creating it if it does not exist.
@@ -81,24 +140,8 @@ Future<void> setupDatabase() async {
     log('jadb.sqlite extracted to $dbPath');
   }
 
-  log('Opening database at $dbPath');
-  final Database database = await openDatabase(
-    dbPath,
-    version: 2,
-    readOnly: false,
-    onUpgrade: migrate,
-    onConfigure: (db) async {
-      // Enable foreign key constraints
-      await db.execute('PRAGMA foreign_keys=ON');
-    },
-    onOpen: (db) async {
-      log('Verifying jadb tables...');
-
-      db.jadbVerifyTables();
-
-      log('jadb opened successfully');
-    },
-  );
+  final List<DatabaseMigration> migrations = await readMigrationsFromAssets();
+  final Database database = await openAndMigrateDatabase(dbPath, migrations);
 
   log('Registering database in GetIt...');
   GetIt.instance.registerSingleton<Database>(database);

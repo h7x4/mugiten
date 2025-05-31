@@ -40,6 +40,8 @@
           GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/34.0.0/aapt2";
           FLUTTER_SDK = "${flutter'}";
           JAVA_HOME = "${jdk'}/lib/openjdk";
+          LIBSQLITE_PATH = "${pkgs.sqlite.out}/lib/libsqlite3.so";
+          JADB_PATH = "./assets/jadb.sqlite";
         };
       };
     });
