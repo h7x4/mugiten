@@ -7,15 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mdi/mdi.dart';
+import 'package:mugiten/database/database.dart';
+import 'package:mugiten/models/history/history_entry.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sembast/sembast_io.dart';
-import 'package:sembast/utils/sembast_import_export.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../bloc/theme/theme_bloc.dart';
 import '../components/common/denshi_jisho_background.dart';
 import '../models/history/search.dart';
 import '../routing/routes.dart';
-import '../services/database.dart';
+// import '../services/database.dart';
 import '../services/snackbar.dart';
 import '../settings.dart';
 
@@ -30,14 +31,6 @@ class _SettingsViewState extends State<SettingsView> {
   final Database db = GetIt.instance.get<Database>();
   bool dataExportIsLoading = false;
   bool dataImportIsLoading = false;
-
-  Future<void> clearHistory(context) async {
-    final bool userIsSure = await confirm(context);
-
-    if (userIsSure) {
-      await Search.store.delete(db);
-    }
-  }
 
   // ignore: avoid_positional_boolean_parameters
   void toggleAutoTheme(bool b) {
@@ -63,80 +56,95 @@ class _SettingsViewState extends State<SettingsView> {
     }
   }
 
-  /// Can assume Android for time being
-  Future<void> exportData(context) async {
-    setState(() => dataExportIsLoading = true);
+  // /// Can assume Android for time being
+  // Future<void> exportData(context) async {
+  //   setState(() => dataExportIsLoading = true);
 
-    final path = (await getExternalStorageDirectory())!;
-    final dbData = await exportDatabase(db);
-    final file = File('${path.path}/mugiten_data.json');
-    file.createSync(recursive: true);
-    await file.writeAsString(jsonEncode(dbData));
+  // final path = (await getExternalStorageDirectory())!;
+  // final dbData = await exportDatabase(db);
+  // final file = File('${path.path}/mugiten_data.json');
+  // file.createSync(recursive: true);
+  // await file.writeAsString(jsonEncode(dbData));
 
-    setState(() => dataExportIsLoading = false);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Data exported to ${file.path}')));
-  }
+  //   setState(() => dataExportIsLoading = false);
+  //   ScaffoldMessenger.of(context)
+  //       .showSnackBar(SnackBar(content: Text('Data exported to ${file.path}')));
+  // }
 
-  /// Can assume Android for time being
-  Future<void> importData(context) async {
-    setState(() => dataImportIsLoading = true);
+  // /// Can assume Android for time being
+  // Future<void> importData(context) async {
+  //   setState(() => dataImportIsLoading = true);
 
-    final path = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    final file = File(path!.files[0].path!);
+  //   final path = await FilePicker.platform.pickFiles(
+  //     type: FileType.custom,
+  //     allowedExtensions: ['json'],
+  //   );
+  //   final file = File(path!.files[0].path!);
 
-    final List<Search> prevSearches = (await Search.store.find(db))
-        .map((e) => Search.fromJson(e.value! as Map<String, Object?>))
-        .toList();
-    late final List<Search> importedSearches;
-    try {
-      importedSearches = (jsonDecode(await file.readAsString())
-              as List<dynamic>)
-          // importedSearches = (((jsonDecode(await file.readAsString())
-          //             as Map<String, Object?>)['stores']! as List<Object?>)
-          //         .map((e) => e! as Map<String, Object?>)
-          //         .where((e) => e['name'] == 'search')
-          //         .first['values'] as List<dynamic>)
-          .map((item) => Search.fromJson(item))
-          .toList();
-    } catch (e) {
-      debugPrint(e.toString());
-      showSnackbar(
-        context,
-        "Couldn't read file. Did you choose the right one?",
-      );
-      return;
-    }
+  //   final List<Search> prevSearches = (await Search.store.find(db))
+  //       .map((e) => Search.fromJson(e.value! as Map<String, Object?>))
+  //       .toList();
+  //   late final List<Search> importedSearches;
+  //   try {
+  //     importedSearches = (jsonDecode(await file.readAsString())
+  //             as List<dynamic>)
+  //         // importedSearches = (((jsonDecode(await file.readAsString())
+  //         //             as Map<String, Object?>)['stores']! as List<Object?>)
+  //         //         .map((e) => e! as Map<String, Object?>)
+  //         //         .where((e) => e['name'] == 'search')
+  //         //         .first['values'] as List<dynamic>)
+  //         .map((item) => Search.fromJson(item))
+  //         .toList();
+  //   } catch (e) {
+  //     debugPrint(e.toString());
+  //     showSnackbar(
+  //       context,
+  //       "Couldn't read file. Did you choose the right one?",
+  //     );
+  //     return;
+  //   }
 
-    final List<Search> mergedSearches =
-        mergeSearches(prevSearches, importedSearches);
+  //   final List<Search> mergedSearches =
+  //       mergeSearches(prevSearches, importedSearches);
 
-    await GetIt.instance.get<Database>().close();
-    GetIt.instance.unregister<Database>();
+  // await GetIt.instance.get<Database>().close();
+  // GetIt.instance.unregister<Database>();
 
-    final importedDb = await importDatabase(
-      {
-        'sembast_export': 1,
-        'version': 1,
-        'stores': [
-          {
-            'name': 'search',
-            'keys': [for (var i = 1; i <= mergedSearches.length; i++) i],
-            'values': mergedSearches.map((e) => e.toJson()).toList(),
-          }
-        ]
-      },
-      databaseFactoryIo,
-      await databasePath(),
-    );
-    GetIt.instance.registerSingleton<Database>(importedDb);
+  //   final importedDb = await importDatabase(
+  //     {
+  //       'sembast_export': 1,
+  //       'version': 1,
+  //       'stores': [
+  //         {
+  //           'name': 'search',
+  //           'keys': [for (var i = 1; i <= mergedSearches.length; i++) i],
+  //           'values': mergedSearches.map((e) => e.toJson()).toList(),
+  //         }
+  //       ]
+  //     },
+  //     databaseFactoryIo,
+  //     await databasePath(),
+  //   );
+  //   GetIt.instance.registerSingleton<Database>(importedDb);
 
-    setState(() => dataImportIsLoading = false);
-    showSnackbar(context, 'Data imported successfully');
-  }
+  //   setState(() => dataImportIsLoading = false);
+  //   showSnackbar(context, 'Data imported successfully');
+  // }
+
+  // Future<void> clearHistory(context) async {
+  //   final historyCount = await HistoryEntry.amountOfEntries();
+
+  //   final bool userIsSure = await confirm(
+  //     context,
+  //     content: Text(
+  //       'Are you sure that you want to clear all $historyCount entries in history?',
+  //     ),
+  //   );
+
+  //   if (userIsSure) {
+  //     await Search.store.delete(db);
+  //   }
+  // }
 
   Future<int?> Function(BuildContext) _chooseFromList({
     required List<String> list,
@@ -231,49 +239,73 @@ class _SettingsViewState extends State<SettingsView> {
                 title: Text('Data', style: titleTextStyle),
                 tiles: <SettingsTile>[
                   SettingsTile(
+                    enabled: false,
+                    // enabled: Platform.isAndroid,
                     leading: const Icon(Icons.file_upload),
                     title: const Text('Import Data'),
-                    onPressed: importData,
-                    enabled: Platform.isAndroid,
                     description: Platform.isAndroid
                         ? null
                         : Text('Not available on iOS yet'),
+                    onPressed: (c) {},
                     value: dataImportIsLoading
                         ? const LinearProgressIndicator()
                         : null,
                   ),
                   SettingsTile(
+                    enabled: false,
+                    // enabled: Platform.isAndroid,
                     leading: const Icon(Icons.file_download),
                     title: const Text('Export Data'),
-                    enabled: Platform.isAndroid,
                     description: Platform.isAndroid
                         ? null
                         : Text('Not available on iOS yet'),
+                    onPressed: (c) {},
                     value: dataExportIsLoading
                         ? const LinearProgressIndicator()
                         : null,
                   ),
                   SettingsTile(
+                    enabled: false,
                     leading: const Icon(Icons.delete),
                     title: const Text(
                       'Clear History',
                       style: TextStyle(color: Colors.red),
                     ),
-                    onPressed: clearHistory,
-                  ),
-                  SettingsTile(
-                    leading: const Icon(Icons.delete),
-                    title: const Text(
-                      'Clear Favourites',
-                      style: TextStyle(color: Colors.red),
-                    ),
+                    // onPressed: clearHistory,
                     onPressed: (c) {
                       showSnackbar(
                         context,
                         'This feature is not implemented yet',
                       );
                     },
+                  ),
+                  SettingsTile(
                     enabled: false,
+                    leading: const Icon(Icons.delete),
+                    title: const Text(
+                      'Clear Favourites',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    onPressed: (c) {},
+                  ),
+                  SettingsTile(
+                    enabled: true,
+                    leading: const Icon(Icons.delete),
+                    title: const Text(
+                      'Reset database',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    onPressed: (ctx) async {
+                      showSnackbar(
+                        ctx,
+                        'Resetting the database...',
+                      );
+                      await resetDatabase();
+                      showSnackbar(
+                        ctx,
+                        'Database reset successfully.',
+                      );
+                    },
                   ),
                 ],
               ),

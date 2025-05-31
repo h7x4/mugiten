@@ -27,7 +27,6 @@ dependencies:
   mdi: ^5.0.0-nullsafety.0
   path: ^1.9.0
   path_provider: ^2.1.5
-  sembast: ^3.8.3
   share_plus: ^11.0.0
   shared_preferences: ^2.5.3
   signature: ^5.5.0
@@ -35,6 +34,7 @@ dependencies:
   sqflite: ^2.4.1
   sqlite3_flutter_libs: ^0.5.32
   sqflite_common_ffi: ^2.3.4+4
+  ruby_text: ^3.0.3
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +45,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - migrations/
     - assets/
     - assets/fonts/
     - assets/images/

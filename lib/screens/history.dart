@@ -1,41 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:sembast/sembast_io.dart';
 
 import '../components/common/loading.dart';
 import '../components/common/opaque_box.dart';
 import '../components/history/date_divider.dart';
-import '../components/history/search_item.dart';
-import '../models/history/search.dart';
+import '../components/history/history_entry_tile.dart';
+import '../models/history/history_entry.dart';
 import '../services/datetime.dart';
 
 class HistoryView extends StatelessWidget {
   const HistoryView({super.key});
 
-  Stream<Map<int, Search>> get searchStream => Search.store
-      .query(finder: Finder(sortOrders: [SortOrder('lastTimestamp', false)]))
-      .onSnapshots(_db)
-      .map(
-        (snapshot) => Map.fromEntries(
-          snapshot.where((snap) => snap.value != null).map(
-                (snap) => MapEntry(
-                  snap.key,
-                  Search.fromJson(snap.value! as Map<String, Object?>),
-                ),
-              ),
-        ),
-      );
-
-  Database get _db => GetIt.instance.get<Database>();
-
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Map<int, Search>>(
-      stream: searchStream,
+    // TODO: Use infinite scroll pagination
+    return FutureBuilder<List<HistoryEntry>>(
+      future: HistoryEntry.fromDB,
       builder: (context, snapshot) {
+        // TODO: provide proper error handling
+        if (snapshot.hasError) return ErrorWidget(snapshot.error!);
         if (!snapshot.hasData) return const LoadingScreen();
 
-        final Map<int, Search> data = snapshot.data!;
+        final Map<int, HistoryEntry> data = snapshot.data!.asMap();
         if (data.isEmpty) {
           return const Center(
             child: Text('The history is empty.\nTry searching for something!'),
@@ -55,26 +40,31 @@ class HistoryView extends StatelessWidget {
   }
 
   Widget Function(BuildContext, int) historyEntrySeparatorWithData(
-    List<Search> data,
+    List<HistoryEntry> data,
   ) =>
       (context, index) {
-        final Search search = data[index];
-        final DateTime searchDate = search.timestamp;
+        final HistoryEntry search = data[index];
+        final DateTime searchDate = search.lastTimestamp;
 
-        if (index == 0 || !dateIsEqual(data[index - 1].timestamp, searchDate)) {
+        if (index == 0 ||
+            !dateIsEqual(data[index - 1].lastTimestamp, searchDate)) {
           return TextDivider(text: formatDate(roundToDay(searchDate)));
         }
 
-        return const Divider(height: 0);
+        return const Divider(
+          height: 0,
+          indent: 10,
+          endIndent: 10,
+        );
       };
 
   Widget Function(BuildContext, int) historyEntryWithData(
-    Map<int, Search> data,
+    Map<int, HistoryEntry> data,
   ) =>
       (context, index) => (index == 0)
           ? const SizedBox.shrink()
-          : SearchItem(
-              search: data.values.toList()[index - 1],
+          : HistoryEntryTile(
+              entry: data.values.toList()[index - 1],
               objectKey: data.keys.toList()[index - 1],
               onDelete: () => build(context),
             );

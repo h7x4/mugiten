@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mugiten/services/jadb.dart';
+import 'package:mugiten/database/database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'bloc/theme/theme_bloc.dart';
 import 'routing/router.dart';
-import 'services/database.dart';
 import 'services/licenses.dart';
 import 'services/preferences.dart';
 import 'settings.dart';
@@ -15,7 +14,6 @@ Future<void> main() async {
   databaseFactory = databaseFactoryFfi;
 
   await Future.wait([
-    setupJadb(),
     setupDatabase(),
     setupSharedPreferences(),
   ]);

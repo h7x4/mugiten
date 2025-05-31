@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:get_it/get_it.dart';
-import 'package:mugiten/database/database.dart';
 import 'package:mugiten/database/history/table_names.dart';
+
+import '../../database/database.dart';
+
+export 'package:get_it/get_it.dart';
 
 class HistoryEntry {
   int id;

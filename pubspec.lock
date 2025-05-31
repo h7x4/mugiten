@@ -182,6 +182,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.1.1"
+  flutter_hooks:
+    dependency: transitive
+    description:
+      name: flutter_hooks
+      sha256: "6a126f703b89499818d73305e4ce1e3de33b4ae1c5512e3b8eab4b986f46774c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.6"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -269,7 +277,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "42e7c95f5992d030537c91d63162fbe5972b5258"
+      resolved-ref: bd0fee1b2de564d6f8d9f979fb836ddd56de67a9
       url: "https://git.pvv.ntnu.no/oysteikt/jadb.git"
     source: git
     version: "1.0.0"
@@ -457,14 +465,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.5"
-  sembast:
+  ruby_text:
     dependency: "direct main"
     description:
-      name: sembast
-      sha256: "9026ea34aa3a0f26a966529ef80b57b6fe40f810cadeadd1b208202d1bf153e7"
+      name: ruby_text
+      sha256: c9fe49dfe703c240f2ef8274d75c33654ec893685fa7180fd0dcdaf32b850511
       url: "https://pub.dev"
     source: hosted
-    version: "3.8.3"
+    version: "3.0.3"
   share_plus:
     dependency: "direct main"
     description:
@@ -678,6 +686,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.3"
+  tuple:
+    dependency: transitive
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:

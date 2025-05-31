@@ -46,10 +46,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
           }
 
           if (!addedToDatabase) {
-            addSearchToDatabase(
-              searchTerm: widget.searchTerm,
-              isKanji: false,
-            );
+            HistoryEntry.insertWord(word: widget.searchTerm);
             addedToDatabase = true;
           }
 
