@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/components/drawing_board/drawing_board.dart';
 
 import '../../models/themes/theme.dart';
 import '../../routing/routes.dart';
@@ -53,9 +54,45 @@ class GlobalSearchBar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const LanguageSelector()
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const LanguageSelector(),
+              IconButton(
+                icon: const Icon(Icons.mode),
+                onPressed: () async {
+                  final result = await _drawKanji()(context);
+                  if (result != null && result.isNotEmpty) {
+                    controller.text += result;
+                  }
+                },
+              )
+            ],
+          )
         ],
       ),
     );
+  }
+
+  Future<String?> Function(BuildContext) _drawKanji() {
+    final MaterialPageRoute<String> route = MaterialPageRoute(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: const Text('Draw a kanji')),
+        body: Column(
+          children: [
+            const Expanded(child: Column()),
+            DrawingBoard(
+              onlyOneCharacterSuggestions: true,
+              onSuggestionChosen: (suggestion) => Navigator.pop(
+                context,
+                suggestion,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return (context) => Navigator.push<String>(context, route);
   }
 }
