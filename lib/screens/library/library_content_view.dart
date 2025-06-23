@@ -38,7 +38,7 @@ class _LibraryContentViewState extends State<LibraryContentView> {
           IconButton(
             onPressed: () async {
               final entryCount = await widget.library.length;
-              if (!mounted) return;
+              if (!context.mounted) return;
               final bool userIsSure = await confirm(
                 context,
                 content: Text(

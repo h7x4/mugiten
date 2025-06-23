@@ -296,11 +296,17 @@ class _SettingsViewState extends State<SettingsView> {
                       style: TextStyle(color: Colors.red),
                     ),
                     onPressed: (ctx) async {
+                      // TODO: confirmation dialog
+
                       showSnackbar(
                         ctx,
                         'Resetting the database...',
                       );
+
                       await resetDatabase();
+
+                      if (!ctx.mounted) return;
+
                       showSnackbar(
                         ctx,
                         'Database reset successfully.',

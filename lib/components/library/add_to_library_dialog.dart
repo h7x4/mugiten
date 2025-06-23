@@ -47,7 +47,6 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
   void initState() {
     super.initState();
 
-    // TODO:
     LibraryList.allListsContains(
       jmdictEntryId: widget.jmdictEntryId,
       kanji: widget.kanji,
@@ -59,7 +58,6 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
 
     setState(() => toggleLock = true);
 
-    // TODO:
     await lib.toggleEntry(
       jmdictEntryId: widget.jmdictEntryId,
       kanji: widget.kanji,
@@ -81,26 +79,28 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
           ListTile(
             title: Center(
               child: widget.kanji != null
-                  ? Row(
-                      children: [
-                        const Expanded(child: SizedBox()),
-                        KanjiBox.headline4(
-                          context: context,
-                          kanji: widget.kanji!,
-                        ),
-                        const Expanded(child: SizedBox()),
-                      ],
+                  // TODO: fix
+                  // ? KanjiBox.headline4(
+                  //     context: context,
+                  //     kanji: widget.kanji!,
+                  //   )
+                  ? Text(
+                      widget.kanji!,
+                      style: Theme.of(context).textTheme.displayMedium,
                     )
                   : FutureBuilder(
                       future: GetIt.instance
                           .get<Database>()
                           .jadbGetWordById(widget.jmdictEntryId!),
                       builder: (context, snapshot) {
-                        if (snapshot.hasError)
+                        if (snapshot.hasError) {
                           return ErrorWidget(snapshot.error!);
+                        }
+
                         if (!snapshot.hasData) {
                           return const LoadingScreen();
                         }
+
                         final entry = snapshot.data!;
                         final japaneseWord = entry.japanese.firstOrNull;
 

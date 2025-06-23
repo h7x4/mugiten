@@ -14,9 +14,13 @@ import 'parts/kanji.dart';
 
 class SearchResultCard extends StatefulWidget {
   final WordSearchResult result;
+  final List<SlidableAction>? slidableActions;
+  final Widget? leading;
 
   const SearchResultCard({
     required this.result,
+    this.slidableActions,
+    this.leading,
     super.key,
   });
 
@@ -90,27 +94,29 @@ class _SearchResultCardState extends State<SearchResultCard> {
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            backgroundColor: Colors.yellow,
-            icon: Icons.star,
-            onPressed: (_) => LibraryList.favourites.toggleEntry(
-              jmdictEntryId: widget.result.entryId,
-              kanji: null,
-            ),
-          ),
-          SlidableAction(
-            backgroundColor: Colors.blue,
-            icon: Icons.bookmark,
-            onPressed: (context) => showAddToLibraryDialog(
-              context: context,
-              jmdictEntryId: widget.result.entryId,
-              kanji: null,
-            ),
-          ),
-        ],
+        children: widget.slidableActions ??
+            [
+              SlidableAction(
+                backgroundColor: Colors.yellow,
+                icon: Icons.star,
+                onPressed: (_) => LibraryList.favourites.toggleEntry(
+                  jmdictEntryId: widget.result.entryId,
+                  kanji: null,
+                ),
+              ),
+              SlidableAction(
+                backgroundColor: Colors.blue,
+                icon: Icons.bookmark,
+                onPressed: (context) => showAddToLibraryDialog(
+                  context: context,
+                  jmdictEntryId: widget.result.entryId,
+                  kanji: null,
+                ),
+              ),
+            ],
       ),
       child: ExpansionTile(
+        leading: widget.leading,
         collapsedBackgroundColor: backgroundColor,
         backgroundColor: backgroundColor,
         // onExpansionChanged: (b) async { },

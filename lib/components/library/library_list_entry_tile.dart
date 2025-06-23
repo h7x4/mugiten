@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get_it/get_it.dart';
+import 'package:jadb/search.dart';
+import 'package:mugiten/components/search/search_results_body/search_card.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../../models/library/library_entry.dart';
 import '../../models/library/library_list.dart';
@@ -25,52 +29,100 @@ class LibraryListEntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return entry.kanji != null
+        ? _kanjiTile(context, index, entry.kanji!)
+        : _jmdictEntryTile(context, index, entry.jmdictEntryId!);
+  }
+
+  Widget _index(BuildContext context, int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Text(
+        (index + 1).toString(),
+        style: Theme.of(context)
+            .textTheme
+            .titleMedium!
+            .merge(japaneseFont.textStyle),
+      ),
+    );
+  }
+
+  SlidableAction _deleteAction() {
+    return SlidableAction(
+      backgroundColor: Colors.red,
+      icon: Icons.delete,
+      onPressed: (_) async {
+        await library.deleteEntry(
+          jmdictEntryId: entry.jmdictEntryId,
+          kanji: entry.kanji,
+        );
+        onDelete?.call();
+      },
+    );
+  }
+
+  Widget _kanjiTile(BuildContext context, int? index, String kanji) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            backgroundColor: Colors.red,
-            icon: Icons.delete,
-            onPressed: (_) async {
-              await library.deleteEntry(
-                jmdictEntryId: entry.jmdictEntryId,
-                kanji: entry.kanji,
-              );
-              onDelete?.call();
-            },
-          ),
-        ],
+        children: [_deleteAction()],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+        leading: (index != null) ? _index(context, index) : null,
         onTap: () async {
           await Navigator.pushNamed(
             context,
-            entry.kanji != null ? Routes.kanjiSearch : Routes.search,
-            arguments: entry.kanji ?? entry.jmdictEntryId,
+            Routes.kanjiSearch,
+            arguments: kanji,
           );
           onUpdate?.call();
         },
-        title: Row(
-          children: [
-            if (index != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  (index! + 1).toString(),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .merge(japaneseFont.textStyle),
-                ),
-              ),
-            entry.kanji != null
-                ? KanjiBox.headline4(context: context, kanji: entry.kanji!)
-                : Expanded(child: Text(entry.jmdictEntryId.toString())),
-          ],
-        ),
+        title: Row(children: [
+          SizedBox(width: 15),
+          KanjiBox.headline4(context: context, kanji: kanji),
+        ]),
       ),
+    );
+  }
+
+  Widget _jmdictEntryTile(BuildContext context, int? index, int jmdictEntryId) {
+    return FutureBuilder(
+      future: GetIt.instance.get<Database>().jadbGetWordById(jmdictEntryId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return ListTile(
+            leading: (index != null) ? _index(context, index) : null,
+            title: const Expanded(
+              child: Text(
+                '...',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data == null) {
+          return ListTile(
+            leading: (index != null) ? _index(context, index) : null,
+            title: const Expanded(
+              child: Text(
+                '<Not found>',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          );
+        }
+
+        final entry = snapshot.data!;
+
+        final result = SearchResultCard(
+          result: entry,
+          leading: index != null ? _index(context, index) : null,
+          slidableActions: [_deleteAction()],
+        );
+
+        return result;
+      },
     );
   }
 }

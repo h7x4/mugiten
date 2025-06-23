@@ -286,7 +286,7 @@ class LibraryList {
     final nextEntryQuery = await db().query(
       LibraryListTableNames.libraryListEntry,
       where:
-          '"listName" = ? AND "(prevEntryJmdictEntryId" = ? OR "prevEntryKanji" = ?)',
+          '"listName" = ? AND ("prevEntryJmdictEntryId" = ? OR "prevEntryKanji" = ?)',
       whereArgs: [name, jmdictEntryId, kanji],
     );
 

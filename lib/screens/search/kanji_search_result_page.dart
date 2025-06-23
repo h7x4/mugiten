@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/search.dart';
+import 'package:mugiten/components/library/add_to_library_dialog.dart';
 import 'package:mugiten/models/history/search.dart';
+import 'package:mugiten/models/library/library_list.dart';
 import 'package:sqflite/sqflite.dart';
 
 // import './kanji_result_body/examples.dart';
@@ -25,6 +27,7 @@ class KanjiSearchResultPage extends StatefulWidget {
 
 class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   bool addedToDatabase = false;
+  bool isFavourite = false;
 
   // TODO: add compart link
   Widget _headerRow(KanjiSearchResult result) => Container(
@@ -97,7 +100,28 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
 
   Widget _body(KanjiSearchResult result) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(actions: [
+        IconButton(
+          icon: const Icon(Icons.star),
+          color: isFavourite ? Colors.yellow : null,
+          onPressed: () {
+            LibraryList.favourites
+                .toggleEntry(
+                  jmdictEntryId: null,
+                  kanji: result.kanji,
+                )
+                .then((state) => setState(() => isFavourite = state));
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.bookmark),
+          onPressed: () => showAddToLibraryDialog(
+            context: context,
+            jmdictEntryId: null,
+            kanji: result.kanji,
+          ),
+        ),
+      ]),
       body: ListView(
         children: [
           _headerRow(result),
@@ -129,26 +153,31 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    LibraryList.favourites
+        .containsKanji(widget.kanji)
+        .then((value) => setState(() => isFavourite = value));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: FutureBuilder(
-        future: GetIt.instance.get<Database>().jadbSearchKanji(widget.kanji),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return ErrorWidget(snapshot.error!);
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) return ErrorWidget(snapshot.error!);
+    return FutureBuilder(
+      future: GetIt.instance.get<Database>().jadbSearchKanji(widget.kanji),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return ErrorWidget(snapshot.error!);
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) return ErrorWidget(snapshot.error!);
 
-          if (!addedToDatabase) {
-            HistoryEntry.insertKanji(kanji: widget.kanji);
-            addedToDatabase = true;
-          }
+        if (!addedToDatabase) {
+          HistoryEntry.insertKanji(kanji: widget.kanji);
+          addedToDatabase = true;
+        }
 
-          return _body(snapshot.data!);
-        },
-      ),
+        return _body(snapshot.data!);
+      },
     );
   }
 }
