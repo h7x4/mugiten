@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Ink;
 import 'package:get_it/get_it.dart';
+import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:jadb/search.dart';
 import 'package:signature/signature.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../bloc/theme/theme_bloc.dart';
-import '../../services/handwriting.dart';
 import '../../settings.dart';
 
 class DrawingBoard extends StatefulWidget {
@@ -33,8 +33,8 @@ class DrawingBoard extends StatefulWidget {
 class _DrawingBoardState extends State<DrawingBoard> {
   List<String> suggestions = [];
 
-  final List<List<TimedPoint>> strokes = [];
-  final List<List<TimedPoint>> undoQueue = [];
+  final List<List<StrokePoint>> strokes = [];
+  final List<List<StrokePoint>> undoQueue = [];
 
   GlobalKey signatureW = GlobalKey();
   GlobalKey suggestionBarW = GlobalKey();
@@ -53,21 +53,35 @@ class _DrawingBoardState extends State<DrawingBoard> {
       strokes.add([]);
       undoQueue.clear();
     },
-    onDrawMove: () => strokes.last
-        .add(TimedPoint(time: DateTime.now(), point: controller.points.last)),
+    onDrawMove: () => strokes.last.add(StrokePoint(
+      t: DateTime.now().millisecondsSinceEpoch,
+      x: controller.points.last.offset.dx,
+      y: controller.points.last.offset.dy,
+    )),
     onDrawEnd: () => updateSuggestions(),
   );
 
   Future<void> updateSuggestions() async {
     if (strokes.isEmpty) return setState(() => suggestions.clear());
 
-    final newSuggestions = await HandwritingRequest(
-      writingAreaHeight: signatureW.currentContext!.size!.width.toInt(),
-      writingAreaWidth: signatureW.currentContext!.size!.width.toInt(),
-      ink: strokes,
-    ).fetch();
+    final digitalInkRecognizer = DigitalInkRecognizer(languageCode: 'ja');
+    final context = DigitalInkRecognitionContext(
+      writingArea: WritingArea(
+        height: signatureW.currentContext!.size!.height,
+        width: signatureW.currentContext!.size!.width,
+      ),
+    );
+
+    final ink = Ink()
+      ..strokes = strokes.map((s) => Stroke()..points = s).toList();
+
+    final newSuggestions = await digitalInkRecognizer.recognize(
+      ink,
+      context: context,
+    );
+
     setState(() {
-      suggestions = newSuggestions;
+      suggestions = newSuggestions.map((rc) => rc.text).toList();
     });
   }
 

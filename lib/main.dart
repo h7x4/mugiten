@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:mugiten/database/database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -16,6 +17,12 @@ Future<void> main() async {
   await Future.wait([
     setupDatabase(),
     setupSharedPreferences(),
+    (() async {
+      final modelManager = DigitalInkRecognizerModelManager();
+      if (!await modelManager.isModelDownloaded('ja')) {
+        await modelManager.downloadModel('ja');
+      }
+    })()
   ]);
 
   registerExtraLicenses();
