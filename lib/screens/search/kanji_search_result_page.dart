@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/search.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
-import 'package:mugiten/models/history/search.dart';
+import 'package:mugiten/models/history/history_entry.dart';
 import 'package:mugiten/models/library/library_list.dart';
 import 'package:sqflite/sqflite.dart';
 
