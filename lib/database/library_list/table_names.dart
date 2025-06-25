@@ -19,5 +19,5 @@ abstract class LibraryListTableNames {
 
   /// Attributes:
   /// - name TEXT
-  static const String libraryListOrdered = 'Mugiten_LibraryListOrdered';
+  static const String libraryListOrdered = 'Mugiten_LibraryList_Ordered';
 }
