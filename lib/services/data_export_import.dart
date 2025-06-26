@@ -25,7 +25,7 @@ Future<Directory> tmpdir() async =>
 
 Future<Directory> unpackZipToTempDir(String zipFilePath) async {
   final outputDir = await tmpdir();
-  extractFileToDisk(
+  await extractFileToDisk(
     zipFilePath,
     outputDir.path,
   );
