@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
+import 'package:mugiten/models/verify_tables.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -119,10 +120,12 @@ Future<Database> openAndMigrateDatabase(
     },
     onOpen: (db) async {
       log('Verifying jadb tables...');
-
       db.jadbVerifyTables();
 
-      log('jadb opened successfully');
+      log('Verifying jadb tables...');
+      verifyMugitenTablesWithDbConnection(db);
+
+      log('Database tables verified successfully');
     },
   );
   return database;

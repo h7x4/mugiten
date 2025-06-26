@@ -31,4 +31,12 @@ abstract class HistoryTableNames {
   /// - language CHAR(1)?
   static const String historyEntryOrderedByTimestamp =
       'Mugiten_HistoryEntry_orderedByTimestamp';
+
+  static Set<String> get allTables => {
+        historyEntry,
+        historyEntryKanji,
+        historyEntryTimestamp,
+        historyEntryWord,
+        historyEntryOrderedByTimestamp,
+      };
 }

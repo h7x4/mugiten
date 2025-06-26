@@ -20,4 +20,10 @@ abstract class LibraryListTableNames {
   /// Attributes:
   /// - name TEXT
   static const String libraryListOrdered = 'Mugiten_LibraryList_Ordered';
+
+  static Set<String> get allTables => {
+        libraryList,
+        libraryListEntry,
+        libraryListOrdered,
+      };
 }
