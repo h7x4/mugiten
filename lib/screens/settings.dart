@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:file_picker/file_picker.dart';
@@ -80,16 +81,20 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future<void> clearAll(context) async {
-    final historyCount = await HistoryEntry.amountOfEntries();
-    final libraryCount = await LibraryList.libraryCount();
-
-    if (!context.mounted) return;
+    int? historyCount;
+    int? libraryCount;
+    try {
+      historyCount = await HistoryEntry.amountOfEntries();
+      libraryCount = await LibraryList.libraryCount();
+    } catch (e) {
+      log('Error getting counts: $e');
+    }
 
     final bool userIsSure = await confirm(
       context,
       content: Text(
-        'Are you sure you want to delete $historyCount history entries '
-        'and $libraryCount libraries?',
+        'Are you sure you want to delete ${historyCount ?? '?'} history entries '
+        'and ${libraryCount ?? '?'} libraries?',
       ),
     );
 
