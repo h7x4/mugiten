@@ -148,5 +148,33 @@ Future<void> exportLibraryListsTo(
 
 // TODO: how do we handle lists that already exist? There seems to be no good way to merge them?
 Future<void> importLibraryListsFrom(Directory libraryListsDir) async {
-  print('TODO: Implement importLibraryLists');
+  for (final file in libraryListsDir.listSync()) {
+    if (file is! File) continue;
+
+    assert(file.path.endsWith('.json'));
+
+    final libraryName =
+        file.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), '');
+
+    if (await LibraryList.exists(libraryName)) {
+      if ((await LibraryList.byName(libraryName).length) > 0) {
+        print(
+            'Library list "$libraryName" already exists and is not empty. Skipping import.');
+        continue;
+      } else {
+        print('Library list "$libraryName" already exists but is empty. '
+            'Importing entries from file ${file.path}.');
+      }
+    } else {
+      LibraryList.insert(libraryName);
+    }
+
+    final content = await file.readAsString();
+    final List<Map<String, Object?>> jsonEntries = (jsonDecode(content) as List)
+        .map((e) => e as Map<String, Object?>)
+        .toList();
+
+    final libraryList = LibraryList.byName(libraryName);
+    await libraryList.insertJsonEntries(jsonEntries);
+  }
 }

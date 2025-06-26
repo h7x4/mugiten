@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:collection/collection.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/library_list/table_names.dart';
 
 import '../../database/database.dart';
@@ -10,9 +11,9 @@ import 'library_entry.dart';
 class LibraryList {
   final String name;
 
-  const LibraryList._byName(this.name);
+  const LibraryList.byName(this.name);
 
-  static const LibraryList favourites = LibraryList._byName('favourites');
+  static const LibraryList favourites = LibraryList.byName('favourites');
 
   /// Get all entries within the library, in their custom order
   Future<List<LibraryEntry>> get entries async {
@@ -48,7 +49,7 @@ class LibraryList {
   static Future<List<LibraryList>> get allLibraries async {
     final query = await db().query(LibraryListTableNames.libraryListOrdered);
     return query
-        .map((lib) => LibraryList._byName(lib['name']! as String))
+        .map((lib) => LibraryList.byName(lib['name']! as String))
         .toList();
   }
 
@@ -83,7 +84,7 @@ class LibraryList {
     return Map.fromEntries(
       query.map(
         (lib) => MapEntry(
-          LibraryList._byName(lib['name']! as String),
+          LibraryList.byName(lib['name']! as String),
           lib['exists']! as int == 1,
         ),
       ),
@@ -247,6 +248,32 @@ class LibraryList {
       'prevEntryJmdictEntryId': prevEntry?.jmdictEntryId,
       'prevEntryKanji': prevEntry?.kanji,
     });
+  }
+
+  Future<void> insertJsonEntries(
+    List<Map<String, Object?>> jsonEntries,
+  ) async {
+    List<LibraryEntry> entries =
+        jsonEntries.map((e) => LibraryEntry.fromJson(e)).toList();
+
+    // TODO: batch
+    for (final entry in entries) {
+      if (entry.kanji != null) {
+        await insertEntry(
+          kanji: entry.kanji,
+          jmdictEntryId: null,
+          position: null,
+          lastModified: entry.lastModified,
+        );
+      } else if (entry.jmdictEntryId != null) {
+        await insertEntry(
+          jmdictEntryId: entry.jmdictEntryId,
+          kanji: null,
+          position: null,
+          lastModified: entry.lastModified,
+        );
+      }
+    }
   }
 
   /// Deletes an entry within a list
@@ -418,7 +445,7 @@ class LibraryList {
       'name': libraryName,
       'prevList': prevList.name,
     });
-    return LibraryList._byName(libraryName);
+    return LibraryList.byName(libraryName);
   }
 
   /// Delete this library from the database
