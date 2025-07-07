@@ -347,6 +347,12 @@ class _SettingsViewState extends State<SettingsView> {
                     onPressed: (c) =>
                         Navigator.pushNamed(context, Routes.aboutLicenses),
                   ),
+                  SettingsTile(
+                    leading: const Icon(Icons.notes),
+                    title: const Text('Changelog'),
+                    onPressed: (c) =>
+                        Navigator.pushNamed(context, Routes.aboutChangelog),
+                  ),
                 ],
               ),
             ],
