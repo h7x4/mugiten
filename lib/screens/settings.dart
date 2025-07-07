@@ -31,16 +31,6 @@ class _SettingsViewState extends State<SettingsView> {
   bool dataExportIsLoading = false;
   bool dataImportIsLoading = false;
 
-  // Future<bool?> assertExternalStorePermissions() async {
-  //   final permissionStatus = await Permission.storage.status;
-
-  //   if (permissionStatus.isGranted) return null;
-
-  //   final permissionResult = await Permission.storage.request();
-
-  //   return permissionResult.isGranted;
-  // }
-
   Future<void> clearHistory(context) async {
     final historyCount = await HistoryEntry.amountOfEntries();
 
