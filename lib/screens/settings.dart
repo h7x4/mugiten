@@ -202,7 +202,10 @@ class _SettingsViewState extends State<SettingsView> {
                 // titleTextStyle: _titleTextStyle,
                 tiles: <SettingsTile>[
                   SettingsTile.switchTile(
-                    title: const Text('Use romaji'),
+                    title: const Text('Romaji mode'),
+                    description: const Text(
+                      'Display romaji instead of kana for word readings',
+                    ),
                     leading: const Icon(Mdi.alphabetical),
                     onToggle: (b) => setState(() => romajiEnabled = b),
                     initialValue: romajiEnabled,
@@ -226,6 +229,8 @@ class _SettingsViewState extends State<SettingsView> {
                 tiles: <SettingsTile>[
                   SettingsTile.switchTile(
                     title: const Text('Automatic theme'),
+                    description:
+                        const Text('Let theme be determined by system'),
                     leading: const Icon(Icons.brightness_auto),
                     onToggle: toggleAutoTheme,
                     initialValue: autoThemeEnabled,
@@ -254,6 +259,7 @@ class _SettingsViewState extends State<SettingsView> {
                     enabled: true,
                     leading: const Icon(Icons.file_upload),
                     title: const Text('Import Data'),
+                    description: const Text('Import user data from a file'),
                     onPressed: importHandler,
                     value: dataImportIsLoading
                         ? const LinearProgressIndicator()
@@ -263,6 +269,7 @@ class _SettingsViewState extends State<SettingsView> {
                     enabled: true,
                     leading: const Icon(Icons.file_download),
                     title: const Text('Export Data'),
+                    description: const Text('Export user data to a file'),
                     onPressed: exportHandler,
                     value: dataExportIsLoading
                         ? const LinearProgressIndicator()
@@ -275,6 +282,7 @@ class _SettingsViewState extends State<SettingsView> {
                       'Clear History',
                       style: TextStyle(color: Colors.red),
                     ),
+                    description: const Text('Delete all search history'),
                     onPressed: clearHistory,
                   ),
                   SettingsTile(
@@ -283,6 +291,9 @@ class _SettingsViewState extends State<SettingsView> {
                     title: const Text(
                       'Reset database',
                       style: TextStyle(color: Colors.red),
+                    ),
+                    description: const Text(
+                      'Delete all user data and reinitialize dictionary data',
                     ),
                     onPressed: clearAll,
                   ),
@@ -294,6 +305,9 @@ class _SettingsViewState extends State<SettingsView> {
                   SettingsTile.switchTile(
                     leading: const Icon(Mdi.incognito),
                     title: const Text('Disable history tracking'),
+                    description: const Text(
+                      'Useful for reviewing history for library lists without cluttering the order',
+                    ),
                     onToggle: (b) => setState(() => incognitoModeEnabled = b),
                     initialValue: incognitoModeEnabled,
                     activeSwitchColor: AppTheme.mugitenWheat.background,
@@ -302,7 +316,8 @@ class _SettingsViewState extends State<SettingsView> {
                     leading: const Icon(Icons.close_fullscreen),
                     title: const Text('Shrink kanji drawing board'),
                     description: const Text(
-                        'Might be useful if you keep accidentally activating system gestures'),
+                      'Useful if you keep accidentally activating system gestures',
+                    ),
                     onToggle: (b) =>
                         setState(() => reduceKanjiDrawingBoardSize = b),
                     initialValue: reduceKanjiDrawingBoardSize,
@@ -315,7 +330,8 @@ class _SettingsViewState extends State<SettingsView> {
                 tiles: <SettingsTile>[
                   SettingsTile(
                     leading: const Icon(Icons.copyright),
-                    title: const Text('Licenses'),
+                    title: const Text('About'),
+                    description: const Text('Information about Mugiten and licenses used'),
                     onPressed: (c) =>
                         Navigator.pushNamed(context, Routes.aboutLicenses),
                   ),
@@ -328,6 +344,7 @@ class _SettingsViewState extends State<SettingsView> {
                   SettingsTile(
                     leading: const Icon(Mdi.git),
                     title: const Text('Repository'),
+                    description: const Text('https://git.pvv.ntnu.no/mugiten'),
                     onPressed: (c) => launchUrl(
                       Uri.parse('https://git.pvv.ntnu.no/mugiten'),
                     ),
