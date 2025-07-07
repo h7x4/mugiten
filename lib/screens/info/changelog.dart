@@ -12,7 +12,7 @@ class ChangelogView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Changelogs'),
+        title: const Text('Changelog'),
       ),
       body: FutureBuilder<List<String>>(
         future: _fetchChangelogs(),
