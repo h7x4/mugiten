@@ -17,6 +17,7 @@ import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/services/data_export_import.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -334,6 +335,16 @@ class _SettingsViewState extends State<SettingsView> {
                     title: const Text('Disable history tracking'),
                     onToggle: (b) => setState(() => incognitoModeEnabled = b),
                     initialValue: incognitoModeEnabled,
+                    activeSwitchColor: AppTheme.mugitenWheat.background,
+                  ),
+                  SettingsTile.switchTile(
+                    leading: const Icon(Icons.close_fullscreen),
+                    title: const Text('Shrink kanji drawing board'),
+                    description: const Text(
+                        'Might be useful if you keep accidentally activating system gestures'),
+                    onToggle: (b) =>
+                        setState(() => reduceKanjiDrawingBoardSize = b),
+                    initialValue: reduceKanjiDrawingBoardSize,
                     activeSwitchColor: AppTheme.mugitenWheat.background,
                   ),
                 ],

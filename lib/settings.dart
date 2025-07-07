@@ -45,6 +45,7 @@ const Map<String, dynamic> _defaults = {
   'darkThemeEnabled': false,
   'autoThemeEnabled': false,
   'japaneseFont': JapaneseFont.droidSansJapanese,
+  'reduceKanjiDrawingBoardSize': false,
 };
 
 bool _getSettingOrDefault(String settingName) =>
@@ -55,6 +56,8 @@ bool get incognitoModeEnabled =>
 bool get romajiEnabled => _getSettingOrDefault('romajiEnabled');
 bool get darkThemeEnabled => _getSettingOrDefault('darkThemeEnabled');
 bool get autoThemeEnabled => _getSettingOrDefault('autoThemeEnabled');
+bool get reduceKanjiDrawingBoardSize =>
+    _getSettingOrDefault('reduceKanjiDrawingBoardSize');
 JapaneseFont get japaneseFont {
   final int? i = _prefs.getInt('japaneseFont');
   return (i != null) ? JapaneseFont.values[i] : _defaults['japaneseFont'];
@@ -64,4 +67,6 @@ set incognitoModeEnabled(b) => _prefs.setBool('incognitoModeEnabled', b);
 set romajiEnabled(b) => _prefs.setBool('romajiEnabled', b);
 set darkThemeEnabled(b) => _prefs.setBool('darkThemeEnabled', b);
 set autoThemeEnabled(b) => _prefs.setBool('autoThemeEnabled', b);
+set reduceKanjiDrawingBoardSize(b) =>
+    _prefs.setBool('reduceKanjiDrawingBoardSize', b);
 set japaneseFont(JapaneseFont jf) => _prefs.setInt('japaneseFont', jf.index);

@@ -237,22 +237,32 @@ class _DrawingBoardState extends State<DrawingBoard> {
         ),
       );
 
-  Widget drawingPanel() => AspectRatio(
-        aspectRatio: 1.2,
-        child: Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            ClipRect(
-              child: Signature(
-                key: signatureW,
-                controller: controller,
-                backgroundColor: panelColor.background,
-              ),
+  Widget drawingPanel() {
+    final board = AspectRatio(
+      aspectRatio: 1.0,
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          ClipRect(
+            child: Signature(
+              key: signatureW,
+              controller: controller,
+              backgroundColor: panelColor.background,
             ),
-            buttonRow(),
-          ],
-        ),
+          ),
+          buttonRow(),
+        ],
+      ),
+    );
+
+    if (reduceKanjiDrawingBoardSize) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(50, 0, 50, 30),
+        child: board,
       );
+    }
+    return board;
+  }
 
   @override
   Widget build(BuildContext context) {

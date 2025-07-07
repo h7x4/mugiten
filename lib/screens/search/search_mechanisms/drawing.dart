@@ -22,8 +22,8 @@ class KanjiDrawingSearch extends StatelessWidget {
                 arguments: suggestion,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

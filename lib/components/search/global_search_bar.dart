@@ -97,8 +97,8 @@ class GlobalSearchBar extends StatelessWidget {
                   suggestion,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
