@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:markdown/markdown.dart' show markdownToHtml, ExtensionSet;
+import 'package:markdown/markdown.dart' show ExtensionSet;
 
 class ChangelogView extends StatelessWidget {
   const ChangelogView({super.key});
