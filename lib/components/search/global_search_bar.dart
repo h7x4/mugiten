@@ -63,7 +63,15 @@ class GlobalSearchBar extends StatelessWidget {
                 onPressed: () async {
                   final result = await _drawKanji()(context);
                   if (result != null && result.isNotEmpty) {
-                    controller.text += result;
+                    final pos = controller.selection.baseOffset;
+                    controller.text = controller.text.substring(0, pos) +
+                        result +
+                        controller.text.substring(pos);
+                    controller.selection = TextSelection.fromPosition(
+                      TextPosition(
+                        offset: pos + result.length,
+                      ),
+                    );
                   }
                 },
               )
