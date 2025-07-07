@@ -353,6 +353,13 @@ class _SettingsViewState extends State<SettingsView> {
                     onPressed: (c) =>
                         Navigator.pushNamed(context, Routes.aboutChangelog),
                   ),
+                  SettingsTile(
+                    leading: const Icon(Mdi.git),
+                    title: const Text('Repository'),
+                    onPressed: (c) => launchUrl(
+                      Uri.parse('https://git.pvv.ntnu.no/mugiten'),
+                    ),
+                  )
                 ],
               ),
             ],
