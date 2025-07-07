@@ -61,26 +61,6 @@ class _SettingsViewState extends State<SettingsView> {
     showSnackbar(context, 'Cleared history');
   }
 
-  Future<void> clearFavourites(context) async {
-    final favouritesCount = await LibraryList.favourites.length;
-
-    if (!context.mounted) return;
-
-    final bool userIsSure = await confirm(
-      context,
-      content: Text(
-        'Are you sure that you want to clear all $favouritesCount entries in favourites?',
-      ),
-    );
-    if (!userIsSure) return;
-
-    await LibraryList.favourites.deleteAllEntries();
-
-    if (!context.mounted) return;
-
-    showSnackbar(context, 'Cleared favourites');
-  }
-
   Future<void> clearAll(context) async {
     int? historyCount;
     int? libraryCount;
@@ -306,15 +286,6 @@ class _SettingsViewState extends State<SettingsView> {
                       style: TextStyle(color: Colors.red),
                     ),
                     onPressed: clearHistory,
-                  ),
-                  SettingsTile(
-                    enabled: true,
-                    leading: const Icon(Icons.delete),
-                    title: const Text(
-                      'Clear Favourites',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    onPressed: clearFavourites,
                   ),
                   SettingsTile(
                     enabled: true,
