@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:mdi/mdi.dart';
 import 'package:mugiten/screens/search/kanji_search_view.dart';
 import 'package:mugiten/screens/search/word_search_view.dart';
+import 'package:mugiten/services/snackbar.dart';
+import 'package:mugiten/settings.dart';
 
 import '../bloc/theme/theme_bloc.dart';
 import '../components/common/denshi_jisho_background.dart';
@@ -61,16 +63,30 @@ class _HomeState extends State<Home> {
   }
 
   List<_Page> get pages => [
-        const _Page(
-          content: WordSearchView(),
-          titleBar: 'Search',
-          icon: Icon(Icons.search),
-        ),
-        const _Page(
-          content: KanjiSearchView(),
-          titleBar: 'Kanji Search',
-          icon: Icon(Mdi.ideogramCjk, size: 30),
-        ),
+        _Page(
+            content: WordSearchView(),
+            titleBar: 'Search',
+            icon: Icon(Icons.search),
+            actions: [
+              if (incognitoModeEnabled)
+                IconButton(
+                  icon: const Icon(Mdi.incognito),
+                  onPressed: () =>
+                      showSnackbar(context, 'History tracking is disabled'),
+                ),
+            ]),
+        _Page(
+            content: KanjiSearchView(),
+            titleBar: 'Kanji Search',
+            icon: Icon(Mdi.ideogramCjk, size: 30),
+            actions: [
+              if (incognitoModeEnabled)
+                IconButton(
+                  icon: const Icon(Mdi.incognito),
+                  onPressed: () =>
+                      showSnackbar(context, 'History tracking is disabled'),
+                ),
+            ]),
         const _Page(
           content: HistoryView(),
           titleBar: 'History',

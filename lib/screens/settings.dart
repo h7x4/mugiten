@@ -327,6 +327,18 @@ class _SettingsViewState extends State<SettingsView> {
                 ],
               ),
               SettingsSection(
+                title: Text('Misc', style: titleTextStyle),
+                tiles: <SettingsTile>[
+                  SettingsTile.switchTile(
+                    leading: const Icon(Mdi.incognito),
+                    title: const Text('Disable history tracking'),
+                    onToggle: (b) => setState(() => incognitoModeEnabled = b),
+                    initialValue: incognitoModeEnabled,
+                    activeSwitchColor: AppTheme.mugitenWheat.background,
+                  ),
+                ],
+              ),
+              SettingsSection(
                 title: Text('Info', style: titleTextStyle),
                 tiles: <SettingsTile>[
                   SettingsTile(

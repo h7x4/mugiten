@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/search.dart';
+import 'package:mdi/mdi.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
 import 'package:mugiten/models/history/history_entry.dart';
 import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/services/snackbar.dart';
+import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqflite.dart';
 
 // import './kanji_result_body/examples.dart';
@@ -101,6 +104,12 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   Widget _body(KanjiSearchResult result) {
     return Scaffold(
       appBar: AppBar(actions: [
+        if (incognitoModeEnabled)
+          IconButton(
+            icon: const Icon(Mdi.incognito),
+            onPressed: () =>
+                showSnackbar(context, 'History tracking is disabled'),
+          ),
         IconButton(
           icon: const Icon(Icons.star),
           color: isFavourite ? Colors.yellow : null,
@@ -171,7 +180,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
         }
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
 
-        if (!addedToDatabase) {
+        if (!incognitoModeEnabled && !addedToDatabase) {
           HistoryEntry.insertKanji(kanji: widget.kanji);
           addedToDatabase = true;
         }

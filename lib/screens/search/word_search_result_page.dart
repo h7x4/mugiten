@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart' show JaDBConnection;
+import 'package:mdi/mdi.dart';
 import 'package:mugiten/models/history/history_entry.dart';
+import 'package:mugiten/services/snackbar.dart';
+import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../components/search/search_results_body/search_card.dart';
@@ -27,7 +30,17 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text('Search'),
+        actions: [
+          if (incognitoModeEnabled)
+            IconButton(
+              icon: const Icon(Mdi.incognito),
+              onPressed: () =>
+                  showSnackbar(context, 'History tracking is disabled'),
+            ),
+        ],
+      ),
       body: FutureBuilder(
         future: (() async {
           final jadbConnection = GetIt.instance.get<Database>();
@@ -45,7 +58,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!addedToDatabase) {
+          if (!incognitoModeEnabled && !addedToDatabase) {
             HistoryEntry.insertWord(word: widget.searchTerm);
             addedToDatabase = true;
           }

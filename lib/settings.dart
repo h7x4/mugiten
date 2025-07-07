@@ -42,6 +42,7 @@ extension Methods on JapaneseFont {
 const String appVersion = '0.1 Beta';
 
 const Map<String, dynamic> _defaults = {
+  'incognitoModeEnabled': false,
   'romajiEnabled': false,
   'darkThemeEnabled': false,
   'autoThemeEnabled': false,
@@ -51,6 +52,8 @@ const Map<String, dynamic> _defaults = {
 bool _getSettingOrDefault(String settingName) =>
     _prefs.getBool(settingName) ?? _defaults[settingName];
 
+bool get incognitoModeEnabled =>
+    _getSettingOrDefault('incognitoModeEnabled');
 bool get romajiEnabled => _getSettingOrDefault('romajiEnabled');
 bool get darkThemeEnabled => _getSettingOrDefault('darkThemeEnabled');
 bool get autoThemeEnabled => _getSettingOrDefault('autoThemeEnabled');
@@ -59,6 +62,7 @@ JapaneseFont get japaneseFont {
   return (i != null) ? JapaneseFont.values[i] : _defaults['japaneseFont'];
 }
 
+set incognitoModeEnabled(b) => _prefs.setBool('incognitoModeEnabled', b);
 set romajiEnabled(b) => _prefs.setBool('romajiEnabled', b);
 set darkThemeEnabled(b) => _prefs.setBool('darkThemeEnabled', b);
 set autoThemeEnabled(b) => _prefs.setBool('autoThemeEnabled', b);
