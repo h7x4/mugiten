@@ -10,15 +10,17 @@ class KanjiDrawingSearch extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Draw a kanji')),
-      body: Column(
-        children: [
-          const Expanded(child: Column()),
-          DrawingBoard(
-            onlyOneCharacterSuggestions: true,
-            onSuggestionChosen: (suggestion) => Navigator.popAndPushNamed(
-              context,
-              Routes.kanjiSearch,
-              arguments: suggestion,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Expanded(child: Column()),
+            DrawingBoard(
+              onlyOneCharacterSuggestions: true,
+              onSuggestionChosen: (suggestion) => Navigator.popAndPushNamed(
+                context,
+                Routes.kanjiSearch,
+                arguments: suggestion,
+              ),
             ),
           ),
         ],

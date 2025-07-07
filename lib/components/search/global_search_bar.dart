@@ -86,14 +86,16 @@ class GlobalSearchBar extends StatelessWidget {
     final MaterialPageRoute<String> route = MaterialPageRoute(
       builder: (context) => Scaffold(
         appBar: AppBar(title: const Text('Draw a kanji')),
-        body: Column(
-          children: [
-            const Expanded(child: Column()),
-            DrawingBoard(
-              onlyOneCharacterSuggestions: true,
-              onSuggestionChosen: (suggestion) => Navigator.pop(
-                context,
-                suggestion,
+        body: SafeArea(
+          child: Column(
+            children: [
+              const Expanded(child: Column()),
+              DrawingBoard(
+                onlyOneCharacterSuggestions: true,
+                onSuggestionChosen: (suggestion) => Navigator.pop(
+                  context,
+                  suggestion,
+                ),
               ),
             ),
           ],
