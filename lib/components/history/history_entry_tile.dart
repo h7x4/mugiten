@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:mugiten/bloc/theme/theme_bloc.dart';
+import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
 
 import '../../models/history/history_entry.dart';
 import '../../routing/routes.dart';
@@ -92,14 +95,24 @@ class HistoryEntryTile extends StatelessWidget {
                 child: Text(formatTime(entry.lastTimestamp)),
               ),
               DefaultTextStyle.merge(
-                style: japaneseFont.textStyle,
-                child: entry.isKanji
-                    ? KanjiBox.headline4(
-                        context: context,
-                        kanji: entry.kanji!,
-                      )
-                    : Expanded(child: Text(entry.word!)),
-              ),
+                  style: japaneseFont.textStyle,
+                  child: entry.isKanji
+                      ? KanjiBox.headline4(
+                          context: context,
+                          kanji: entry.kanji!,
+                        )
+                      : Expanded(child: Text(entry.word!))),
+              if (entry.isKanji) Expanded(child: SizedBox.shrink()),
+              if ((entry.timestampCount ?? 0) > 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: BlocBuilder<ThemeBloc, ThemeState>(
+                    builder: (context, themeState) => CircleBadge(
+                      color: themeState.theme.menuGreyNormal.background,
+                      child: Text('${entry.timestampCount}'),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

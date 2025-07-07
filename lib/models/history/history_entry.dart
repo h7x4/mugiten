@@ -10,6 +10,7 @@ class HistoryEntry {
   final String? kanji;
   final String? word;
   final DateTime lastTimestamp;
+  final int? timestampCount;
 
   /// Whether this item is a kanji search or a word search
   bool get isKanji => word == null;
@@ -18,12 +19,14 @@ class HistoryEntry {
     required this.id,
     required this.kanji,
     required this.lastTimestamp,
+    this.timestampCount,
   }) : word = null;
 
   HistoryEntry.withWord({
     required this.id,
     required this.word,
     required this.lastTimestamp,
+    this.timestampCount,
   }) : kanji = null;
 
   /// Reconstruct a HistoryEntry object with data from the database
@@ -43,6 +46,9 @@ class HistoryEntry {
               lastTimestamp: DateTime.fromMillisecondsSinceEpoch(
                 dbObject['timestamp']! as int,
               ),
+              timestampCount: dbObject.containsKey('timestampCount')
+                  ? dbObject['timestampCount']! as int
+                  : null,
             )
           : HistoryEntry.withKanji(
               id: dbObject['entryId']! as int,
@@ -50,6 +56,9 @@ class HistoryEntry {
               lastTimestamp: DateTime.fromMillisecondsSinceEpoch(
                 dbObject['timestamp']! as int,
               ),
+              timestampCount: dbObject.containsKey('timestampCount')
+                  ? dbObject['timestampCount']! as int
+                  : null,
             );
 
   // TODO: There is a lot in common with

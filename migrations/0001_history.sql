@@ -26,7 +26,10 @@ CREATE TABLE "Mugiten_HistoryEntryTimestamp" (
 CREATE INDEX "Mugiten_HistoryEntryTimestamp_byTimestamp" ON "Mugiten_HistoryEntryTimestamp"("timestamp");
 
 CREATE VIEW "Mugiten_HistoryEntry_orderedByTimestamp" AS
-  SELECT * FROM "Mugiten_HistoryEntryTimestamp"
+  SELECT
+    *,
+    COUNT("timestamp") AS "timestampCount"
+  FROM "Mugiten_HistoryEntryTimestamp"
   LEFT JOIN "Mugiten_HistoryEntryWord" USING ("entryId")
   LEFT JOIN "Mugiten_HistoryEntryKanji" USING ("entryId")
   GROUP BY "entryId"
