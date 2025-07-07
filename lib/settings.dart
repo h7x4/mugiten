@@ -39,8 +39,6 @@ extension Methods on JapaneseFont {
       '';
 }
 
-const String appVersion = '0.1 Beta';
-
 const Map<String, dynamic> _defaults = {
   'incognitoModeEnabled': false,
   'romajiEnabled': false,
