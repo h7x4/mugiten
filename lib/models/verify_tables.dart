@@ -7,8 +7,8 @@ Future<void> verifyMugitenTablesWithDbConnection(DatabaseExecutor db) async {
       .query(
     'sqlite_master',
     columns: ['name'],
-    where: 'type = ?',
-    whereArgs: ['table'],
+    where: 'type IN (?, ?)',
+    whereArgs: ['table', 'view'],
   )
       .then((result) {
     return result.map((row) => row['name'] as String).toSet();
