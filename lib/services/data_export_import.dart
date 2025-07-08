@@ -16,8 +16,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 //     - listb.json
 
 extension ArchiveFormat on Directory {
-  File get historyFile => File(uri.resolve('history.json').path);
-  Directory get libraryDir => Directory(uri.resolve('library').path);
+  File get historyFile => File(uri.resolve('history.json').toFilePath());
+  Directory get libraryDir => Directory(uri.resolve('library').toFilePath());
 }
 
 Future<Directory> tmpdir() async =>
@@ -38,7 +38,7 @@ Future<File> packZip(
 }) async {
   if (outputFile == null || !outputFile.existsSync()) {
     final outputDir = await tmpdir();
-    outputFile = File(outputDir.uri.resolve('mugiten_data.zip').path);
+    outputFile = File(outputDir.uri.resolve('mugiten_data.zip').toFilePath());
     outputFile.createSync();
   }
 
@@ -69,7 +69,7 @@ String getExportFileNameNoSuffix() {
 Future<File> exportData(DatabaseExecutor db) async {
   final dir = await tmpdir();
 
-  final libraryDir = Directory(dir.uri.resolve('library').path);
+  final libraryDir = Directory(dir.uri.resolve('library').toFilePath());
   libraryDir.createSync();
 
   await Future.wait([
@@ -139,7 +139,7 @@ Future<void> exportLibraryListsTo(
 ) async =>
     Future.wait(
       (await LibraryList.allLibraries).map((lib) async {
-        final file = File(dir.uri.resolve('${lib.name}.json').path);
+        final file = File(dir.uri.resolve('${lib.name}.json').toFilePath());
         file.createSync();
         final entries = await lib.entries;
         file.writeAsStringSync(jsonEncode(entries));
