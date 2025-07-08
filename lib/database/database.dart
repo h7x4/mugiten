@@ -12,6 +12,8 @@ import 'package:sqflite/sqflite.dart';
 
 export 'package:sqflite/sqlite_api.dart';
 
+const int expectedDatabaseVersion = 2;
+
 Database db() => GetIt.instance.get<Database>();
 
 /// Returns the directory where mugiten's database file is stored.
@@ -25,6 +27,35 @@ Future<Directory> _databaseDir() async {
 Future<String> databasePath() async {
   return join((await _databaseDir()).path, 'mugiten.sqlite');
 }
+
+Future<bool> databaseNeedsInitialization() async {
+  final String dbPath = await databasePath();
+
+  if (!await File(dbPath).exists()) {
+    return true;
+  }
+
+  final Database database = await openDatabase(
+    dbPath,
+    readOnly: true,
+    singleInstance: true,
+  );
+  final databaseVersion = await database.getVersion();
+  await database.close();
+
+  if (databaseVersion < expectedDatabaseVersion) {
+    return true;
+  }
+
+  return false;
+}
+
+Future<void> quickInitializeDatabase() async {
+  // TODO: Create more lightweight solution
+  await setupDatabase();
+}
+
+/// Migration logic and heavy initialization
 
 class DatabaseMigration {
   final String path;
@@ -96,6 +127,35 @@ Future<void> migrate(Database db, List<DatabaseMigration> migrations) async {
   }
 }
 
+Future<Database> openDatabaseWithoutMigrations(
+  String dbPath, {
+  bool readOnly = false,
+  bool verifyTables = true,
+}) async {
+  log('Opening database at $dbPath');
+  final Database database = await openDatabase(
+    dbPath,
+    version: expectedDatabaseVersion,
+    readOnly: readOnly,
+    onConfigure: (db) async {
+      // Enable foreign key constraints
+      await db.execute('PRAGMA foreign_keys=ON');
+    },
+    onOpen: (db) async {
+      if (verifyTables) {
+        log('Verifying jadb tables...');
+        db.jadbVerifyTables();
+
+        log('Verifying mugiten tables...');
+        verifyMugitenTablesWithDbConnection(db);
+
+        log('Database tables verified successfully');
+      }
+    },
+  );
+  return database;
+}
+
 Future<Database> openAndMigrateDatabase(
   String dbPath,
   List<DatabaseMigration> migrations,
@@ -103,7 +163,7 @@ Future<Database> openAndMigrateDatabase(
   log('Opening database at $dbPath');
   final Database database = await openDatabase(
     dbPath,
-    version: 2,
+    version: expectedDatabaseVersion,
     readOnly: false,
     onUpgrade: (db, oldVersion, newVersion) async {
       log('Migrating database from v$oldVersion to v$newVersion...');
@@ -137,14 +197,17 @@ Future<void> setupDatabase() async {
 
   final String dbPath = await databasePath();
 
-  if (!await File(dbPath).exists()) {
-    log('Extracting jadb.sqlite from assets...');
-    await extractJadbFromAssets(dbPath);
-    log('jadb.sqlite extracted to $dbPath');
-  }
+  assert(
+      await File(dbPath).exists(), 'Database file should exist at this point');
 
-  final List<DatabaseMigration> migrations = await readMigrationsFromAssets();
-  final Database database = await openAndMigrateDatabase(dbPath, migrations);
+  final database = await openDatabaseWithoutMigrations(
+    dbPath,
+    readOnly: false,
+    verifyTables: true,
+  );
+
+  assert(await database.getVersion() == expectedDatabaseVersion,
+      'Database version should be $expectedDatabaseVersion');
 
   log('Registering database in GetIt...');
   GetIt.instance.registerSingleton<Database>(database);

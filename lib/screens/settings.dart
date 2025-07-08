@@ -11,6 +11,7 @@ import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/common/denshi_jisho_background.dart';
 import 'package:mugiten/database/database.dart';
 import 'package:mugiten/database/history/table_names.dart';
+import 'package:mugiten/main.dart';
 import 'package:mugiten/models/history/history_entry.dart';
 import 'package:mugiten/models/library/library_list.dart';
 import 'package:mugiten/routing/routes.dart';
@@ -49,35 +50,6 @@ class _SettingsViewState extends State<SettingsView> {
     if (!context.mounted) return;
 
     showSnackbar(context, 'Cleared history');
-  }
-
-  Future<void> clearAll(context) async {
-    int? historyCount;
-    int? libraryCount;
-    try {
-      historyCount = await HistoryEntry.amountOfEntries();
-      libraryCount = await LibraryList.libraryCount();
-    } catch (e) {
-      log('Error getting counts: $e');
-    }
-
-    final bool userIsSure = await confirm(
-      context,
-      content: Text(
-        'Are you sure you want to delete ${historyCount ?? '?'} history entries '
-        'and ${libraryCount ?? '?'} libraries?',
-      ),
-    );
-
-    if (!userIsSure) return;
-    await resetDatabase();
-
-    if (!context.mounted) return;
-
-    showSnackbar(
-      context,
-      'Database reset successfully.',
-    );
   }
 
   // ignore: avoid_positional_boolean_parameters
@@ -285,18 +257,6 @@ class _SettingsViewState extends State<SettingsView> {
                     description: const Text('Delete all search history'),
                     onPressed: clearHistory,
                   ),
-                  SettingsTile(
-                    enabled: true,
-                    leading: const Icon(Icons.delete),
-                    title: const Text(
-                      'Reset database',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    description: const Text(
-                      'Delete all user data and reinitialize dictionary data',
-                    ),
-                    onPressed: clearAll,
-                  ),
                 ],
               ),
               SettingsSection(
@@ -323,6 +283,31 @@ class _SettingsViewState extends State<SettingsView> {
                     initialValue: reduceKanjiDrawingBoardSize,
                     activeSwitchColor: AppTheme.mugitenWheat.background,
                   ),
+                  SettingsTile(
+                    enabled: true,
+                    leading: const Icon(Icons.cached),
+                    title: const Text(
+                      'Reinitialize application',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    description: const Text(
+                      'Reinstall dictionary data and set up internal workings anew',
+                    ),
+                    onPressed: (_) async {
+                      if (!await confirm(
+                        context,
+                        content: const Text(
+                          'Are you sure you want to reinitialize the application?',
+                        ),
+                      )) {
+                        return;
+                      }
+
+                      GetIt.instance.get<Database>().close();
+                      GetIt.instance.reset();
+                      runInitializationScreen();
+                    },
+                  ),
                 ],
               ),
               SettingsSection(
@@ -331,7 +316,8 @@ class _SettingsViewState extends State<SettingsView> {
                   SettingsTile(
                     leading: const Icon(Icons.copyright),
                     title: const Text('About'),
-                    description: const Text('Information about Mugiten and licenses used'),
+                    description: const Text(
+                        'Information about Mugiten and licenses used'),
                     onPressed: (c) =>
                         Navigator.pushNamed(context, Routes.aboutLicenses),
                   ),

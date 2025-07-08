@@ -1,33 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
-import 'package:mugiten/database/database.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:mugiten/screens/initialization.dart';
+import 'package:mugiten/services/initialization/initialization_logic.dart';
 
 import 'bloc/theme/theme_bloc.dart';
 import 'routing/router.dart';
-import 'services/licenses.dart';
-import 'services/preferences.dart';
 import 'settings.dart';
+
+void runInitializationScreen() {
+  runApp(
+    InitializationView(
+      onInitializationComplete: () =>
+          quickInitialization().then((_) => runApp(const MyApp())),
+    ),
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  databaseFactory = databaseFactoryFfi;
-
-  await Future.wait([
-    setupDatabase(),
-    setupSharedPreferences(),
-    (() async {
-      final modelManager = DigitalInkRecognizerModelManager();
-      if (!await modelManager.isModelDownloaded('ja')) {
-        await modelManager.downloadModel('ja');
-      }
-    })()
-  ]);
-
-  registerExtraLicenses();
-
-  runApp(const MyApp());
+  if (await needsInitialization()) {
+    runInitializationScreen();
+  } else {
+    await quickInitialization();
+    runApp(const MyApp());
+  }
 }
 
 class MyApp extends StatefulWidget {
