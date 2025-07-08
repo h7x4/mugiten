@@ -7,7 +7,8 @@ import '../../settings.dart';
 import 'language_selector.dart';
 
 class GlobalSearchBar extends StatelessWidget {
-  final TextEditingController controller = TextEditingController();
+  final TextEditingController textController = TextEditingController();
+  final FocusNode textFocus = FocusNode();
 
   GlobalSearchBar({super.key});
 
@@ -25,7 +26,8 @@ class GlobalSearchBar extends StatelessWidget {
         children: [
           TextField(
             onSubmitted: (text) => _search(context, text),
-            controller: controller,
+            controller: textController,
+            focusNode: textFocus,
             style: japaneseFont.textStyle,
             decoration: InputDecoration(
               labelText: 'Search',
@@ -41,8 +43,8 @@ class GlobalSearchBar extends StatelessWidget {
                 color: AppTheme.mugitenWheat.background,
                 child: IconButton(
                   onPressed: () {
-                    if (controller.text.isNotEmpty) {
-                      _search(context, controller.text);
+                    if (textController.text.isNotEmpty) {
+                      _search(context, textController.text);
                     }
                   },
                   icon: const Icon(
@@ -63,15 +65,21 @@ class GlobalSearchBar extends StatelessWidget {
                 onPressed: () async {
                   final result = await _drawKanji()(context);
                   if (result != null && result.isNotEmpty) {
-                    final pos = controller.selection.baseOffset;
-                    controller.text = controller.text.substring(0, pos) +
-                        result +
-                        controller.text.substring(pos);
-                    controller.selection = TextSelection.fromPosition(
-                      TextPosition(
-                        offset: pos + result.length,
-                      ),
-                    );
+                    if (textController.selection.isValid) {
+                      final pos = textController.selection.baseOffset;
+                      textController.text = textController.text.substring(0, pos) +
+                          result +
+                          textController.text.substring(pos);
+                      textController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: pos + result.length),
+                      );
+                    } else {
+                      textController.text += result;
+                      textController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: textController.text.length),
+                      );
+                      textFocus.requestFocus();
+                    }
                   }
                 },
               )
