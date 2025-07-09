@@ -6,11 +6,12 @@ import 'bloc/theme/theme_bloc.dart';
 import 'routing/router.dart';
 import 'settings.dart';
 
-void runInitializationScreen() {
+void runInitializationScreen(bool deleteDatabase) {
   runApp(
     InitializationView(
       onInitializationComplete: () =>
           quickInitialization().then((_) => runApp(const MyApp())),
+      deleteDatabase: deleteDatabase,
     ),
   );
 }
@@ -19,7 +20,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (await needsInitialization()) {
-    runInitializationScreen();
+    runInitializationScreen(false);
   } else {
     await quickInitialization();
     runApp(const MyApp());

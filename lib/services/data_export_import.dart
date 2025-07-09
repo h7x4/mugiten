@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:mugiten/database/history/table_names.dart';
+import 'package:mugiten/database/library_list/table_names.dart';
 import 'package:mugiten/models/history/history_entry.dart';
 import 'package:mugiten/models/library/library_list.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -74,7 +75,7 @@ Future<File> exportData(DatabaseExecutor db) async {
 
   await Future.wait([
     exportHistoryTo(db, dir),
-    exportLibraryListsTo(libraryDir),
+    exportLibraryListsTo(db, libraryDir),
   ]);
 
   final zipFile = await packZip(dir);
@@ -134,17 +135,34 @@ Future<void> importHistoryFrom(File file) async {
 ///////////////////
 
 Future<void> exportLibraryListsTo(
-  // DatabaseExecutor db,
+  DatabaseExecutor db,
   Directory dir,
-) async =>
-    Future.wait(
-      (await LibraryList.allLibraries).map((lib) async {
-        final file = File(dir.uri.resolve('${lib.name}.json').toFilePath());
-        file.createSync();
-        final entries = await lib.entries;
-        file.writeAsStringSync(jsonEncode(entries));
-      }),
-    );
+) async {
+  final libraryNames = await db.query(
+    LibraryListTableNames.libraryList,
+    columns: ['name'],
+  ).then((result) => result.map((row) => row['name'] as String).toList());
+
+  await Future.wait([
+    for (final libraryName in libraryNames)
+      exportLibraryListTo(db, libraryName, dir),
+  ]);
+}
+
+Future<void> exportLibraryListTo(
+  DatabaseExecutor db,
+  String libraryName,
+  Directory dir,
+) async {
+  final file = File(dir.uri.resolve('$libraryName.json').toFilePath());
+  await file.create();
+
+  final entries = (await LibraryList.byName(libraryName).entries(db))
+      .map((e) => e.toJson())
+      .toList();
+
+  await file.writeAsString(jsonEncode(entries));
+}
 
 // TODO: how do we handle lists that already exist? There seems to be no good way to merge them?
 Future<void> importLibraryListsFrom(Directory libraryListsDir) async {

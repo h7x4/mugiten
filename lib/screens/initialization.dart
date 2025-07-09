@@ -10,7 +10,8 @@ class InitializationView extends StatelessWidget {
   InitializationView({
     super.key,
     required this.onInitializationComplete,
-  }) : cubit = InitializationCubit();
+    required bool deleteDatabase,
+  }) : cubit = InitializationCubit(deleteDatabase);
 
   @override
   Widget build(BuildContext context) {

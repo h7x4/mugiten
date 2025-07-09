@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:mugiten/database/database.dart'
     show
@@ -14,9 +15,12 @@ import 'package:mugiten/database/database.dart'
 import 'package:mugiten/services/data_export_import.dart';
 import 'package:mugiten/services/initialization/initialization_status.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class InitializationCubit extends Cubit<InitializationStatus> {
-  InitializationCubit() : super(InitializationNotStarted());
+  final bool deleteDatabase;
+
+  InitializationCubit(this.deleteDatabase) : super(InitializationNotStarted());
 
   Future<void> start() async {
     emit(InitializationPending());
@@ -33,7 +37,7 @@ class InitializationCubit extends Cubit<InitializationStatus> {
     emit(FinishDownloadMLKitDigitalInkModel());
 
     emit(CheckDatabase());
-    if (await databaseNeedsInitialization()) {
+    if (deleteDatabase || await databaseNeedsInitialization()) {
       final String dbPath = await databasePath();
       final databaseAlreadyExists = await File(dbPath).exists();
 
@@ -45,12 +49,21 @@ class InitializationCubit extends Cubit<InitializationStatus> {
         emit(BackupUserData(total: 2, progress: 1));
         final tempDir = await getTemporaryDirectory();
         final database = await openDatabaseWithoutMigrations(dbPath);
+
+        GetIt.instance.registerSingleton<Database>(database);
         final dataDump = await exportData(database);
+        GetIt.instance.unregister<Database>();
+
         await database.close();
 
         tmpdirDataDump =
             await dataDump.copy('${tempDir.path}/mugiten_data_backup.zip');
         emit(BackupUserData(total: 2, progress: 2));
+      }
+
+      if (deleteDatabase) {
+        await File(dbPath).delete();
+        await extractJadbFromAssets(dbPath);
       }
 
       emit(MigrateDatabase(total: 2, progress: 1));
@@ -63,7 +76,11 @@ class InitializationCubit extends Cubit<InitializationStatus> {
 
       if (databaseAlreadyExists) {
         emit(RestoreUserData(total: 2, progress: 1));
+
+        GetIt.instance.registerSingleton<Database>(database);
         await importData(database, tmpdirDataDump!);
+        GetIt.instance.unregister<Database>();
+
         emit(RestoreUserData(total: 2, progress: 2));
       }
 

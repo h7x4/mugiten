@@ -305,7 +305,7 @@ class _SettingsViewState extends State<SettingsView> {
 
                       GetIt.instance.get<Database>().close();
                       GetIt.instance.reset();
-                      runInitializationScreen();
+                      runInitializationScreen(true);
                     },
                   ),
                 ],

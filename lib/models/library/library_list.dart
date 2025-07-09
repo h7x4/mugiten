@@ -16,9 +16,9 @@ class LibraryList {
   static const LibraryList favourites = LibraryList.byName('favourites');
 
   /// Get all entries within the library, in their custom order
-  Future<List<LibraryEntry>> get entries async {
+  Future<List<LibraryEntry>> entries(DatabaseExecutor db) async {
     const columns = ['jmdictEntryId', 'kanji', 'lastModified'];
-    final query = await db().rawQuery(
+    final query = await db.rawQuery(
       '''
         WITH RECURSIVE
           "RecursionTable"(${columns.map((c) => '"$c"').join(', ')}) AS (
@@ -207,7 +207,7 @@ class LibraryList {
 
         final b = db().batch();
 
-        final entries_ = await entries;
+        final entries_ = await entries(db());
         final prevEntry = entries_[position - 1];
         final nextEntry = entries_[position];
 
@@ -239,7 +239,7 @@ class LibraryList {
       'Adding ${jmdictEntryId != null ? 'jmdict entry $jmdictEntryId' : 'kanji "$kanji"'} to library "$name"',
     );
 
-    final LibraryEntry? prevEntry = (await entries).lastOrNull;
+    final LibraryEntry? prevEntry = (await entries(db())).lastOrNull;
 
     await db().insert(LibraryListTableNames.libraryListEntry, {
       'listName': name,

@@ -1,5 +1,6 @@
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:mugiten/database/database.dart';
 
 import '../../components/common/loading.dart';
 import '../../components/library/library_list_entry_tile.dart';
@@ -21,7 +22,7 @@ class _LibraryContentViewState extends State<LibraryContentView> {
   List<LibraryEntry>? entries;
 
   Future<void> getEntriesFromDatabase() =>
-      widget.library.entries.then((es) => setState(() => entries = es));
+      widget.library.entries(db()).then((es) => setState(() => entries = es));
 
   @override
   void initState() {
