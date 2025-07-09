@@ -456,10 +456,87 @@ class LibraryList {
         illegalArguments: {'name': name},
       );
     }
-    await db().delete(
+
+    await db().transaction((txn) async {
+      await txn.delete(
+        LibraryListTableNames.libraryListEntry,
+        where: 'listName = ?',
+        whereArgs: [name],
+      );
+
+      final String prevName = await txn
+          .query(
+            LibraryListTableNames.libraryList,
+            columns: ['prevList'],
+            where: 'name = ?',
+            whereArgs: [name],
+          )
+          .then((rows) => rows.first['prevList']! as String);
+
+      final String? nextName = await txn
+          .query(
+            LibraryListTableNames.libraryList,
+            columns: ['name'],
+            where: 'prevList = ?',
+            whereArgs: [name],
+          )
+          .then((rows) => rows.firstOrNull?['name'] as String?);
+
+      await txn.delete(
+        LibraryListTableNames.libraryList,
+        where: 'name = ?',
+        whereArgs: [name],
+      );
+
+      if (nextName != null) {
+        await txn.update(
+          LibraryListTableNames.libraryList,
+          {'prevList': prevName},
+          where: 'name = ?',
+          whereArgs: [nextName],
+        );
+      }
+
+      if (!await verifyLibrariesLinkedList(txn)) {
+        print(
+            'Library list "$name" has a broken linked list after deletion, rolling back');
+        txn.execute('ROLLBACK');
+      }
+    });
+  }
+
+  Future<bool> verifyLibrariesLinkedList(
+    DatabaseExecutor db,
+  ) async {
+    final int allItemsCount = await db.query(
       LibraryListTableNames.libraryList,
-      where: 'name = ?',
-      whereArgs: [name],
-    );
+      columns: ['COUNT(*) AS count'],
+    ).then((rows) => rows.first['count']! as int);
+
+    final int distinctPrevListCount = await db.query(
+      LibraryListTableNames.libraryList,
+      columns: ['COUNT(DISTINCT prevList) AS count'],
+    ).then((rows) => (rows.first['count']! as int) + 1);
+
+    final int recursiveCount = await db.query(
+      LibraryListTableNames.libraryListOrdered,
+      columns: ['COUNT(*) AS count'],
+    ).then((rows) => rows.first['count']! as int);
+
+    if (allItemsCount != distinctPrevListCount) {
+      log(
+        'Library list "$name" has a mismatch between all items count ($allItemsCount) and distinct prevList count ($distinctPrevListCount).',
+      );
+      return false;
+    }
+
+    if (recursiveCount != allItemsCount) {
+      log(
+        'Library list "$name" has a mismatch between recursive count ($recursiveCount) and all items count ($allItemsCount).',
+      );
+      return false;
+    }
+
+    return true;
   }
 }
