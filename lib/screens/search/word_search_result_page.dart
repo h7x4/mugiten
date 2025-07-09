@@ -46,8 +46,12 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
           final jadbConnection = GetIt.instance.get<Database>();
 
           final results = await Future.wait([
-            jadbConnection.jadbSearchWordCount(widget.searchTerm),
-            jadbConnection.jadbSearchWord(widget.searchTerm),
+            jadbConnection
+                .jadbSearchWordCount(widget.searchTerm)
+                .then((v) => v ?? 0),
+            jadbConnection
+                .jadbSearchWord(widget.searchTerm)
+                .then((v) => v ?? <WordSearchResult>[]),
           ]);
 
           return (results[0] as int, results[1] as List<WordSearchResult>);
