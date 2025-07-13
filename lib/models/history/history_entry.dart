@@ -20,14 +20,22 @@ class HistoryEntry {
     required this.kanji,
     required this.lastTimestamp,
     this.timestampCount,
-  }) : word = null;
+  })  : word = null,
+        assert(
+          kanji!.runes.length == 1,
+          'Kanji must be a single character',
+        );
 
   HistoryEntry.withWord({
     required this.id,
     required this.word,
     required this.lastTimestamp,
     this.timestampCount,
-  }) : kanji = null;
+  })  : kanji = null,
+        assert(
+          word == word!.trim(),
+          'Word must not contain leading or trailing whitespace',
+        );
 
   /// Reconstruct a HistoryEntry object with data from the database
   /// This is specifically intended for the historyEntryOrderedByTimestamp
