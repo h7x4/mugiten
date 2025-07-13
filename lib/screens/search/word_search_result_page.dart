@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart' show JaDBConnection;
 import 'package:mdi/mdi.dart';
@@ -9,6 +10,9 @@ import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../components/search/search_results_body/search_card.dart';
+
+const int pageSize = 50;
+const int invisibleItemsThreshold = 25;
 
 class WordSearchResultPage extends StatefulWidget {
   final String searchTerm;
@@ -23,9 +27,36 @@ class WordSearchResultPage extends StatefulWidget {
 }
 
 class _WordSearchResultPageState extends State<WordSearchResultPage> {
-  final List<WordSearchResult> results = [];
-
   bool addedToDatabase = false;
+
+  late final _pagingController = PagingController<int, WordSearchResult>(
+    getNextPageKey: (state) =>
+        state.lastPageIsEmpty ? null : state.nextIntPageKey,
+    fetchPage: (pageKey) => GetIt.instance
+        .get<Database>()
+        .jadbSearchWord(
+          widget.searchTerm,
+          page: pageKey,
+          pageSize: pageSize,
+        )
+        .then((v) => v ?? <WordSearchResult>[]),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (!incognitoModeEnabled && !addedToDatabase) {
+      HistoryEntry.insertWord(word: widget.searchTerm);
+      addedToDatabase = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,44 +73,44 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
         ],
       ),
       body: FutureBuilder(
-        future: (() async {
-          final jadbConnection = GetIt.instance.get<Database>();
-
-          final results = await Future.wait([
-            jadbConnection
-                .jadbSearchWordCount(widget.searchTerm)
-                .then((v) => v ?? 0),
-            jadbConnection
-                .jadbSearchWord(widget.searchTerm)
-                .then((v) => v ?? <WordSearchResult>[]),
-          ]);
-
-          return (results[0] as int, results[1] as List<WordSearchResult>);
-        })(),
+        future: GetIt.instance
+            .get<Database>()
+            .jadbSearchWordCount(widget.searchTerm)
+            .then((v) => v ?? 0),
         builder: (context, snapshot) {
           if (snapshot.hasError) return ErrorWidget(snapshot.error!);
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!incognitoModeEnabled && !addedToDatabase) {
-            HistoryEntry.insertWord(word: widget.searchTerm);
-            addedToDatabase = true;
-          }
+          final searchCount = snapshot.data!;
 
-          return ListView(
+          return Column(
             children: [
               Center(
                 child: Text(
-                  'Found ${snapshot.data!.$1} results for "${widget.searchTerm}"',
+                  'Found $searchCount results for "${widget.searchTerm}"',
                   style: const TextStyle(
                     fontSize: 10,
                     color: Colors.grey,
                   ),
                 ),
               ),
-              for (final result in snapshot.data!.$2)
-                SearchResultCard(result: result)
+              Expanded(
+                child: PagingListener(
+                  controller: _pagingController,
+                  builder: (context, state, fetchNextPage) =>
+                      PagedListView<int, WordSearchResult>(
+                    state: state,
+                    fetchNextPage: fetchNextPage,
+                    builderDelegate: PagedChildBuilderDelegate(
+                      invisibleItemsThreshold: invisibleItemsThreshold,
+                      itemBuilder: (context, item, index) =>
+                          SearchResultCard(result: item),
+                    ),
+                  ),
+                ),
+              ),
             ],
           );
         },
