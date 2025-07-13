@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
+import 'package:sealed_languages/sealed_languages.dart';
 
 import '../../../../../bloc/theme/theme_bloc.dart';
 import 'antonyms.dart';
 import 'english_definitions.dart';
+
+final Map<String, String> languageNameMap = {
+  ...{
+    for (final lang in NaturalLanguage.list) lang.code: lang.name,
+    for (final lang in NaturalLanguage.list)
+      if (lang.bibliographicCode != null) lang.bibliographicCode!: lang.name,
+  }
+};
 
 class Sense extends StatelessWidget {
   final int index;
@@ -26,9 +35,15 @@ class Sense extends StatelessWidget {
       ...sense.restrictedToKanji.map((e) => 'Restricted to $e'),
       ...sense.fields.map((e) => 'Field: ${_capitalize(e.description)}'),
       ...sense.misc.map((e) => e.description),
-      ...sense.languageSource
-          .where((e) => !e.fullyDescribesSense)
-          .map((e) => 'From ${e.language}, "${e.phrase}"'),
+      ...sense.languageSource.map((e) {
+        final languageName = languageNameMap[e.language.toUpperCase()] ?? e.language;
+
+        if (e.phrase != null) {
+          return 'From $languageName, "${e.phrase}"';
+        } else {
+          return 'From $languageName';
+        }
+      }),
       ...sense.seeAlso.map((e) => 'See also: ${e.baseWord}'),
       ...sense.dialects.map((e) => '${_capitalize(e.description)} dialect'),
     ];

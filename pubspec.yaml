@@ -40,6 +40,7 @@ dependencies:
   package_info_plus: ^8.3.0
   flutter_markdown_plus: ^1.0.3
   markdown: ^7.3.0
+  sealed_languages: ^2.1.0
 
 dev_dependencies:
   flutter_test:
