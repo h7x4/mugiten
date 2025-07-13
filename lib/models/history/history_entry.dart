@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/history/table_names.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../../database/database.dart';
 

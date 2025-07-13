@@ -1,23 +1,23 @@
 import 'dart:io';
-import 'dart:developer';
 
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mdi/mdi.dart';
 import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/common/denshi_jisho_background.dart';
-import 'package:mugiten/database/database.dart';
 import 'package:mugiten/database/history/table_names.dart';
 import 'package:mugiten/main.dart';
 import 'package:mugiten/models/history/history_entry.dart';
-import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/models/themes/theme.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/services/data_export_import.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
+import 'package:sqflite/sqlite_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatefulWidget {

@@ -10,8 +10,6 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-export 'package:sqflite/sqlite_api.dart';
-
 const int expectedDatabaseVersion = 2;
 
 Database db() => GetIt.instance.get<Database>();

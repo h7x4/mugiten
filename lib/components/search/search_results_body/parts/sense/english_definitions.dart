@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../../../bloc/theme/theme_bloc.dart';
+import 'package:mugiten/models/themes/theme.dart';
 import 'search_chip.dart';
 
 class EnglishDefinitions extends StatelessWidget {

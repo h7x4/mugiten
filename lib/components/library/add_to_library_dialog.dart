@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
-import 'package:mugiten/models/history/history_entry.dart';
 import 'package:ruby_text/ruby_text.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../models/library/library_list.dart';
-import '../common/kanji_box.dart';
 import '../common/loading.dart';
 
 Future<void> showAddToLibraryDialog({

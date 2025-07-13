@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mdi/mdi.dart';
+import 'package:mugiten/models/themes/theme.dart';
 import 'package:mugiten/screens/search/kanji_search_view.dart';
 import 'package:mugiten/screens/search/word_search_view.dart';
 import 'package:mugiten/services/snackbar.dart';

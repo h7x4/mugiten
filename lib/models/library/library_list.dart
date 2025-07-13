@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:collection/collection.dart';
-import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/library_list/table_names.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../../database/database.dart';
 import '../../database/database_errors.dart';
