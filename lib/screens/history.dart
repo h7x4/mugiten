@@ -43,12 +43,25 @@ class HistoryView extends StatelessWidget {
     List<HistoryEntry> data,
   ) =>
       (context, index) {
-        final HistoryEntry search = data[index];
+        final firstSearchDate = data.firstOrNull?.lastTimestamp ?? DateTime.now();
+        if (index == 0) {
+          return TextDivider(text: formatDate(roundToDay(firstSearchDate)));
+        }
+
+        if (index == 1) {
+          return const Divider(
+            height: 0,
+            indent: 10,
+            endIndent: 10,
+          );
+        }
+
+        final int historyIndex = index - 1;
+        final HistoryEntry search = data[historyIndex];
         final DateTime searchDate = search.lastTimestamp;
 
-        if (index != 1 &&
-            (index == 0 ||
-                !dateIsEqual(data[index - 2].lastTimestamp, searchDate))) {
+        if (historyIndex != 0 &&
+            !dateIsEqual(data[historyIndex - 1].lastTimestamp, searchDate)) {
           return TextDivider(text: formatDate(roundToDay(searchDate)));
         }
 
