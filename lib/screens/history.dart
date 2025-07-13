@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import '../components/common/loading.dart';
@@ -9,96 +10,130 @@ import '../components/history/history_entry_tile.dart';
 import '../models/history/history_entry.dart';
 import '../services/datetime.dart';
 
-class HistoryView extends StatelessWidget {
+const int pageSize = 50;
+const int invisibleItemsThreshold = 25;
+
+class HistoryView extends StatefulWidget {
   const HistoryView({super.key});
 
   @override
+  State<HistoryView> createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<HistoryView> {
+  late final _pagingController = PagingController<int, HistoryEntry?>(
+    getNextPageKey: (state) =>
+        state.lastPageIsEmpty ? null : state.nextIntPageKey,
+    fetchPage: (pageKey) async {
+      List<HistoryEntry?> result = await HistoryEntry.entriesFromDb(
+        GetIt.instance.get<Database>(),
+        page: pageKey - 1,
+        pageSize: pageSize,
+      );
+
+      // Insert a null entry at the start in order to prepend a separator to the first actual entry.
+      if (pageKey == 1) {
+        result = [null, ...result];
+      }
+
+      return result;
+    },
+  );
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: Use infinite scroll pagination
-    return FutureBuilder<List<HistoryEntry>>(
-      future: HistoryEntry.fromDB(GetIt.instance.get<Database>()),
+    return FutureBuilder<int>(
+      future: HistoryEntry.amountOfEntries(GetIt.instance.get<Database>()),
       builder: (context, snapshot) {
         // TODO: provide proper error handling
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
         if (!snapshot.hasData) return const LoadingScreen();
 
-        final Map<int, HistoryEntry> data = snapshot.data!.asMap();
-        if (data.isEmpty) {
-          return const Center(
-            child: Text('The history is empty.\nTry searching for something!'),
-          );
-        }
+        final int amountOfEntries = snapshot.data!;
 
         return OpaqueBox(
-          child: ListView.separated(
-            itemCount: data.length + 2,
-            itemBuilder: historyEntryWithData(data),
-            separatorBuilder:
-                historyEntrySeparatorWithData(data.values.toList()),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Center(
+                  child: Text(
+                    '$amountOfEntries distinct searches made',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: PagingListener(
+                  controller: _pagingController,
+                  builder: (context, state, fetchNextPage) =>
+                      PagedListView<int, HistoryEntry?>.separated(
+                    state: state,
+                    fetchNextPage: fetchNextPage,
+                    separatorBuilder: (context, index) {
+                      if (index == 0) {
+                        final firstItemDate =
+                            _pagingController.items![1]!.lastTimestamp;
+                        return _dateDivider(firstItemDate);
+                      }
+
+                      final data = _pagingController.items!;
+
+                      final HistoryEntry search = data[index]!;
+                      // Previous in the sense of time, but it is the next item in the list.
+                      final HistoryEntry? previousSearch =
+                          data.length >= index + 1 ? data[index + 1] : null;
+
+                      if (previousSearch != null &&
+                          !dateIsEqual(
+                            search.lastTimestamp,
+                            previousSearch.lastTimestamp,
+                          )) {
+                        return _dateDivider(previousSearch.lastTimestamp);
+                      }
+
+                      return _divider();
+                    },
+                    builderDelegate: PagedChildBuilderDelegate<HistoryEntry?>(
+                      invisibleItemsThreshold: invisibleItemsThreshold,
+                      itemBuilder: (context, entry, index) => index == 0
+                          ? SizedBox.shrink()
+                          : HistoryEntryTile(
+                              entry: entry!,
+                              objectKey: entry.id,
+                              onDelete: () => _pagingController.refresh(),
+                            ),
+                      noItemsFoundIndicatorBuilder: (context) => const Center(
+                        child: Text(
+                          'The history is empty.\nTry searching for something!',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget Function(BuildContext, int) historyEntrySeparatorWithData(
-    List<HistoryEntry> data,
-  ) =>
-      (context, index) {
-        final firstSearchDate =
-            data.firstOrNull?.lastTimestamp ?? DateTime.now();
-        if (index == 0) {
-          return TextDivider(text: formatDate(roundToDay(firstSearchDate)));
-        }
+  Widget _dateDivider(DateTime date) =>
+      TextDivider(text: formatDate(roundToDay(date)));
 
-        if (index == 1) {
-          return const Divider(
-            height: 0,
-            indent: 10,
-            endIndent: 10,
-          );
-        }
-
-        final int historyIndex = index - 1;
-        final HistoryEntry search = data[historyIndex];
-        final DateTime searchDate = search.lastTimestamp;
-
-        if (historyIndex != 0 &&
-            !dateIsEqual(data[historyIndex - 1].lastTimestamp, searchDate)) {
-          return TextDivider(text: formatDate(roundToDay(searchDate)));
-        }
-
-        return const Divider(
-          height: 0,
-          indent: 10,
-          endIndent: 10,
-        );
-      };
-
-  Widget Function(BuildContext, int) historyEntryWithData(
-    Map<int, HistoryEntry> data,
-  ) {
-    return (context, index) {
-      return switch (index) {
-        0 => const SizedBox.shrink(),
-        1 => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Center(
-              child: Text(
-                '${data.length} distinct searches made',
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          ),
-        int i => HistoryEntryTile(
-            entry: data.values.toList()[i - 2],
-            objectKey: data.keys.toList()[i - 2],
-            onDelete: () => build(context),
-          ),
-      };
-    };
-  }
+  Widget _divider() => const Divider(
+        height: 0,
+        indent: 10,
+        endIndent: 10,
+      );
 }

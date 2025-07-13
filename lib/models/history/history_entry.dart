@@ -374,11 +374,30 @@ class HistoryEntry {
     return query.first['count']! as int;
   }
 
-  static Future<List<HistoryEntry>> fromDB(DatabaseExecutor db) async =>
-      (await db.query(HistoryTableNames.historyEntryOrderedByTimestamp))
-          .map((e) => HistoryEntry.fromDBMap(e))
-          .toList();
+  static Future<List<HistoryEntry>> entriesFromDb(
+    DatabaseExecutor db, {
+    int? page,
+    int? pageSize,
+  }) async {
+    assert(page == null || page >= 0);
+    assert(pageSize == null || pageSize > 0);
+    assert(
+      pageSize != null || page == null,
+      'pageSize must be provided if page is provided',
+    );
 
-  Future<void> delete(DatabaseExecutor db) => db
-      .delete(HistoryTableNames.historyEntry, where: 'id = ?', whereArgs: [id]);
+    final result = await db.query(
+      HistoryTableNames.historyEntryOrderedByTimestamp,
+      limit: pageSize,
+      offset: page != null && pageSize != null ? page * pageSize : null,
+    );
+
+    return result.map((e) => HistoryEntry.fromDBMap(e)).toList();
+  }
+
+  Future<void> delete(DatabaseExecutor db) => db.delete(
+        HistoryTableNames.historyEntry,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
 }
