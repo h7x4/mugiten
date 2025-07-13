@@ -16,7 +16,20 @@ class LibraryList {
   static const LibraryList favourites = LibraryList.byName('favourites');
 
   /// Get all entries within the library, in their custom order
-  Future<List<LibraryEntry>> entries(DatabaseExecutor db) async {
+  Future<List<LibraryEntry>> entries(
+    DatabaseExecutor db, {
+    int? page,
+    int? pageSize,
+  }) async {
+    assert(
+      page == null || page >= 0,
+    );
+    assert(pageSize == null || pageSize > 0);
+    assert(
+      page == null || pageSize != null,
+      'If page is provided, pageSize must also be provided.',
+    );
+
     const columns = ['jmdictEntryId', 'kanji', 'lastModified'];
     final query = await db.rawQuery(
       '''
@@ -37,9 +50,16 @@ class LibraryList {
               AND ("R"."prevEntryJmdictEntryId" = "RecursionTable"."jmdictEntryId"
               OR "R"."prevEntryKanji" = "RecursionTable"."kanji")
           )
-        SELECT ${columns.map((c) => '"$c"').join(', ')} FROM "RecursionTable";
+        SELECT ${columns.map((c) => '"$c"').join(', ')} FROM "RecursionTable"
+        ${pageSize != null ? 'LIMIT ?' : ''}
+        ${page != null ? 'OFFSET ?' : ''}
       ''',
-      [name, name],
+      [
+        name,
+        name,
+        if (pageSize != null) pageSize,
+        if (page != null) page * pageSize!,
+      ],
     );
 
     return query.map((e) => LibraryEntry.fromDBMap(e)).toList();
