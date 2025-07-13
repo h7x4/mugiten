@@ -54,11 +54,13 @@ class YomiChips extends StatelessWidget {
     required BuildContext context,
     required String yomi,
     required ColorSet colors,
+    bool searchable = true,
     TextStyle? extraTextStyle,
   }) =>
       InkWell(
-        onTap: () =>
-            Navigator.pushNamed(context, Routes.search, arguments: yomi),
+        onTap: searchable
+            ? () => Navigator.pushNamed(context, Routes.search, arguments: yomi)
+            : null,
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 5),
           padding: const EdgeInsets.symmetric(
@@ -99,6 +101,7 @@ class YomiChips extends StatelessWidget {
         yomiCard(
           context: context,
           yomi: type == YomiType.kunyomi ? 'Kun:' : 'On:',
+          searchable: false,
           colors: ColorSet(
             foreground: type.getColors(context).background,
             background: Colors.transparent,
