@@ -43,8 +43,9 @@ class GlobalSearchBar extends StatelessWidget {
                 color: AppTheme.mugitenWheat.background,
                 child: IconButton(
                   onPressed: () {
-                    if (textController.text.isNotEmpty) {
-                      _search(context, textController.text);
+                    final text = textController.text.trim();
+                    if (text.isNotEmpty) {
+                      _search(context, text);
                     }
                   },
                   icon: const Icon(
@@ -67,9 +68,10 @@ class GlobalSearchBar extends StatelessWidget {
                   if (result != null && result.isNotEmpty) {
                     if (textController.selection.isValid) {
                       final pos = textController.selection.baseOffset;
-                      textController.text = textController.text.substring(0, pos) +
-                          result +
-                          textController.text.substring(pos);
+                      textController.text =
+                          textController.text.substring(0, pos) +
+                              result +
+                              textController.text.substring(pos);
                       textController.selection = TextSelection.fromPosition(
                         TextPosition(offset: pos + result.length),
                       );
