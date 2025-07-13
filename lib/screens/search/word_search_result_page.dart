@@ -36,7 +36,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
         .get<Database>()
         .jadbSearchWord(
           widget.searchTerm,
-          page: pageKey,
+          page: pageKey - 1,
           pageSize: pageSize,
         )
         .then((v) => v ?? <WordSearchResult>[]),
