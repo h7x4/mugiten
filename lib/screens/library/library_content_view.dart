@@ -23,8 +23,9 @@ class LibraryContentView extends StatefulWidget {
 class _LibraryContentViewState extends State<LibraryContentView> {
   List<LibraryEntry>? entries;
 
-  Future<void> getEntriesFromDatabase() =>
-      widget.library.entries(db()).then((es) => setState(() => entries = es));
+  Future<void> getEntriesFromDatabase() => widget.library
+      .entries(GetIt.instance.get<Database>())
+      .then((es) => setState(() => entries = es));
 
   @override
   void initState() {

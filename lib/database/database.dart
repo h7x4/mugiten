@@ -12,8 +12,6 @@ import 'package:sqflite/sqflite.dart';
 
 const int expectedDatabaseVersion = 2;
 
-Database db() => GetIt.instance.get<Database>();
-
 /// Returns the directory where mugiten's database file is stored.
 Future<Directory> _databaseDir() async {
   final Directory appDocDir = await getApplicationDocumentsDirectory();
@@ -214,7 +212,7 @@ Future<void> setupDatabase() async {
 /// Resets the database by closing it, deleting the file, and setting it up again.
 Future<void> resetDatabase() async {
   log('Closing database...');
-  await db().close();
+  await GetIt.instance.get<Database>().close();
 
   log('Deleting mugiten.sqlite file...');
   File(await databasePath()).deleteSync();
