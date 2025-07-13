@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:mugiten/database/library_list/table_names.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-import '../../database/database.dart';
 import '../../database/database_errors.dart';
 import 'library_entry.dart';
 
@@ -66,8 +65,8 @@ class LibraryList {
   }
 
   /// Get all existing libraries in their custom order.
-  static Future<List<LibraryList>> get allLibraries async {
-    final query = await db().query(LibraryListTableNames.libraryListOrdered);
+  static Future<List<LibraryList>> allLibraries(DatabaseExecutor db) async {
+    final query = await db.query(LibraryListTableNames.libraryListOrdered);
     return query
         .map((lib) => LibraryList.byName(lib['name']! as String))
         .toList();
@@ -76,6 +75,7 @@ class LibraryList {
   /// Generates a map of all the libraries, with the value being
   /// whether or not the specified entry is within the library.
   static Future<Map<LibraryList, bool>> allListsContains({
+    required DatabaseExecutor db,
     required int? jmdictEntryId,
     required String? kanji,
   }) async {
@@ -85,7 +85,7 @@ class LibraryList {
       );
     }
 
-    final query = await db().rawQuery(
+    final query = await db.rawQuery(
       '''
       SELECT
         *,
@@ -113,6 +113,7 @@ class LibraryList {
 
   /// Whether a library contains a specific entry
   Future<bool> contains({
+    required DatabaseExecutor db,
     required int? jmdictEntryId,
     required String? kanji,
   }) async {
@@ -125,7 +126,7 @@ class LibraryList {
       );
     }
 
-    final query = await db().rawQuery(
+    final query = await db.rawQuery(
       '''
         SELECT EXISTS(
           SELECT *
@@ -139,20 +140,33 @@ class LibraryList {
   }
 
   /// Whether a library contains a specific word entry
-  Future<bool> containsJmdictEntryId(int jmdictEntryId) => contains(
+  Future<bool> containsJmdictEntryId(
+    DatabaseExecutor db,
+    int jmdictEntryId,
+  ) =>
+      contains(
+        db: db,
         jmdictEntryId: jmdictEntryId,
         kanji: null,
       );
 
   /// Whether a library contains a specific kanji entry
-  Future<bool> containsKanji(String kanji) => contains(
+  Future<bool> containsKanji(
+    DatabaseExecutor db,
+    String kanji,
+  ) =>
+      contains(
+        db: db,
         jmdictEntryId: null,
         kanji: kanji,
       );
 
   /// Whether a library exists in the database
-  static Future<bool> exists(String libraryName) async {
-    final query = await db().rawQuery(
+  static Future<bool> exists(
+    DatabaseExecutor db,
+    String libraryName,
+  ) async {
+    final query = await db.rawQuery(
       '''
         SELECT EXISTS(
           SELECT *
@@ -165,8 +179,10 @@ class LibraryList {
     return query.first['exists']! as int == 1;
   }
 
-  static Future<int> libraryCount() async {
-    final query = await db().query(
+  static Future<int> libraryCount(
+    DatabaseExecutor db,
+  ) async {
+    final query = await db.query(
       LibraryListTableNames.libraryList,
       columns: ['COUNT(*) AS count'],
     );
@@ -174,8 +190,8 @@ class LibraryList {
   }
 
   /// The amount of items within this library.
-  Future<int> get length async {
-    final query = await db().query(
+  Future<int> length(DatabaseExecutor db) async {
+    final query = await db.query(
       LibraryListTableNames.libraryListEntry,
       columns: ['COUNT(*) AS count'],
       where: 'listName = ?',
@@ -187,6 +203,7 @@ class LibraryList {
   /// Swaps two entries within a list
   /// Will throw an exception if the entry is already in the library
   Future<void> insertEntry({
+    required DatabaseExecutor db,
     required int? jmdictEntryId,
     required String? kanji,
     int? position,
@@ -199,7 +216,11 @@ class LibraryList {
     }
     // TODO: set up lastModified insertion
 
-    if (await contains(jmdictEntryId: jmdictEntryId, kanji: kanji)) {
+    if (await contains(
+      db: db,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+    )) {
       throw DataAlreadyExistsError(
         tableName: LibraryListTableNames.libraryListEntry,
         illegalArguments: {
@@ -210,7 +231,7 @@ class LibraryList {
     }
 
     if (position != null) {
-      final len = await length;
+      final len = await length(db);
       if (0 > position || position > len) {
         throw IndexError.withLength(
           position,
@@ -225,9 +246,10 @@ class LibraryList {
           'Adding ${jmdictEntryId != null ? 'jmdict entry $jmdictEntryId' : 'kanji "$kanji"'} to library "$name" at position $position',
         );
 
-        final b = db().batch();
+        // TODO: use a transaction instead of a batch
+        final b = db.batch();
 
-        final entries_ = await entries(db());
+        final entries_ = await entries(db);
         final prevEntry = entries_[position - 1];
         final nextEntry = entries_[position];
 
@@ -259,9 +281,9 @@ class LibraryList {
       'Adding ${jmdictEntryId != null ? 'jmdict entry $jmdictEntryId' : 'kanji "$kanji"'} to library "$name"',
     );
 
-    final LibraryEntry? prevEntry = (await entries(db())).lastOrNull;
+    final LibraryEntry? prevEntry = (await entries(db)).lastOrNull;
 
-    await db().insert(LibraryListTableNames.libraryListEntry, {
+    await db.insert(LibraryListTableNames.libraryListEntry, {
       'listName': name,
       'jmdictEntryId': jmdictEntryId,
       'kanji': kanji,
@@ -271,6 +293,7 @@ class LibraryList {
   }
 
   Future<void> insertJsonEntries(
+    DatabaseExecutor db,
     List<Map<String, Object?>> jsonEntries,
   ) async {
     List<LibraryEntry> entries =
@@ -280,6 +303,7 @@ class LibraryList {
     for (final entry in entries) {
       if (entry.kanji != null) {
         await insertEntry(
+          db: db,
           kanji: entry.kanji,
           jmdictEntryId: null,
           position: null,
@@ -287,6 +311,7 @@ class LibraryList {
         );
       } else if (entry.jmdictEntryId != null) {
         await insertEntry(
+          db: db,
           jmdictEntryId: entry.jmdictEntryId,
           kanji: null,
           position: null,
@@ -299,6 +324,7 @@ class LibraryList {
   /// Deletes an entry within a list
   /// Will throw an exception if the entry is not in the library
   Future<void> deleteEntry({
+    required DatabaseExecutor db,
     required int? jmdictEntryId,
     required String? kanji,
   }) async {
@@ -308,7 +334,11 @@ class LibraryList {
       );
     }
 
-    if (!await contains(jmdictEntryId: jmdictEntryId, kanji: kanji)) {
+    if (!await contains(
+      db: db,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+    )) {
       throw DataNotFoundError(
         tableName: LibraryListTableNames.libraryListEntry,
         illegalArguments: {
@@ -323,14 +353,14 @@ class LibraryList {
     );
 
     // TODO: these queries might be combined into one
-    final entryQuery = await db().query(
+    final entryQuery = await db.query(
       LibraryListTableNames.libraryListEntry,
       columns: ['prevEntryJmdictEntryId', 'prevEntryKanji'],
       where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
       whereArgs: [name, jmdictEntryId, kanji],
     );
 
-    final nextEntryQuery = await db().query(
+    final nextEntryQuery = await db.query(
       LibraryListTableNames.libraryListEntry,
       where:
           '"listName" = ? AND ("prevEntryJmdictEntryId" = ? OR "prevEntryKanji" = ?)',
@@ -344,7 +374,8 @@ class LibraryList {
     final LibraryEntry? nextEntry =
         nextEntryQuery.map((e) => LibraryEntry.fromDBMap(e)).firstOrNull;
 
-    final b = db().batch();
+    // TODO: use a transaction instead of a batch
+    final b = db.batch();
 
     if (nextEntry != null) {
       b.update(
@@ -370,6 +401,7 @@ class LibraryList {
   /// Swaps two entries within a list
   /// Will throw an error if both of the entries doesn't exist
   Future<void> swapEntries({
+    required DatabaseExecutor db,
     required int? jmdictEntryId1,
     required String? kanji1,
     required int? jmdictEntryId2,
@@ -382,7 +414,11 @@ class LibraryList {
       );
     }
 
-    if (!await contains(jmdictEntryId: jmdictEntryId1, kanji: kanji1)) {
+    if (!await contains(
+      db: db,
+      jmdictEntryId: jmdictEntryId1,
+      kanji: kanji1,
+    )) {
       throw DataNotFoundError(
         tableName: LibraryListTableNames.libraryListEntry,
         illegalArguments: {
@@ -392,7 +428,11 @@ class LibraryList {
       );
     }
 
-    if (!await contains(jmdictEntryId: jmdictEntryId2, kanji: kanji2)) {
+    if (!await contains(
+      db: db,
+      jmdictEntryId: jmdictEntryId2,
+      kanji: kanji2,
+    )) {
       throw DataNotFoundError(
         tableName: LibraryListTableNames.libraryListEntry,
         illegalArguments: {
@@ -415,6 +455,7 @@ class LibraryList {
   /// delete the entry respectively. Else, it will figure out whether the entry
   /// is in the library already automatically.
   Future<bool> toggleEntry({
+    required DatabaseExecutor db,
     required int? jmdictEntryId,
     required String? kanji,
     bool? overrideToggleOn,
@@ -425,16 +466,21 @@ class LibraryList {
       );
     }
 
-    overrideToggleOn ??=
-        !(await contains(jmdictEntryId: jmdictEntryId, kanji: kanji));
+    overrideToggleOn ??= !(await contains(
+      db: db,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+    ));
 
     if (overrideToggleOn) {
       await insertEntry(
+        db: db,
         jmdictEntryId: jmdictEntryId,
         kanji: kanji,
       );
     } else {
       await deleteEntry(
+        db: db,
         jmdictEntryId: jmdictEntryId,
         kanji: kanji,
       );
@@ -442,15 +488,18 @@ class LibraryList {
     return overrideToggleOn;
   }
 
-  Future<void> deleteAllEntries() => db().delete(
+  Future<void> deleteAllEntries(DatabaseExecutor db) => db.delete(
         LibraryListTableNames.libraryListEntry,
         where: 'listName = ?',
         whereArgs: [name],
       );
 
   /// Insert a new library list into the database
-  static Future<LibraryList> insert(String libraryName) async {
-    if (await exists(libraryName)) {
+  static Future<LibraryList> insert(
+    DatabaseExecutor db,
+    String libraryName,
+  ) async {
+    if (await exists(db, libraryName)) {
       throw DataAlreadyExistsError(
         tableName: LibraryListTableNames.libraryList,
         illegalArguments: {
@@ -460,8 +509,8 @@ class LibraryList {
     }
 
     // This is ok, because "favourites" should always exist.
-    final prevList = (await allLibraries).last;
-    await db().insert(LibraryListTableNames.libraryList, {
+    final prevList = (await allLibraries(db)).last;
+    await db.insert(LibraryListTableNames.libraryList, {
       'name': libraryName,
       'prevList': prevList.name,
     });
@@ -469,7 +518,7 @@ class LibraryList {
   }
 
   /// Delete this library from the database
-  Future<void> delete() async {
+  Future<void> delete(Database db) async {
     if (name == 'favourites') {
       throw IllegalDeletionError(
         tableName: LibraryListTableNames.libraryList,
@@ -477,7 +526,7 @@ class LibraryList {
       );
     }
 
-    await db().transaction((txn) async {
+    await db.transaction((txn) async {
       await txn.delete(
         LibraryListTableNames.libraryListEntry,
         where: 'listName = ?',

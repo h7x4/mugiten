@@ -53,6 +53,7 @@ class LibraryListEntryTile extends StatelessWidget {
       icon: Icons.delete,
       onPressed: (_) async {
         await library.deleteEntry(
+          db: GetIt.instance.get<Database>(),
           jmdictEntryId: entry.jmdictEntryId,
           kanji: entry.kanji,
         );

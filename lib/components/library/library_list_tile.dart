@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get_it/get_it.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../../models/library/library_list.dart';
 import '../../routing/routes.dart';
@@ -41,7 +43,9 @@ class LibraryListTile extends StatelessWidget {
                   backgroundColor: Colors.red,
                   icon: Icons.delete,
                   onPressed: (_) async {
-                    await library.delete();
+                    await library.delete(
+                      GetIt.instance.get<Database>(),
+                    );
                     onDelete?.call();
                   },
                 ),
@@ -58,7 +62,7 @@ class LibraryListTile extends StatelessWidget {
           children: [
             Expanded(child: Text(library.name)),
             FutureBuilder<int>(
-              future: library.length,
+              future: library.length(GetIt.instance.get<Database>()),
               builder: (context, snapshot) {
                 if (snapshot.hasError) return ErrorWidget(snapshot.error!);
                 if (!snapshot.hasData) return const LoadingScreen();

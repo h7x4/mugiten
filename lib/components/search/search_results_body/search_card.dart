@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get_it/get_it.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/util/text_filtering.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
 import 'package:mugiten/models/library/library_list.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import './parts/common_badge.dart';
 import './parts/header.dart';
@@ -100,6 +102,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
                 backgroundColor: Colors.yellow,
                 icon: Icons.star,
                 onPressed: (_) => LibraryList.favourites.toggleEntry(
+                  db: GetIt.instance.get<Database>(),
                   jmdictEntryId: widget.result.entryId,
                   kanji: null,
                 ),

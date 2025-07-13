@@ -88,7 +88,7 @@ Future<void> importData(DatabaseExecutor db, File zipFile) async {
 
   await Future.wait([
     importHistoryFrom(dir.historyFile),
-    importLibraryListsFrom(dir.libraryDir),
+    importLibraryListsFrom(db, dir.libraryDir),
   ]);
 
   dir.deleteSync(recursive: true);
@@ -165,7 +165,8 @@ Future<void> exportLibraryListTo(
 }
 
 // TODO: how do we handle lists that already exist? There seems to be no good way to merge them?
-Future<void> importLibraryListsFrom(Directory libraryListsDir) async {
+Future<void> importLibraryListsFrom(
+    DatabaseExecutor db, Directory libraryListsDir) async {
   for (final file in libraryListsDir.listSync()) {
     if (file is! File) continue;
 
@@ -174,8 +175,8 @@ Future<void> importLibraryListsFrom(Directory libraryListsDir) async {
     final libraryName =
         file.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), '');
 
-    if (await LibraryList.exists(libraryName)) {
-      if ((await LibraryList.byName(libraryName).length) > 0) {
+    if (await LibraryList.exists(db, libraryName)) {
+      if ((await LibraryList.byName(libraryName).length(db)) > 0) {
         print(
             'Library list "$libraryName" already exists and is not empty. Skipping import.');
         continue;
@@ -184,7 +185,7 @@ Future<void> importLibraryListsFrom(Directory libraryListsDir) async {
             'Importing entries from file ${file.path}.');
       }
     } else {
-      LibraryList.insert(libraryName);
+      LibraryList.insert(db, libraryName);
     }
 
     final content = await file.readAsString();
@@ -193,6 +194,6 @@ Future<void> importLibraryListsFrom(Directory libraryListsDir) async {
         .toList();
 
     final libraryList = LibraryList.byName(libraryName);
-    await libraryList.insertJsonEntries(jsonEntries);
+    await libraryList.insertJsonEntries(db, jsonEntries);
   }
 }

@@ -116,6 +116,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
           onPressed: () {
             LibraryList.favourites
                 .toggleEntry(
+                  db: GetIt.instance.get<Database>(),
                   jmdictEntryId: null,
                   kanji: result.kanji,
                 )
@@ -165,7 +166,10 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   void initState() {
     super.initState();
     LibraryList.favourites
-        .containsKanji(widget.kanji)
+        .containsKanji(
+          GetIt.instance.get<Database>(),
+          widget.kanji,
+        )
         .then((value) => setState(() => isFavourite = value));
   }
 

@@ -1,6 +1,8 @@
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/database.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../../components/common/loading.dart';
 import '../../components/library/library_list_entry_tile.dart';
@@ -38,7 +40,9 @@ class _LibraryContentViewState extends State<LibraryContentView> {
         actions: [
           IconButton(
             onPressed: () async {
-              final entryCount = await widget.library.length;
+              final entryCount = await widget.library.length(
+                GetIt.instance.get<Database>(),
+              );
               if (!context.mounted) return;
               final bool userIsSure = await confirm(
                 context,
@@ -48,7 +52,9 @@ class _LibraryContentViewState extends State<LibraryContentView> {
               );
               if (!userIsSure) return;
 
-              await widget.library.deleteAllEntries();
+              await widget.library.deleteAllEntries(
+                GetIt.instance.get<Database>(),
+              );
               await getEntriesFromDatabase();
             },
             icon: const Icon(Icons.delete),

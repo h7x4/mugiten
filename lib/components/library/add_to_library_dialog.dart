@@ -47,6 +47,7 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
     super.initState();
 
     LibraryList.allListsContains(
+      db: GetIt.instance.get<Database>(),
       jmdictEntryId: widget.jmdictEntryId,
       kanji: widget.kanji,
     ).then((data) => setState(() => librariesContainEntry = data));
@@ -58,6 +59,7 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
     setState(() => toggleLock = true);
 
     await lib.toggleEntry(
+      db: GetIt.instance.get<Database>(),
       jmdictEntryId: widget.jmdictEntryId,
       kanji: widget.kanji,
     );

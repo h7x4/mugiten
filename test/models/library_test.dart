@@ -46,13 +46,15 @@ Future<Database> createDatabaseCopy({
 }
 
 Future<void> insertTestData(Database db) async {
-  final libraryList1 = await LibraryList.insert("Test Library 1");
+  final libraryList1 = await LibraryList.insert(db, "Test Library 1");
 
   await libraryList1.insertEntry(
+    db: db,
     jmdictEntryId: null,
     kanji: "漢",
   );
   await libraryList1.insertEntry(
+    db: db,
     jmdictEntryId: null,
     kanji: "字",
   );

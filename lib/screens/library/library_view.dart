@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../../components/common/loading.dart';
 import '../../components/library/library_list_tile.dart';
@@ -15,7 +17,8 @@ class _LibraryViewState extends State<LibraryView> {
   List<LibraryList>? libraries;
 
   Future<void> getEntriesFromDatabase() =>
-      LibraryList.allLibraries.then((libs) => setState(() => libraries = libs));
+      LibraryList.allLibraries(GetIt.instance.get<Database>())
+          .then((libs) => setState(() => libraries = libs));
 
   @override
   void initState() {
