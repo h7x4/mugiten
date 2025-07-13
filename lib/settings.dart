@@ -51,8 +51,7 @@ const Map<String, dynamic> _defaults = {
 bool _getSettingOrDefault(String settingName) =>
     _prefs.getBool(settingName) ?? _defaults[settingName];
 
-bool get incognitoModeEnabled =>
-    _getSettingOrDefault('incognitoModeEnabled');
+bool get incognitoModeEnabled => _getSettingOrDefault('incognitoModeEnabled');
 bool get romajiEnabled => _getSettingOrDefault('romajiEnabled');
 bool get darkThemeEnabled => _getSettingOrDefault('darkThemeEnabled');
 bool get autoThemeEnabled => _getSettingOrDefault('autoThemeEnabled');

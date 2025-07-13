@@ -103,7 +103,8 @@ class ChangelogView extends StatelessWidget {
             }
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
               physics: const AlwaysScrollableScrollPhysics(),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),

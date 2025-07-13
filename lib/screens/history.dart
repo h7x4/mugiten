@@ -43,7 +43,8 @@ class HistoryView extends StatelessWidget {
     List<HistoryEntry> data,
   ) =>
       (context, index) {
-        final firstSearchDate = data.firstOrNull?.lastTimestamp ?? DateTime.now();
+        final firstSearchDate =
+            data.firstOrNull?.lastTimestamp ?? DateTime.now();
         if (index == 0) {
           return TextDivider(text: formatDate(roundToDay(firstSearchDate)));
         }

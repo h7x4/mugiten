@@ -37,7 +37,8 @@ class Sense extends StatelessWidget {
       ...sense.fields.map((e) => 'Field: ${_capitalize(e.description)}'),
       ...sense.misc.map((e) => e.description),
       ...sense.languageSource.map((e) {
-        final languageName = languageNameMap[e.language.toUpperCase()] ?? e.language;
+        final languageName =
+            languageNameMap[e.language.toUpperCase()] ?? e.language;
 
         if (e.phrase != null) {
           return 'From $languageName, "${e.phrase}"';
