@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../../models/history/history_entry.dart';
 import '../../routing/routes.dart';
@@ -41,7 +43,7 @@ class HistoryEntryTile extends StatelessWidget {
         builder: (context) => Scaffold(
           appBar: AppBar(title: const Text('Last searched')),
           body: FutureBuilder<List<DateTime>>(
-            future: entry.timestamps,
+            future: entry.timestamps(GetIt.instance.get<Database>()),
             builder: (context, snapshot) {
               // TODO: provide proper error handling
               if (snapshot.hasError) return ErrorWidget(snapshot.error!);
@@ -70,7 +72,7 @@ class HistoryEntryTile extends StatelessWidget {
           backgroundColor: Colors.red,
           icon: Icons.delete,
           onPressed: (_) async {
-            await entry.delete();
+            await entry.delete(GetIt.instance.get<Database>());
             onDelete?.call();
           },
         ),

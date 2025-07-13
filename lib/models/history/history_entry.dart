@@ -1,10 +1,7 @@
 import 'dart:math';
 
-import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/history/table_names.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-import '../../database/database.dart';
 
 class HistoryEntry {
   int id;
@@ -80,9 +77,10 @@ class HistoryEntry {
   /// Insert a kanji history entry into the database.
   /// If it already exists, only a timestamp will be added
   static Future<HistoryEntry> insertKanji({
+    required Database db,
     required String kanji,
   }) =>
-      db().transaction((txn) async {
+      db.transaction((txn) async {
         final DateTime timestamp = DateTime.now();
         late final int id;
 
@@ -129,10 +127,11 @@ class HistoryEntry {
   /// Insert a word history entry into the database.
   /// If it already exists, only a timestamp will be added
   static Future<HistoryEntry> insertWord({
+    required Database db,
     required String word,
     String? language,
   }) =>
-      db().transaction((txn) async {
+      db.transaction((txn) async {
         final DateTime timestamp = DateTime.now();
         late final int id;
 
@@ -182,41 +181,42 @@ class HistoryEntry {
 
   /// All recorded timestamps for this specific HistoryEntry
   /// sorted in descending order.
-  Future<List<DateTime>> get timestamps async => GetIt.instance
-      .get<Database>()
-      .query(
-        HistoryTableNames.historyEntryTimestamp,
-        where: 'entryId = ?',
-        whereArgs: [id],
-        orderBy: 'timestamp DESC',
-      )
-      .then(
-        (timestamps) => timestamps
-            .map(
-              (t) => DateTime.fromMillisecondsSinceEpoch(
-                t['timestamp']! as int,
-              ),
-            )
-            .toList(),
-      );
+  Future<List<DateTime>> timestamps(DatabaseExecutor db) async {
+    final timestamps = await db.query(
+      HistoryTableNames.historyEntryTimestamp,
+      where: 'entryId = ?',
+      whereArgs: [id],
+      orderBy: 'timestamp DESC',
+    );
+
+    return timestamps
+        .map((t) => DateTime.fromMillisecondsSinceEpoch(t['timestamp']! as int))
+        .toList();
+  }
 
   /// Export to json for archival reasons
   /// Combined with [insertJsonEntry], this makes up functionality for exporting
   /// and importing data from the app.
-  Future<Map<String, Object?>> toJson() async => {
-        'word': word,
-        'kanji': kanji,
-        'timestamps':
-            (await timestamps).map((ts) => ts.millisecondsSinceEpoch).toList()
-      };
+  Future<Map<String, Object?>> toJson(DatabaseExecutor db) async {
+    final rawTimestamps = await timestamps(db);
+    final timestamps_ =
+        rawTimestamps.map((ts) => ts.millisecondsSinceEpoch).toList();
+
+    return {
+      'word': word,
+      'kanji': kanji,
+      'timestamps': timestamps_,
+    };
+  }
 
   /// Insert archived json entry into database if it doesn't exist there already.
   /// Combined with [toJson], this makes up functionality for exporting and
   /// importing data from the app.
   static Future<HistoryEntry> insertJsonEntry(
+    Database db,
     Map<String, Object?> json,
   ) async =>
-      db().transaction((txn) async {
+      db.transaction((txn) async {
         final b = txn.batch();
         final bool isKanji = json['word'] == null;
         final existingEntry = isKanji
@@ -288,9 +288,10 @@ class HistoryEntry {
   /// This assumes that there are no duplicates within the elements
   /// in the json.
   static Future<List<HistoryEntry>> insertJsonEntries(
+    Database db,
     List<Map<String, Object?>> json,
   ) =>
-      db().transaction((txn) async {
+      db.transaction((txn) async {
         final b = txn.batch();
         final List<HistoryEntry> entries = [];
         for (final jsonObject in json) {
@@ -365,19 +366,19 @@ class HistoryEntry {
         return entries;
       });
 
-  static Future<int> amountOfEntries() async {
-    final query = await db().query(
+  static Future<int> amountOfEntries(DatabaseExecutor db) async {
+    final query = await db.query(
       HistoryTableNames.historyEntry,
       columns: ['COUNT(*) AS count'],
     );
     return query.first['count']! as int;
   }
 
-  static Future<List<HistoryEntry>> get fromDB async =>
-      (await db().query(HistoryTableNames.historyEntryOrderedByTimestamp))
+  static Future<List<HistoryEntry>> fromDB(DatabaseExecutor db) async =>
+      (await db.query(HistoryTableNames.historyEntryOrderedByTimestamp))
           .map((e) => HistoryEntry.fromDBMap(e))
           .toList();
 
-  Future<void> delete() => db()
+  Future<void> delete(DatabaseExecutor db) => db
       .delete(HistoryTableNames.historyEntry, where: 'id = ?', whereArgs: [id]);
 }

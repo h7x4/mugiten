@@ -185,7 +185,10 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
 
         if (!incognitoModeEnabled && !addedToDatabase) {
-          HistoryEntry.insertKanji(kanji: widget.kanji);
+          HistoryEntry.insertKanji(
+            db: GetIt.instance.get<Database>(),
+            kanji: widget.kanji,
+          );
           addedToDatabase = true;
         }
 

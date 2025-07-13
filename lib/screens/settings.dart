@@ -33,7 +33,10 @@ class _SettingsViewState extends State<SettingsView> {
   bool dataImportIsLoading = false;
 
   Future<void> clearHistory(context) async {
-    final historyCount = await HistoryEntry.amountOfEntries();
+
+    final historyCount = await HistoryEntry.amountOfEntries(
+      GetIt.instance.get<Database>(),
+    );
 
     if (!context.mounted) return;
 

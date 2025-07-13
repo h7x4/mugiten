@@ -47,7 +47,10 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
     super.initState();
 
     if (!incognitoModeEnabled && !addedToDatabase) {
-      HistoryEntry.insertWord(word: widget.searchTerm);
+      HistoryEntry.insertWord(
+        db: GetIt.instance.get<Database>(),
+        word: widget.searchTerm,
+      );
       addedToDatabase = true;
     }
   }

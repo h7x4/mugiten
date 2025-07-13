@@ -83,11 +83,11 @@ Future<File> exportData(DatabaseExecutor db) async {
   return zipFile;
 }
 
-Future<void> importData(DatabaseExecutor db, File zipFile) async {
+Future<void> importData(Database db, File zipFile) async {
   final dir = await unpackZipToTempDir(zipFile.path);
 
   await Future.wait([
-    importHistoryFrom(dir.historyFile),
+    importHistoryFrom(db, dir.historyFile),
     importLibraryListsFrom(db, dir.libraryDir),
   ]);
 
@@ -116,18 +116,19 @@ Future<void> exportHistoryTo(
   ///
   /// On second thought, is that even possible? It's a doubly nested list structure.
   final List<Map<String, Object?>> jsonEntries = await Future.wait(
-      entries.map((historyEntry) async => historyEntry.toJson()));
+    entries.map((historyEntry) async => historyEntry.toJson(db)),
+  );
 
   file.writeAsStringSync(jsonEncode(jsonEntries));
 }
 
-Future<void> importHistoryFrom(File file) async {
+Future<void> importHistoryFrom(Database db, File file) async {
   final String content = file.readAsStringSync();
   final List<Map<String, Object?>> json = (jsonDecode(content) as List)
       .map((h) => h as Map<String, Object?>)
       .toList();
   // log('Importing ${json.length} entries from ${file.path}');
-  await HistoryEntry.insertJsonEntries(json);
+  await HistoryEntry.insertJsonEntries(db, json);
 }
 
 ///////////////////

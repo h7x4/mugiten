@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../components/common/loading.dart';
 import '../components/common/opaque_box.dart';
@@ -14,7 +16,7 @@ class HistoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: Use infinite scroll pagination
     return FutureBuilder<List<HistoryEntry>>(
-      future: HistoryEntry.fromDB,
+      future: HistoryEntry.fromDB(GetIt.instance.get<Database>()),
       builder: (context, snapshot) {
         // TODO: provide proper error handling
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
