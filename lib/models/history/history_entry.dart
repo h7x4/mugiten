@@ -8,17 +8,20 @@ class HistoryEntry {
   final String? kanji;
   final String? word;
   final DateTime lastTimestamp;
-  final int? timestampCount;
+  int? _timestampCount;
 
   /// Whether this item is a kanji search or a word search
   bool get isKanji => word == null;
+
+  int? get timestampCount => _timestampCount;
 
   HistoryEntry.withKanji({
     required this.id,
     required this.kanji,
     required this.lastTimestamp,
-    this.timestampCount,
+    timestampCount,
   })  : word = null,
+        _timestampCount = timestampCount,
         assert(
           kanji!.runes.length == 1,
           'Kanji must be a single character',
@@ -28,8 +31,9 @@ class HistoryEntry {
     required this.id,
     required this.word,
     required this.lastTimestamp,
-    this.timestampCount,
+    timestampCount,
   })  : kanji = null,
+        _timestampCount = timestampCount,
         assert(
           word == word!.trim(),
           'Word must not contain leading or trailing whitespace',
@@ -66,6 +70,40 @@ class HistoryEntry {
                   ? dbObject['timestampCount']! as int
                   : null,
             );
+
+  static Future<HistoryEntry?> getWord(
+    DatabaseExecutor db,
+    String word,
+  ) async {
+    final result = await db.query(
+      HistoryTableNames.historyEntryOrderedByTimestamp,
+      where: 'word = ?',
+      whereArgs: [word],
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return HistoryEntry.fromDBMap(result.first);
+  }
+
+  static Future<HistoryEntry?> getKanji(
+    DatabaseExecutor db,
+    String kanji,
+  ) async {
+    final result = await db.query(
+      HistoryTableNames.historyEntryOrderedByTimestamp,
+      where: 'kanji = ?',
+      whereArgs: [kanji],
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return HistoryEntry.fromDBMap(result.first);
+  }
 
   // TODO: There is a lot in common with
   //   insertKanji,
@@ -393,6 +431,19 @@ class HistoryEntry {
     );
 
     return result.map((e) => HistoryEntry.fromDBMap(e)).toList();
+  }
+
+  Future<void> populateTimestampCount(DatabaseExecutor db) async {
+    final result = await db.query(
+      columns: ['COUNT(*) AS count'],
+      HistoryTableNames.historyEntryTimestamp,
+      where: 'entryId = ?',
+      whereArgs: [id],
+    );
+
+    final count = result.firstOrNull?['count'] as int? ?? 0;
+
+    _timestampCount = count;
   }
 
   Future<void> delete(DatabaseExecutor db) => db.delete(

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart' show JaDBConnection;
 import 'package:mdi/mdi.dart';
+import 'package:mugiten/bloc/theme/theme_bloc.dart';
+import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
 import 'package:mugiten/models/history/history_entry.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
@@ -28,6 +31,7 @@ class WordSearchResultPage extends StatefulWidget {
 
 class _WordSearchResultPageState extends State<WordSearchResultPage> {
   bool addedToDatabase = false;
+  HistoryEntry? historyEntry;
 
   late final _pagingController = PagingController<int, WordSearchResult>(
     getNextPageKey: (state) =>
@@ -50,8 +54,25 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
       HistoryEntry.insertWord(
         db: GetIt.instance.get<Database>(),
         word: widget.searchTerm,
+      ).then((historyEntry) async {
+        await historyEntry
+            .populateTimestampCount(GetIt.instance.get<Database>());
+        return historyEntry;
+      }).then(
+        (entry) => setState(() {
+          addedToDatabase = true;
+          historyEntry = entry;
+        }),
       );
-      addedToDatabase = true;
+    } else {
+      HistoryEntry.getWord(
+        GetIt.instance.get<Database>(),
+        widget.searchTerm,
+      ).then(
+        (entry) => setState(() {
+          historyEntry = entry;
+        }),
+      );
     }
   }
 
@@ -72,6 +93,16 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
               icon: const Icon(Mdi.incognito),
               onPressed: () =>
                   showSnackbar(context, 'History tracking is disabled'),
+            ),
+          if (historyEntry != null && (historyEntry!.timestampCount ?? 0) > 1)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: BlocBuilder<ThemeBloc, ThemeState>(
+                builder: (context, themeState) => CircleBadge(
+                  color: themeState.theme.menuGreyNormal.background,
+                  child: Text('${historyEntry!.timestampCount}'),
+                ),
+              ),
             ),
         ],
       ),
