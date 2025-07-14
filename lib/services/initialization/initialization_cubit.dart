@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:mugiten/database/database.dart'
     show
@@ -15,7 +14,6 @@ import 'package:mugiten/database/database.dart'
 import 'package:mugiten/services/data_export_import.dart';
 import 'package:mugiten/services/initialization/initialization_status.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 
 class InitializationCubit extends Cubit<InitializationStatus> {
   final bool deleteDatabase;
@@ -50,9 +48,7 @@ class InitializationCubit extends Cubit<InitializationStatus> {
         final tempDir = await getTemporaryDirectory();
         final database = await openDatabaseWithoutMigrations(dbPath);
 
-        GetIt.instance.registerSingleton<Database>(database);
         final dataDump = await exportData(database);
-        GetIt.instance.unregister<Database>();
 
         await database.close();
 
@@ -77,9 +73,7 @@ class InitializationCubit extends Cubit<InitializationStatus> {
       if (databaseAlreadyExists) {
         emit(RestoreUserData(total: 2, progress: 1));
 
-        GetIt.instance.registerSingleton<Database>(database);
         await importData(database, tmpdirDataDump!);
-        GetIt.instance.unregister<Database>();
 
         emit(RestoreUserData(total: 2, progress: 2));
       }
