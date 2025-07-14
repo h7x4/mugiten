@@ -7,7 +7,7 @@ import 'package:jadb/search.dart' show JaDBConnection;
 import 'package:mdi/mdi.dart';
 import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
-import 'package:mugiten/models/history/history_entry.dart';
+import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqflite.dart';
@@ -51,28 +51,27 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
     super.initState();
 
     if (!incognitoModeEnabled && !addedToDatabase) {
-      HistoryEntry.insertWord(
-        db: GetIt.instance.get<Database>(),
-        word: widget.searchTerm,
-      ).then((historyEntry) async {
-        await historyEntry
-            .populateTimestampCount(GetIt.instance.get<Database>());
-        return historyEntry;
-      }).then(
-        (entry) => setState(() {
-          addedToDatabase = true;
-          historyEntry = entry;
-        }),
-      );
+      GetIt.instance
+          .get<Database>()
+          .historyEntryInsertWord(widget.searchTerm)
+          .then((_) => GetIt.instance
+              .get<Database>()
+              .historyEntryGetWord(widget.searchTerm))
+          .then(
+            (entry) => setState(() {
+              addedToDatabase = true;
+              historyEntry = entry;
+            }),
+          );
     } else {
-      HistoryEntry.getWord(
-        GetIt.instance.get<Database>(),
-        widget.searchTerm,
-      ).then(
-        (entry) => setState(() {
-          historyEntry = entry;
-        }),
-      );
+      GetIt.instance
+          .get<Database>()
+          .historyEntryGetWord(widget.searchTerm)
+          .then(
+            (entry) => setState(() {
+              historyEntry = entry;
+            }),
+          );
     }
   }
 
@@ -94,7 +93,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
               onPressed: () =>
                   showSnackbar(context, 'History tracking is disabled'),
             ),
-          if (historyEntry != null && (historyEntry!.timestampCount ?? 0) > 1)
+          if (historyEntry != null && historyEntry!.timestampCount > 1)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: BlocBuilder<ThemeBloc, ThemeState>(

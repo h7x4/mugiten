@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:ruby_text/ruby_text.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../models/library/library_list.dart';
 import '../common/loading.dart';
 
 Future<void> showAddToLibraryDialog({
@@ -36,7 +36,7 @@ class AddToLibraryDialog extends StatefulWidget {
 }
 
 class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
-  Map<LibraryList, bool>? librariesContainEntry;
+  Map<String, bool>? librariesContainEntry;
 
   /// A lock to make sure that the local data and the database doesn't
   /// get out of sync.
@@ -46,27 +46,30 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
   void initState() {
     super.initState();
 
-    LibraryList.allListsContains(
-      db: GetIt.instance.get<Database>(),
-      jmdictEntryId: widget.jmdictEntryId,
-      kanji: widget.kanji,
-    ).then((data) => setState(() => librariesContainEntry = data));
+    GetIt.instance
+        .get<Database>()
+        .libraryListAllListsContain(
+          jmdictEntryId: widget.jmdictEntryId,
+          kanji: widget.kanji,
+        )
+        .then((data) => setState(() => librariesContainEntry = data));
   }
 
-  Future<void> toggleEntry({required LibraryList lib}) async {
+  Future<void> toggleEntry(String libraryName) async {
     if (toggleLock) return;
 
     setState(() => toggleLock = true);
 
-    await lib.toggleEntry(
-      db: GetIt.instance.get<Database>(),
-      jmdictEntryId: widget.jmdictEntryId,
-      kanji: widget.kanji,
-    );
+    await GetIt.instance.get<Database>().libraryListToggleEntry(
+          libraryName,
+          jmdictEntryId: widget.jmdictEntryId,
+          kanji: widget.kanji,
+        );
 
     setState(() {
       toggleLock = false;
-      librariesContainEntry![lib] = !librariesContainEntry![lib]!;
+      librariesContainEntry![libraryName] =
+          !librariesContainEntry![libraryName]!;
     });
   }
 
@@ -132,19 +135,19 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
                   ? const LoadingScreen()
                   : ListView(
                       children: librariesContainEntry!.entries.map((e) {
-                        final lib = e.key;
+                        final libraryName = e.key;
                         final checked = e.value;
                         return ListTile(
-                          onTap: () => toggleEntry(lib: lib),
+                          onTap: () => toggleEntry(libraryName),
                           contentPadding:
                               const EdgeInsets.symmetric(vertical: 5),
                           title: Row(
                             children: [
                               Checkbox(
                                 value: checked,
-                                onChanged: (_) => toggleEntry(lib: lib),
+                                onChanged: (_) => toggleEntry(libraryName),
                               ),
-                              Text(lib.name),
+                              Text(libraryName),
                             ],
                           ),
                         );

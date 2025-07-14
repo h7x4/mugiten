@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import '../../components/common/loading.dart';
 import '../../components/library/library_list_tile.dart';
-import '../../models/library/library_list.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key});
@@ -16,9 +16,10 @@ class LibraryView extends StatefulWidget {
 class _LibraryViewState extends State<LibraryView> {
   List<LibraryList>? libraries;
 
-  Future<void> getEntriesFromDatabase() =>
-      LibraryList.allLibraries(GetIt.instance.get<Database>())
-          .then((libs) => setState(() => libraries = libs));
+  Future<void> getEntriesFromDatabase() => GetIt.instance
+      .get<Database>()
+      .libraryListGetLists()
+      .then((libs) => setState(() => libraries = libs));
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _LibraryViewState extends State<LibraryView> {
     return Column(
       children: [
         LibraryListTile(
-          library: LibraryList.favourites,
+          library: libraries!.first,
           leading: const Icon(Icons.star),
           onDelete: getEntriesFromDatabase,
           onUpdate: getEntriesFromDatabase,

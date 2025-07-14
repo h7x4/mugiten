@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-import '../../models/library/library_list.dart';
 import '../../routing/routes.dart';
-import '../common/loading.dart';
 
 class LibraryListTile extends StatelessWidget {
   final Widget? leading;
@@ -39,13 +38,14 @@ class LibraryListTile extends StatelessWidget {
                     onUpdate?.call();
                   },
                 ),
+                // TODO: ask for confirmation before deleting
                 SlidableAction(
                   backgroundColor: Colors.red,
                   icon: Icons.delete,
                   onPressed: (_) async {
-                    await library.delete(
-                      GetIt.instance.get<Database>(),
-                    );
+                    await GetIt.instance
+                        .get<Database>()
+                        .libraryListDeleteList(library.name);
                     onDelete?.call();
                   },
                 ),
@@ -61,14 +61,7 @@ class LibraryListTile extends StatelessWidget {
         title: Row(
           children: [
             Expanded(child: Text(library.name)),
-            FutureBuilder<int>(
-              future: library.length(GetIt.instance.get<Database>()),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) return ErrorWidget(snapshot.error!);
-                if (!snapshot.hasData) return const LoadingScreen();
-                return Text('${snapshot.data} items');
-              },
-            ),
+            Text('${library.totalCount} items'),
           ],
         ),
       ),

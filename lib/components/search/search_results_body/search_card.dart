@@ -4,7 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/util/text_filtering.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
-import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import './parts/common_badge.dart';
@@ -101,11 +101,12 @@ class _SearchResultCardState extends State<SearchResultCard> {
               SlidableAction(
                 backgroundColor: Colors.yellow,
                 icon: Icons.star,
-                onPressed: (_) => LibraryList.favourites.toggleEntry(
-                  db: GetIt.instance.get<Database>(),
-                  jmdictEntryId: widget.result.entryId,
-                  kanji: null,
-                ),
+                onPressed: (_) =>
+                    GetIt.instance.get<Database>().libraryListToggleEntry(
+                          "favourites",
+                          jmdictEntryId: widget.result.entryId,
+                          kanji: null,
+                        ),
               ),
               SlidableAction(
                 backgroundColor: Colors.blue,

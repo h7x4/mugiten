@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/screens/info/changelog.dart';
 import 'package:mugiten/screens/library/library_content_view.dart';
 import 'package:mugiten/screens/search/kanji_search_result_page.dart';

@@ -4,13 +4,12 @@ import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/search.dart';
 import 'package:mdi/mdi.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
-import 'package:mugiten/models/history/history_entry.dart';
-import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/models/history_entry.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqflite.dart';
 
-// import './kanji_result_body/examples.dart';
 import '../../components/kanji/kanji_result_body/grade.dart';
 import '../../components/kanji/kanji_result_body/header.dart';
 import '../../components/kanji/kanji_result_body/jlpt_level.dart';
@@ -114,9 +113,10 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
           icon: const Icon(Icons.star),
           color: isFavourite ? Colors.yellow : null,
           onPressed: () {
-            LibraryList.favourites
-                .toggleEntry(
-                  db: GetIt.instance.get<Database>(),
+            GetIt.instance
+                .get<Database>()
+                .libraryListToggleEntry(
+                  "favourites",
                   jmdictEntryId: null,
                   kanji: result.kanji,
                 )
@@ -165,12 +165,21 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   @override
   void initState() {
     super.initState();
-    LibraryList.favourites
-        .containsKanji(
-          GetIt.instance.get<Database>(),
-          widget.kanji,
+
+    GetIt.instance
+        .get<Database>()
+        .libraryListListContains(
+          "favourites",
+          kanji: widget.kanji,
         )
         .then((value) => setState(() => isFavourite = value));
+
+    if (!incognitoModeEnabled && !addedToDatabase) {
+      GetIt.instance
+          .get<Database>()
+          .historyEntryInsertKanji(widget.kanji)
+          .then((_) => setState(() => addedToDatabase = true));
+    }
   }
 
   @override
@@ -183,14 +192,6 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
-
-        if (!incognitoModeEnabled && !addedToDatabase) {
-          HistoryEntry.insertKanji(
-            db: GetIt.instance.get<Database>(),
-            kanji: widget.kanji,
-          );
-          addedToDatabase = true;
-        }
 
         return _body(snapshot.data!);
       },

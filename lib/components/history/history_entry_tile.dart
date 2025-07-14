@@ -4,14 +4,13 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
+import 'package:mugiten/models/history_entry.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-import '../../models/history/history_entry.dart';
 import '../../routing/routes.dart';
 import '../../services/datetime.dart';
 import '../../settings.dart';
 import '../common/kanji_box.dart';
-import '../common/loading.dart';
 
 class HistoryEntryTile extends StatelessWidget {
   final HistoryEntry entry;
@@ -42,22 +41,14 @@ class HistoryEntryTile extends StatelessWidget {
   MaterialPageRoute get timestamps => MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: AppBar(title: const Text('Last searched')),
-          body: FutureBuilder<List<DateTime>>(
-            future: entry.timestamps(GetIt.instance.get<Database>()),
-            builder: (context, snapshot) {
-              // TODO: provide proper error handling
-              if (snapshot.hasError) return ErrorWidget(snapshot.error!);
-              if (!snapshot.hasData) return const LoadingScreen();
-              return ListView(
-                children: snapshot.data!
-                    .map(
-                      (ts) => ListTile(
-                        title: Text('${formatDate(ts)}    ${formatTime(ts)}'),
-                      ),
-                    )
-                    .toList(),
-              );
-            },
+          body: ListView(
+            children: entry.timestamps
+                .map(
+                  (ts) => ListTile(
+                    title: Text('${formatDate(ts)}    ${formatTime(ts)}'),
+                  ),
+                )
+                .toList(),
           ),
         ),
       );
@@ -72,7 +63,7 @@ class HistoryEntryTile extends StatelessWidget {
           backgroundColor: Colors.red,
           icon: Icons.delete,
           onPressed: (_) async {
-            await entry.delete(GetIt.instance.get<Database>());
+            await GetIt.instance.get<Database>().historyEntryDelete(entry.id);
             onDelete?.call();
           },
         ),
@@ -105,7 +96,7 @@ class HistoryEntryTile extends StatelessWidget {
                         )
                       : Expanded(child: Text(entry.word!))),
               if (entry.isKanji) Expanded(child: SizedBox.shrink()),
-              if ((entry.timestampCount ?? 0) > 1)
+              if (entry.timestampCount > 1)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: BlocBuilder<ThemeBloc, ThemeState>(

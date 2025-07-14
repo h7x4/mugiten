@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/database.dart';
-import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqlite3/open.dart';
@@ -46,15 +46,17 @@ Future<Database> createDatabaseCopy({
 }
 
 Future<void> insertTestData(Database db) async {
-  final libraryList1 = await LibraryList.insert(db, "Test Library 1");
+  final libraryList1 = await db.libraryListInsertList("Test Library 1");
+  assert(libraryList1 == true);
 
-  await libraryList1.insertEntry(
-    db: db,
+  await db.libraryListInsertEntry(
+    "Test Library 1",
     jmdictEntryId: null,
     kanji: "漢",
   );
-  await libraryList1.insertEntry(
-    db: db,
+
+  await db.libraryListInsertEntry(
+    "Test Library 1",
     jmdictEntryId: null,
     kanji: "字",
   );

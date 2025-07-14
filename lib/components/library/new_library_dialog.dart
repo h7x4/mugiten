@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
-import '../../models/library/library_list.dart';
 
 void Function() showNewLibraryDialog(context) => () async {
       final String? listName = await showDialog<String>(
@@ -9,11 +9,10 @@ void Function() showNewLibraryDialog(context) => () async {
         barrierDismissible: true,
         builder: (_) => const NewLibraryDialog(),
       );
+
       if (listName == null) return;
-      LibraryList.insert(
-        GetIt.instance.get<Database>(),
-        listName,
-      );
+
+      await GetIt.instance.get<Database>().libraryListInsertList(listName);
     };
 
 class NewLibraryDialog extends StatefulWidget {
@@ -42,10 +41,9 @@ class _NewLibraryDialogState extends State<NewLibraryDialog> {
       return;
     }
 
-    final nameAlreadyExists = await LibraryList.exists(
-      GetIt.instance.get<Database>(),
-      proposedListName,
-    );
+    final nameAlreadyExists = await GetIt.instance
+        .get<Database>()
+        .libraryListExists(proposedListName);
     if (nameAlreadyExists) {
       setState(() => nameState = _NameState.alreadyExists);
     } else {

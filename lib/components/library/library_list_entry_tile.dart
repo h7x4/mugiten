@@ -3,10 +3,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
 import 'package:mugiten/components/search/search_results_body/search_card.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-import '../../models/library/library_entry.dart';
-import '../../models/library/library_list.dart';
 import '../../routing/routes.dart';
 import '../../settings.dart';
 import '../common/kanji_box.dart';
@@ -14,7 +13,7 @@ import '../common/kanji_box.dart';
 class LibraryListEntryTile extends StatelessWidget {
   final int? index;
   final LibraryList library;
-  final LibraryEntry entry;
+  final LibraryListEntry entry;
   final void Function()? onDelete;
   final void Function()? onUpdate;
 
@@ -52,11 +51,11 @@ class LibraryListEntryTile extends StatelessWidget {
       backgroundColor: Colors.red,
       icon: Icons.delete,
       onPressed: (_) async {
-        await library.deleteEntry(
-          db: GetIt.instance.get<Database>(),
-          jmdictEntryId: entry.jmdictEntryId,
-          kanji: entry.kanji,
-        );
+        await GetIt.instance.get<Database>().libraryListDeleteEntry(
+              library.name,
+              jmdictEntryId: entry.jmdictEntryId,
+              kanji: entry.kanji,
+            );
         onDelete?.call();
       },
     );

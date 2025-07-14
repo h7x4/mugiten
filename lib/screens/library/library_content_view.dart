@@ -1,13 +1,11 @@
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mugiten/database/database.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import '../../components/common/loading.dart';
 import '../../components/library/library_list_entry_tile.dart';
-import '../../models/library/library_entry.dart';
-import '../../models/library/library_list.dart';
 
 class LibraryContentView extends StatefulWidget {
   final LibraryList library;
@@ -21,11 +19,15 @@ class LibraryContentView extends StatefulWidget {
 }
 
 class _LibraryContentViewState extends State<LibraryContentView> {
-  List<LibraryEntry>? entries;
+  List<LibraryListEntry>? entries;
 
-  Future<void> getEntriesFromDatabase() => widget.library
-      .entries(GetIt.instance.get<Database>())
-      .then((es) => setState(() => entries = es));
+  Future<void> getEntriesFromDatabase() => GetIt.instance
+      .get<Database>()
+      .libraryListGetListEntries(
+        widget.library.name,
+        includeSearchResult: true,
+      )
+      .then((entries_) => setState(() => entries = entries_?.entries));
 
   @override
   void initState() {
@@ -41,9 +43,7 @@ class _LibraryContentViewState extends State<LibraryContentView> {
         actions: [
           IconButton(
             onPressed: () async {
-              final entryCount = await widget.library.length(
-                GetIt.instance.get<Database>(),
-              );
+              final entryCount = widget.library.totalCount;
               if (!context.mounted) return;
               final bool userIsSure = await confirm(
                 context,
@@ -53,9 +53,10 @@ class _LibraryContentViewState extends State<LibraryContentView> {
               );
               if (!userIsSure) return;
 
-              await widget.library.deleteAllEntries(
-                GetIt.instance.get<Database>(),
-              );
+              await GetIt.instance
+                  .get<Database>()
+                  .libraryListDeleteAllEntries(widget.library.name);
+
               await getEntriesFromDatabase();
             },
             icon: const Icon(Icons.delete),

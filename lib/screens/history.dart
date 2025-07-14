@@ -7,7 +7,7 @@ import '../components/common/loading.dart';
 import '../components/common/opaque_box.dart';
 import '../components/history/date_divider.dart';
 import '../components/history/history_entry_tile.dart';
-import '../models/history/history_entry.dart';
+import '../models/history_entry.dart';
 import '../services/datetime.dart';
 
 const int pageSize = 50;
@@ -25,11 +25,11 @@ class _HistoryViewState extends State<HistoryView> {
     getNextPageKey: (state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
     fetchPage: (pageKey) async {
-      List<HistoryEntry?> result = await HistoryEntry.entriesFromDb(
-        GetIt.instance.get<Database>(),
-        page: pageKey - 1,
-        pageSize: pageSize,
-      );
+      List<HistoryEntry?> result =
+          await GetIt.instance.get<Database>().historyEntryGetAll(
+                page: pageKey - 1,
+                pageSize: pageSize,
+              );
 
       // Insert a null entry at the start in order to prepend a separator to the first actual entry.
       if (pageKey == 1) {
@@ -48,8 +48,13 @@ class _HistoryViewState extends State<HistoryView> {
 
   @override
   Widget build(BuildContext context) {
+    GetIt.instance.get<Database>().historyEntryGetAll(
+      page: 0,
+      pageSize: pageSize,
+    );
+
     return FutureBuilder<int>(
-      future: HistoryEntry.amountOfEntries(GetIt.instance.get<Database>()),
+      future: GetIt.instance.get<Database>().historyEntryAmount(),
       builder: (context, snapshot) {
         // TODO: provide proper error handling
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);

@@ -317,7 +317,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: d9006a0767aa0f903db0be1726fde3a14d0cd579
+      resolved-ref: "0a3387e77a0fa3f789e91f3dce00221466f19c98"
       url: "https://git.pvv.ntnu.no/oysteikt/jadb.git"
     source: git
     version: "1.0.0"

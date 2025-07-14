@@ -3,10 +3,9 @@ import 'dart:core';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-import 'package:mugiten/database/history/table_names.dart';
 import 'package:mugiten/database/library_list/table_names.dart';
-import 'package:mugiten/models/history/history_entry.dart';
-import 'package:mugiten/models/library/library_list.dart';
+import 'package:mugiten/models/history_entry.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Example file Structure:
@@ -105,19 +104,8 @@ Future<void> exportHistoryTo(
   final file = dir.historyFile;
   file.createSync();
 
-  final query =
-      await db.query(HistoryTableNames.historyEntryOrderedByTimestamp);
-
-  final List<HistoryEntry> entries =
-      query.map((e) => HistoryEntry.fromDBMap(e)).toList();
-
-  /// TODO: This creates a ton of sql statements. Ideally, the whole export
-  /// should be done in only one query.
-  ///
-  /// On second thought, is that even possible? It's a doubly nested list structure.
-  final List<Map<String, Object?>> jsonEntries = await Future.wait(
-    entries.map((historyEntry) async => historyEntry.toJson(db)),
-  );
+  final List<Map<String, Object?>> jsonEntries =
+      (await db.historyEntryGetAll()).map((e) => e.toJson()).toList();
 
   file.writeAsStringSync(jsonEncode(jsonEntries));
 }
@@ -128,7 +116,7 @@ Future<void> importHistoryFrom(Database db, File file) async {
       .map((h) => h as Map<String, Object?>)
       .toList();
   // log('Importing ${json.length} entries from ${file.path}');
-  await HistoryEntry.insertJsonEntries(db, json);
+  await db.transaction((txn) => txn.historyEntryInsertManyFromJson(json));
 }
 
 ///////////////////
@@ -158,7 +146,9 @@ Future<void> exportLibraryListTo(
   final file = File(dir.uri.resolve('$libraryName.json').toFilePath());
   await file.create();
 
-  final entries = (await LibraryList.byName(libraryName).entries(db))
+  // TODO: properly null check
+  final entries = (await db.libraryListGetListEntries(libraryName))!
+      .entries
       .map((e) => e.toJson())
       .toList();
 
@@ -176,8 +166,8 @@ Future<void> importLibraryListsFrom(
     final libraryName =
         file.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), '');
 
-    if (await LibraryList.exists(db, libraryName)) {
-      if ((await LibraryList.byName(libraryName).length(db)) > 0) {
+    if (await db.libraryListExists(libraryName)) {
+      if ((await db.libraryListGetList(libraryName))!.totalCount > 0) {
         print(
             'Library list "$libraryName" already exists and is not empty. Skipping import.');
         continue;
@@ -186,7 +176,7 @@ Future<void> importLibraryListsFrom(
             'Importing entries from file ${file.path}.');
       }
     } else {
-      LibraryList.insert(db, libraryName);
+      await db.libraryListInsertList(libraryName);
     }
 
     final content = await file.readAsString();
@@ -194,7 +184,9 @@ Future<void> importLibraryListsFrom(
         .map((e) => e as Map<String, Object?>)
         .toList();
 
-    final libraryList = LibraryList.byName(libraryName);
-    await libraryList.insertJsonEntries(db, jsonEntries);
+    await db.libraryListInsertJsonEntriesForSingleList(
+      libraryName,
+      jsonEntries,
+    );
   }
 }

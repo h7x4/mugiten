@@ -11,7 +11,7 @@ import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/common/denshi_jisho_background.dart';
 import 'package:mugiten/database/history/table_names.dart';
 import 'package:mugiten/main.dart';
-import 'package:mugiten/models/history/history_entry.dart';
+import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/themes/theme.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/services/data_export_import.dart';
@@ -33,10 +33,8 @@ class _SettingsViewState extends State<SettingsView> {
   bool dataImportIsLoading = false;
 
   Future<void> clearHistory(context) async {
-
-    final historyCount = await HistoryEntry.amountOfEntries(
-      GetIt.instance.get<Database>(),
-    );
+    final historyCount =
+        await GetIt.instance.get<Database>().historyEntryAmount();
 
     if (!context.mounted) return;
 
