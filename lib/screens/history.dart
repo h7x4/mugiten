@@ -48,11 +48,6 @@ class _HistoryViewState extends State<HistoryView> {
 
   @override
   Widget build(BuildContext context) {
-    GetIt.instance.get<Database>().historyEntryGetAll(
-      page: 0,
-      pageSize: pageSize,
-    );
-
     return FutureBuilder<int>(
       future: GetIt.instance.get<Database>().historyEntryAmount(),
       builder: (context, snapshot) {
