@@ -19,6 +19,7 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation _searchbarMovementAnimation;
+  bool _isFocused = false;
   final FocusNode focus = FocusNode();
   final GlobalKey<KanjiSearchBarState> _kanjiSearchBarState =
       GlobalKey<KanjiSearchBarState>();
@@ -36,12 +37,7 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
     _searchbarMovementAnimation = AlignmentTween(
       begin: Alignment.center,
       end: Alignment.topCenter,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -52,14 +48,13 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_controller.value == 1) {
+    return PopScope(
+      canPop: !_isFocused,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
           focus.unfocus();
           _kanjiSearchBarState.currentState!.clearText();
-          return false;
         }
-        return true;
       },
       child: InkWell(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -81,8 +76,10 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
                       onFocusChange: (hasFocus) {
                         if (hasFocus) {
                           _controller.forward();
+                          setState(() => _isFocused = true);
                         } else {
                           _controller.reverse();
+                          setState(() => _isFocused = false);
                         }
                       },
                       child: KanjiSearchBar(
@@ -101,14 +98,14 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
                       child: (_controller.value == 1 && suggestions.isNotEmpty)
                           ? KanjiGrid(suggestions: suggestions)
                           : (_controller.value == 1)
-                              ? const Text(
-                                  'Type a kanji to start searching',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                  ),
-                                )
-                              : const KanjiSearchOptionsBar(),
+                          ? const Text(
+                              'Type a kanji to start searching',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            )
+                          : const KanjiSearchOptionsBar(),
                     ),
                   ],
                 ),
