@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
-import 'package:jadb/search.dart';
 import 'package:mugiten/components/search/search_results_body/search_card.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -30,7 +29,7 @@ class LibraryListEntryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return entry.kanji != null
         ? _kanjiTile(context, index, entry.kanji!)
-        : _jmdictEntryTile(context, index, entry.jmdictEntryId!);
+        : _jmdictEntryTile(context, index, entry);
   }
 
   Widget _index(BuildContext context, int index) {
@@ -85,44 +84,15 @@ class LibraryListEntryTile extends StatelessWidget {
     );
   }
 
-  Widget _jmdictEntryTile(BuildContext context, int? index, int jmdictEntryId) {
-    return FutureBuilder(
-      future: GetIt.instance.get<Database>().jadbGetWordById(jmdictEntryId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return ListTile(
-            leading: (index != null) ? _index(context, index) : null,
-            title: const Expanded(
-              child: Text(
-                '...',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data == null) {
-          return ListTile(
-            leading: (index != null) ? _index(context, index) : null,
-            title: const Expanded(
-              child: Text(
-                '<Not found>',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ),
-          );
-        }
-
-        final entry = snapshot.data!;
-
-        final result = SearchResultCard(
-          result: entry,
-          leading: index != null ? _index(context, index) : null,
-          slidableActions: [_deleteAction()],
-        );
-
-        return result;
-      },
+  Widget _jmdictEntryTile(
+    BuildContext context,
+    int? index,
+    LibraryListEntry entry,
+  ) {
+    return SearchResultCard(
+      result: entry.wordSearchResult!,
+      leading: index != null ? _index(context, index) : null,
+      slidableActions: [_deleteAction()],
     );
   }
 }
