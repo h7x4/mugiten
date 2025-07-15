@@ -1,11 +1,14 @@
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-import '../../components/common/loading.dart';
 import '../../components/library/library_list_entry_tile.dart';
+
+const int pageSize = 50;
+const int invisibleItemsThreshold = 25;
 
 class LibraryContentView extends StatefulWidget {
   final LibraryList library;
@@ -19,20 +22,24 @@ class LibraryContentView extends StatefulWidget {
 }
 
 class _LibraryContentViewState extends State<LibraryContentView> {
-  List<LibraryListEntry>? entries;
-
-  Future<void> getEntriesFromDatabase() => GetIt.instance
-      .get<Database>()
-      .libraryListGetListEntries(
-        widget.library.name,
-        includeSearchResult: true,
-      )
-      .then((entries_) => setState(() => entries = entries_?.entries));
+  late final _pagingController = PagingController<int, LibraryListEntry>(
+    getNextPageKey: (state) =>
+        state.lastPageIsEmpty ? null : state.nextIntPageKey,
+    fetchPage: (pageKey) => GetIt.instance
+        .get<Database>()
+        .libraryListGetListEntries(
+          widget.library.name,
+          page: pageKey - 1,
+          pageSize: pageSize,
+          includeSearchResult: true,
+        )
+        .then((page) => page?.entries ?? []),
+  );
 
   @override
-  void initState() {
-    super.initState();
-    getEntriesFromDatabase();
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,31 +64,41 @@ class _LibraryContentViewState extends State<LibraryContentView> {
                   .get<Database>()
                   .libraryListDeleteAllEntries(widget.library.name);
 
-              await getEntriesFromDatabase();
+              _pagingController.refresh();
             },
             icon: const Icon(Icons.delete),
           ),
         ],
       ),
-      body: entries == null
-          ? const LoadingScreen()
-          : ListView.separated(
-              itemCount: entries!.length,
-              itemBuilder: (context, index) => LibraryListEntryTile(
-                index: index,
-                entry: entries![index],
-                library: widget.library,
-                onDelete: () => setState(() {
-                  entries!.removeAt(index);
-                }),
-                onUpdate: () => getEntriesFromDatabase(),
-              ),
-              separatorBuilder: (context, index) => const Divider(
-                height: 0,
-                indent: 10,
-                endIndent: 10,
-              ),
+      body: PagingListener(
+        controller: _pagingController,
+        builder: (context, state, fetchNextPage) =>
+            PagedListView<int, LibraryListEntry>.separated(
+          state: state,
+          fetchNextPage: fetchNextPage,
+          builderDelegate: PagedChildBuilderDelegate<LibraryListEntry>(
+            invisibleItemsThreshold: invisibleItemsThreshold,
+            itemBuilder: (context, entry, index) => LibraryListEntryTile(
+              index: index,
+              entry: entry,
+              library: widget.library,
+              onDelete: () => _pagingController.refresh(),
+              onUpdate: () => _pagingController.refresh(),
             ),
+            firstPageErrorIndicatorBuilder: (_) => ErrorWidget(
+              _pagingController.error!,
+            ),
+            noItemsFoundIndicatorBuilder: (_) => const Center(
+              child: Text('List is empty'),
+            ),
+          ),
+          separatorBuilder: (_, __) => const Divider(
+            height: 0,
+            indent: 10,
+            endIndent: 10,
+          ),
+        ),
+      ),
     );
   }
 }
