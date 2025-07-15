@@ -62,6 +62,12 @@ class LightTheme extends AppTheme {
       brightness: Brightness.light,
       primarySwatch: createMaterialColor(AppTheme.mugitenWheat.background),
       // primarySwatch: Colors.green,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          // Use PredictiveBackPageTransitionsBuilder to get the predictive back route transition!
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+        },
+      ),
     );
   }
 }
