@@ -137,12 +137,10 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
         children: [
           _headerRow(result),
           YomiChips(yomi: result.meanings, type: YomiType.meaning),
-          (result.onyomi.isNotEmpty)
-              ? YomiChips(yomi: result.onyomi, type: YomiType.onyomi)
-              : const SizedBox.shrink(),
-          (result.kunyomi.isNotEmpty)
-              ? YomiChips(yomi: result.kunyomi, type: YomiType.kunyomi)
-              : const SizedBox.shrink(),
+          if (result.onyomi.isNotEmpty)
+            YomiChips(yomi: result.onyomi, type: YomiType.onyomi),
+          if (result.kunyomi.isNotEmpty)
+            YomiChips(yomi: result.kunyomi, type: YomiType.kunyomi),
           IntrinsicHeight(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

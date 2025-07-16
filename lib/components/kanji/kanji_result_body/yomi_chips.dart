@@ -42,8 +42,6 @@ class YomiChips extends StatelessWidget {
 
   const YomiChips({required this.yomi, required this.type, super.key});
 
-  bool get isExpandable => yomi.length > 6;
-
   Widget yomiCard({
     required BuildContext context,
     required String yomi,
@@ -86,44 +84,23 @@ class YomiChips extends StatelessWidget {
         )
         .toList();
 
-    final yomiCardsWithTitle = <Widget>[
-      if (type != YomiType.meaning)
-        yomiCard(
-          context: context,
-          yomi: type == YomiType.kunyomi ? 'Kun:' : 'On:',
-          searchable: false,
-          colors: ColorSet(
-            foreground: type.getColors(context).background,
-            background: Colors.transparent,
-          ),
-        ),
-      ...yomiCards,
-    ];
-
-    final wrap = Wrap(
+    return Wrap(
       runSpacing: 10.0,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: yomiCardsWithTitle,
-    );
-
-    if (!isExpandable) {
-      return wrap;
-    } else {
-      return ExpansionTile(
-        title: Center(
-          child: yomiCard(
+      children: [
+        if (type != YomiType.meaning)
+          yomiCard(
             context: context,
-            yomi: type.title,
-            colors: type.getColors(context),
+            yomi: type == YomiType.kunyomi ? 'Kun:' : 'On:',
+            searchable: false,
+            colors: ColorSet(
+              foreground: type.getColors(context).background,
+              background: Colors.transparent,
+            ),
           ),
-        ),
-        children: [
-          const SizedBox(height: 20.0),
-          wrap,
-          const SizedBox(height: 25.0),
-        ],
-      );
-    }
+        ...yomiCards,
+      ],
+    );
   }
 
   @override
