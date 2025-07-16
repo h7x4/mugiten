@@ -99,7 +99,12 @@ class _SettingsViewState extends State<SettingsView> {
     );
 
     if (!context.mounted) return;
-    showSnackbar(context, 'Exported data to $saveFile');
+
+    if (saveFile == null) {
+      showSnackbar(context, 'Export cancelled');
+    } else {
+      showSnackbar(context, 'Exported data to $saveFile');
+    }
   }
 
   Future<void> importHandler(context) async {
