@@ -25,20 +25,19 @@ extension LibraryListExt on DatabaseExecutor {
         ${pageSize != null ? 'LIMIT ?' : ''}
         ${page != null ? 'OFFSET ?' : ''}
       ''',
-      [
-        if (pageSize != null) pageSize,
-        if (page != null) page * pageSize!,
-      ],
+      [if (pageSize != null) pageSize, if (page != null) page * pageSize!],
     );
 
     //   COUNT(*) AS "count"
     // LEFT JOIN "${LibraryListTableNames.libraryListEntry}"
 
     return result
-        .map((row) => LibraryList(
-              name: row['name'] as String,
-              totalCount: row['count'] as int? ?? 0,
-            ))
+        .map(
+          (row) => LibraryList(
+            name: row['name'] as String,
+            totalCount: row['count'] as int? ?? 0,
+          ),
+        )
         .toList();
   }
 
@@ -207,10 +206,7 @@ extension LibraryListExt on DatabaseExecutor {
           ) AS "exists"
         FROM "${LibraryListTableNames.libraryListOrdered}"
       ''',
-      [
-        jmdictEntryId,
-        kanji,
-      ],
+      [jmdictEntryId, kanji],
     );
 
     return {
@@ -233,11 +229,7 @@ extension LibraryListExt on DatabaseExecutor {
             AND ("jmdictEntryId" = ? OR "kanji" = ?)
         ) AS "exists"
       ''',
-      [
-        listName,
-        jmdictEntryId,
-        kanji,
-      ],
+      [listName, jmdictEntryId, kanji],
     );
 
     return (result.firstOrNull?['exists'] as int? ?? 0) == 1;
@@ -282,13 +274,10 @@ extension LibraryListExt on DatabaseExecutor {
 
     // // This is ok, because "favourites" should always exist.
     final prevList = (await libraryListGetLists()).last;
-    await insert(
-      LibraryListTableNames.libraryList,
-      {
-        'name': listName,
-        'prevList': prevList.name,
-      },
-    );
+    await insert(LibraryListTableNames.libraryList, {
+      'name': listName,
+      'prevList': prevList.name,
+    });
 
     return true;
   }
@@ -393,10 +382,7 @@ extension LibraryListExt on DatabaseExecutor {
 
         b.update(
           LibraryListTableNames.libraryListEntry,
-          {
-            'prevEntryJmdictEntryId': jmdictEntryId,
-            'prevEntryKanji': kanji,
-          },
+          {'prevEntryJmdictEntryId': jmdictEntryId, 'prevEntryKanji': kanji},
           where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
           whereArgs: [listName, nextEntry.jmdictEntryId, nextEntry.kanji],
         );
@@ -407,19 +393,17 @@ extension LibraryListExt on DatabaseExecutor {
       }
     }
 
-    final LibraryListEntry? prevEntry =
-        (await libraryListGetListEntries(listName))!.entries.lastOrNull;
+    final LibraryListEntry? prevEntry = (await libraryListGetListEntries(
+      listName,
+    ))!.entries.lastOrNull;
 
-    await insert(
-      LibraryListTableNames.libraryListEntry,
-      {
-        'listName': listName,
-        'jmdictEntryId': jmdictEntryId,
-        'kanji': kanji,
-        'prevEntryJmdictEntryId': prevEntry?.jmdictEntryId,
-        'prevEntryKanji': prevEntry?.kanji,
-      },
-    );
+    await insert(LibraryListTableNames.libraryListEntry, {
+      'listName': listName,
+      'jmdictEntryId': jmdictEntryId,
+      'kanji': kanji,
+      'prevEntryJmdictEntryId': prevEntry?.jmdictEntryId,
+      'prevEntryKanji': prevEntry?.kanji,
+    });
 
     return true;
   }
@@ -470,8 +454,9 @@ extension LibraryListExt on DatabaseExecutor {
         entryQuery.first['prevEntryJmdictEntryId'] as int?;
     final prevEntryKanji = entryQuery.first['prevEntryKanji'] as String?;
 
-    final LibraryListEntry? nextEntry =
-        nextEntryQuery.map((e) => LibraryListEntry.fromDBMap(e)).firstOrNull;
+    final LibraryListEntry? nextEntry = nextEntryQuery
+        .map((e) => LibraryListEntry.fromDBMap(e))
+        .firstOrNull;
 
     // TODO: use a transaction instead of a batch
     final b = batch();
@@ -523,8 +508,7 @@ extension LibraryListExt on DatabaseExecutor {
       listName,
       page: 0,
       pageSize: position + 1,
-    ))
-        ?.entries;
+    ))?.entries;
     if (entries == null || position >= entries.length) {
       return false;
     }
@@ -570,7 +554,8 @@ extension LibraryListExt on DatabaseExecutor {
       );
     }
 
-    final shouldToggleOn = overrideToggleOn ??
+    final shouldToggleOn =
+        overrideToggleOn ??
         !(await libraryListListContains(
           listName,
           jmdictEntryId: jmdictEntryId,
@@ -583,20 +568,14 @@ extension LibraryListExt on DatabaseExecutor {
         jmdictEntryId: jmdictEntryId,
         kanji: kanji,
       );
-      assert(
-        result,
-        'Failed to insert entry into library list "$listName".',
-      );
+      assert(result, 'Failed to insert entry into library list "$listName".');
     } else {
       final result = await libraryListDeleteEntry(
         listName,
         jmdictEntryId: jmdictEntryId,
         kanji: kanji,
       );
-      assert(
-        result,
-        'Failed to delete entry from library list "$listName".',
-      );
+      assert(result, 'Failed to delete entry from library list "$listName".');
     }
 
     return shouldToggleOn;
@@ -623,8 +602,9 @@ extension LibraryListExt on DatabaseExecutor {
     String listName,
     List<Map<String, Object?>> jsonEntries,
   ) async {
-    List<LibraryListEntry> entries =
-        jsonEntries.map((e) => LibraryListEntry.fromJson(e)).toList();
+    List<LibraryListEntry> entries = jsonEntries
+        .map((e) => LibraryListEntry.fromJson(e))
+        .toList();
 
     // TODO: batch
     for (final entry in entries) {
@@ -641,10 +621,7 @@ class LibraryList {
   final String name;
   final int totalCount;
 
-  const LibraryList({
-    required this.name,
-    required this.totalCount,
-  });
+  const LibraryList({required this.name, required this.totalCount});
 }
 
 class LibraryListPage {
@@ -674,45 +651,45 @@ class LibraryListEntry {
     this.jmdictEntryId,
     this.kanji,
     this.kanjiSearchResult,
-  })  : lastModified = lastModified ?? DateTime.now(),
-        assert(
-          kanji != null || jmdictEntryId != null,
-          "Library entry can't be empty",
-        ),
-        assert(
-          !(kanji != null && jmdictEntryId != null),
-          "Library entry can't have both kanji and jmdictEntryId",
-        ),
-        assert(
-          kanjiSearchResult?.kanji == kanji,
-          "KanjiSearchResult's kanji must match the kanji in LibraryListEntry",
-        ),
-        assert(
-          wordSearchResult?.entryId == jmdictEntryId,
-          "WordSearchResult's jmdictEntryId must match the jmdictEntryId in LibraryListEntry",
-        );
+  }) : lastModified = lastModified ?? DateTime.now(),
+       assert(
+         kanji != null || jmdictEntryId != null,
+         "Library entry can't be empty",
+       ),
+       assert(
+         !(kanji != null && jmdictEntryId != null),
+         "Library entry can't have both kanji and jmdictEntryId",
+       ),
+       assert(
+         kanjiSearchResult?.kanji == kanji,
+         "KanjiSearchResult's kanji must match the kanji in LibraryListEntry",
+       ),
+       assert(
+         wordSearchResult?.entryId == jmdictEntryId,
+         "WordSearchResult's jmdictEntryId must match the jmdictEntryId in LibraryListEntry",
+       );
 
   LibraryListEntry.fromJmdictId({
     required int this.jmdictEntryId,
     this.wordSearchResult,
     DateTime? lastModified,
-  })  : lastModified = lastModified ?? DateTime.now(),
-        kanji = null,
-        kanjiSearchResult = null;
+  }) : lastModified = lastModified ?? DateTime.now(),
+       kanji = null,
+       kanjiSearchResult = null;
 
   LibraryListEntry.fromKanji({
     required String this.kanji,
     this.kanjiSearchResult,
     DateTime? lastModified,
-  })  : lastModified = lastModified ?? DateTime.now(),
-        jmdictEntryId = null,
-        wordSearchResult = null;
+  }) : lastModified = lastModified ?? DateTime.now(),
+       jmdictEntryId = null,
+       wordSearchResult = null;
 
   Map<String, Object?> toJson() => {
-        'kanji': kanji,
-        'jmdictEntryId': jmdictEntryId,
-        'lastModified': lastModified.millisecondsSinceEpoch,
-      };
+    'kanji': kanji,
+    'jmdictEntryId': jmdictEntryId,
+    'lastModified': lastModified.millisecondsSinceEpoch,
+  };
 
   factory LibraryListEntry.fromJson(Map<String, Object?> json) {
     assert(

@@ -52,8 +52,9 @@ class InitializationCubit extends Cubit<InitializationStatus> {
 
         await database.close();
 
-        tmpdirDataDump =
-            await dataDump.copy('${tempDir.path}/mugiten_data_backup.zip');
+        tmpdirDataDump = await dataDump.copy(
+          '${tempDir.path}/mugiten_data_backup.zip',
+        );
         emit(BackupUserData(total: 2, progress: 2));
       }
 

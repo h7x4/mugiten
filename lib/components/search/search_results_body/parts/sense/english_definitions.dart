@@ -14,12 +14,12 @@ class EnglishDefinitions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Wrap(
-        runSpacing: 10.0,
-        spacing: 5,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          for (final def in englishDefinitions)
-            SearchChip(text: def, colors: colors)
-        ],
-      );
+    runSpacing: 10.0,
+    spacing: 5,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: [
+      for (final def in englishDefinitions)
+        SearchChip(text: def, colors: colors),
+    ],
+  );
 }

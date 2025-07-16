@@ -27,21 +27,17 @@ class YomiExample {
 
   // ignore: public_member_api_docs
   Map<String, String> toJson() => {
-        'example': example,
-        'reading': reading,
-        'meaning': meaning,
-      };
+    'example': example,
+    'reading': reading,
+    'meaning': meaning,
+  };
 }
 
 class Examples extends StatelessWidget {
   final List<YomiExample> onyomi;
   final List<YomiExample> kunyomi;
 
-  const Examples({
-    super.key,
-    required this.onyomi,
-    required this.kunyomi,
-  });
+  const Examples({super.key, required this.onyomi, required this.kunyomi});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +45,7 @@ class Examples extends StatelessWidget {
 
     final yomiWidgets =
         onyomi.map((onEx) => _Example(onEx, _KanaType.onyomi)).toList() +
-            kunyomi.map((kunEx) => _Example(kunEx, _KanaType.kunyomi)).toList();
+        kunyomi.map((kunEx) => _Example(kunEx, _KanaType.kunyomi)).toList();
 
     const noExamplesWidget = Padding(
       padding: EdgeInsets.symmetric(vertical: 10),
@@ -66,7 +62,7 @@ class Examples extends StatelessWidget {
         if (onyomi.isEmpty && kunyomi.isEmpty)
           noExamplesWidget
         else
-          ...yomiWidgets
+          ...yomiWidgets,
       ],
     );
   }
@@ -82,50 +78,44 @@ class _Example extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) {
-          final theme = state.theme;
-          final menuColors = theme.menuGreyNormal;
-          final kanaColors = kanaType == _KanaType.kunyomi
-              ? theme.kunyomiColor
-              : theme.onyomiColor;
+    builder: (context, state) {
+      final theme = state.theme;
+      final menuColors = theme.menuGreyNormal;
+      final kanaColors = kanaType == _KanaType.kunyomi
+          ? theme.kunyomiColor
+          : theme.onyomiColor;
 
-          return Container(
-            margin: const EdgeInsets.symmetric(
-              vertical: 5.0,
-              horizontal: 10.0,
-            ),
-            decoration: BoxDecoration(
-              color: menuColors.background,
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: IntrinsicHeight(
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      Routes.search,
-                      arguments: yomiExample.example,
-                    ),
-                    child: _Kana(colors: kanaColors, example: yomiExample),
-                  ),
-                  _ExampleText(colors: menuColors, example: yomiExample)
-                ],
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+        decoration: BoxDecoration(
+          color: menuColors.background,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  Routes.search,
+                  arguments: yomiExample.example,
+                ),
+                child: _Kana(colors: kanaColors, example: yomiExample),
               ),
-            ),
-          );
-        },
+              _ExampleText(colors: menuColors, example: yomiExample),
+            ],
+          ),
+        ),
       );
+    },
+  );
 }
 
 class _Kana extends StatelessWidget {
   final ColorSet colors;
   final YomiExample example;
 
-  const _Kana({
-    required this.colors,
-    required this.example,
-  });
+  const _Kana({required this.colors, required this.example});
 
   @override
   Widget build(BuildContext context) {
@@ -168,10 +158,7 @@ class _ExampleText extends StatelessWidget {
   final ColorSet colors;
   final YomiExample example;
 
-  const _ExampleText({
-    required this.colors,
-    required this.example,
-  });
+  const _ExampleText({required this.colors, required this.example});
 
   @override
   Widget build(BuildContext context) {
@@ -180,12 +167,7 @@ class _ExampleText extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         child: Wrap(
           children: [
-            Text(
-              example.meaning,
-              style: TextStyle(
-                color: colors.foreground,
-              ),
-            )
+            Text(example.meaning, style: TextStyle(color: colors.foreground)),
           ],
         ),
       ),

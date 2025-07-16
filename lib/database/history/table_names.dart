@@ -33,10 +33,10 @@ abstract class HistoryTableNames {
       'Mugiten_HistoryEntry_orderedByTimestamp';
 
   static Set<String> get allTables => {
-        historyEntry,
-        historyEntryKanji,
-        historyEntryTimestamp,
-        historyEntryWord,
-        historyEntryOrderedByTimestamp,
-      };
+    historyEntry,
+    historyEntryKanji,
+    historyEntryTimestamp,
+    historyEntryWord,
+    historyEntryOrderedByTimestamp,
+  };
 }

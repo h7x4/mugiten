@@ -49,10 +49,8 @@ class _HomeState extends State<Home> {
             }),
             items: pages
                 .map(
-                  (p) => BottomNavigationBarItem(
-                    label: p.titleBar,
-                    icon: p.icon,
-                  ),
+                  (p) =>
+                      BottomNavigationBarItem(label: p.titleBar, icon: p.icon),
                 )
                 .toList(),
             showSelectedLabels: false,
@@ -65,59 +63,61 @@ class _HomeState extends State<Home> {
   }
 
   List<_Page> get pages => [
-        _Page(
-            content: WordSearchView(),
-            titleBar: 'Search',
-            icon: Icon(Icons.search),
-            actions: [
-              if (incognitoModeEnabled)
-                IconButton(
-                  icon: const Icon(Mdi.incognito),
-                  onPressed: () =>
-                      showSnackbar(context, 'History tracking is disabled'),
-                ),
-            ]),
-        _Page(
-            content: KanjiSearchView(),
-            titleBar: 'Kanji Search',
-            icon: Icon(Mdi.ideogramCjk, size: 30),
-            actions: [
-              if (incognitoModeEnabled)
-                IconButton(
-                  icon: const Icon(Mdi.incognito),
-                  onPressed: () =>
-                      showSnackbar(context, 'History tracking is disabled'),
-                ),
-            ]),
-        const _Page(
-          content: HistoryView(),
-          titleBar: 'History',
-          icon: Icon(Icons.history),
+    _Page(
+      content: WordSearchView(),
+      titleBar: 'Search',
+      icon: Icon(Icons.search),
+      actions: [
+        if (incognitoModeEnabled)
+          IconButton(
+            icon: const Icon(Mdi.incognito),
+            onPressed: () =>
+                showSnackbar(context, 'History tracking is disabled'),
+          ),
+      ],
+    ),
+    _Page(
+      content: KanjiSearchView(),
+      titleBar: 'Kanji Search',
+      icon: Icon(Mdi.ideogramCjk, size: 30),
+      actions: [
+        if (incognitoModeEnabled)
+          IconButton(
+            icon: const Icon(Mdi.incognito),
+            onPressed: () =>
+                showSnackbar(context, 'History tracking is disabled'),
+          ),
+      ],
+    ),
+    const _Page(
+      content: HistoryView(),
+      titleBar: 'History',
+      icon: Icon(Icons.history),
+    ),
+    _Page(
+      content: const LibraryView(),
+      titleBar: 'Library',
+      icon: const Icon(Icons.bookmark),
+      actions: [
+        IconButton(
+          onPressed: showNewLibraryDialog(context),
+          icon: const Icon(Icons.add),
         ),
-        _Page(
-          content: const LibraryView(),
-          titleBar: 'Library',
-          icon: const Icon(Icons.bookmark),
-          actions: [
-            IconButton(
-              onPressed: showNewLibraryDialog(context),
-              icon: const Icon(Icons.add),
-            )
-          ],
-        ),
-        const _Page(
-          content: SettingsView(),
-          titleBar: 'Settings',
-          icon: Icon(Icons.settings),
-        ),
-        if (kDebugMode) ...[
-          const _Page(
-            content: DebugView(),
-            titleBar: 'Debug Page',
-            icon: Icon(Icons.biotech),
-          )
-        ],
-      ];
+      ],
+    ),
+    const _Page(
+      content: SettingsView(),
+      titleBar: 'Settings',
+      icon: Icon(Icons.settings),
+    ),
+    if (kDebugMode) ...[
+      const _Page(
+        content: DebugView(),
+        titleBar: 'Debug Page',
+        icon: Icon(Icons.biotech),
+      ),
+    ],
+  ];
 }
 
 class _Page {

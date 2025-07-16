@@ -25,11 +25,11 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
   List<String> suggestions = [];
 
   Map<String, bool> radicalToggles = {
-    for (final String r in RADICALS.values.expand((l) => l)) r: false
+    for (final String r in RADICALS.values.expand((l) => l)) r: false,
   };
 
   Map<String, bool> allowedToggles = {
-    for (final String r in RADICALS.values.expand((l) => l)) r: true
+    for (final String r in RADICALS.values.expand((l) => l)) r: true,
   };
 
   @override
@@ -43,16 +43,17 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
   }
 
   void resetRadicalToggles() => radicalToggles.forEach((k, _) {
-        radicalToggles[k] = false;
-      });
+    radicalToggles[k] = false;
+  });
 
   void resetAllowedToggles() => allowedToggles.forEach((k, _) {
-        allowedToggles[k] = true;
-      });
+    allowedToggles[k] = true;
+  });
 
   Future<void> updateSuggestions() async {
-    final toggledRadicals =
-        radicalToggles.keys.where((r) => radicalToggles[r] ?? false).toList();
+    final toggledRadicals = radicalToggles.keys
+        .where((r) => radicalToggles[r] ?? false)
+        .toList();
 
     if (toggledRadicals.isEmpty) {
       suggestions.clear();
@@ -87,17 +88,17 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
     final color = isNumber
         ? LightTheme.defaultMenuGreyDark
         : radicalToggles[radical]!
-            ? AppTheme.mugitenWheat
-            : LightTheme.defaultMenuGreyNormal;
+        ? AppTheme.mugitenWheat
+        : LightTheme.defaultMenuGreyNormal;
 
     return InkWell(
       onTap: isNumber
           ? () {}
           : () => setState(() {
-                // TODO: Don't let the user toggle on another kanji before the last one is updated
-                radicalToggles[radical] = !radicalToggles[radical]!;
-                updateSuggestions();
-              }),
+              // TODO: Don't let the user toggle on another kanji before the last one is updated
+              radicalToggles[radical] = !radicalToggles[radical]!;
+              updateSuggestions();
+            }),
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -106,44 +107,38 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
         ),
         child: Text(
           radical,
-          style: TextStyle(
-            color: color.foreground,
-            fontSize: fontSize,
-          ),
+          style: TextStyle(color: color.foreground, fontSize: fontSize),
         ),
       ),
     );
   }
 
   List<Widget> get radicalGridElements => <Widget>[
-        IconButton(
-          onPressed: () => setState(() {
-            suggestions.clear();
-            resetRadicalToggles();
-            resetAllowedToggles();
-          }),
-          icon: const Icon(Icons.restore),
-          color: AppTheme.mugitenWheat.background,
-          iconSize: fontSize * 1.3,
-        ),
-        ...RADICALS
-            .map(
-              (key, value) => MapEntry(
-                key,
-                value
-                    .where((r) => allowedToggles[r]!)
-                    .map((r) => radicalGridElement(r))
-                    .toList()
-                  ..insert(
-                    0,
-                    radicalGridElement(key.toString(), isNumber: true),
-                  ),
-              ),
-            )
-            .values
-            .where((element) => element.length != 1)
-            .expand((l) => l)
-      ];
+    IconButton(
+      onPressed: () => setState(() {
+        suggestions.clear();
+        resetRadicalToggles();
+        resetAllowedToggles();
+      }),
+      icon: const Icon(Icons.restore),
+      color: AppTheme.mugitenWheat.background,
+      iconSize: fontSize * 1.3,
+    ),
+    ...RADICALS
+        .map(
+          (key, value) => MapEntry(
+            key,
+            value
+                .where((r) => allowedToggles[r]!)
+                .map((r) => radicalGridElement(r))
+                .toList()
+              ..insert(0, radicalGridElement(key.toString(), isNumber: true)),
+          ),
+        )
+        .values
+        .where((element) => element.length != 1)
+        .expand((l) => l),
+  ];
 
   Widget kanjiGridElement(String kanji) {
     const color = LightTheme.defaultMenuGreyNormal;
@@ -161,10 +156,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
         alignment: Alignment.center,
         child: Text(
           kanji,
-          style: TextStyle(
-            color: color.foreground,
-            fontSize: fontSize,
-          ),
+          style: TextStyle(color: color.foreground, fontSize: fontSize),
         ),
       ),
     );
@@ -196,8 +188,9 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
                       padding: const EdgeInsets.all(10),
-                      children:
-                          suggestions.map((s) => kanjiGridElement(s)).toList(),
+                      children: suggestions
+                          .map((s) => kanjiGridElement(s))
+                          .toList(),
                     ),
             ),
             Divider(

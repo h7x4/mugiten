@@ -23,10 +23,7 @@ class InitializationView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 100),
-              Image.asset(
-                'assets/images/logo/mugi.png',
-                height: 100,
-              ),
+              Image.asset('assets/images/logo/mugi.png', height: 100),
               const SizedBox(height: 20),
               BlocBuilder<InitializationCubit, InitializationStatus>(
                 bloc: cubit,

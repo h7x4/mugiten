@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class DenshiJishoBackground extends StatelessWidget {
   final Widget child;
 
-  const DenshiJishoBackground({
-    super.key,
-    required this.child,
-  });
+  const DenshiJishoBackground({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

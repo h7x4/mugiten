@@ -40,18 +40,15 @@ class _IconButton extends StatelessWidget {
   final Widget icon;
   final void Function()? onPressed;
 
-  const _IconButton({
-    required this.icon,
-    required this.onPressed,
-  });
+  const _IconButton({required this.icon, required this.onPressed});
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) => IconButton(
-          onPressed: onPressed,
-          icon: icon,
-          iconSize: 30,
-          color: state.theme.menuGreyDark.background,
-        ),
-      );
+    builder: (context, state) => IconButton(
+      onPressed: onPressed,
+      icon: icon,
+      iconSize: 30,
+      color: state.theme.menuGreyDark.background,
+    ),
+  );
 }

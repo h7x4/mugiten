@@ -2,10 +2,7 @@ abstract class DatabaseError implements ArgumentError {
   final String? tableName;
   final Map<String, dynamic>? illegalArguments;
 
-  const DatabaseError({
-    this.tableName,
-    this.illegalArguments,
-  });
+  const DatabaseError({this.tableName, this.illegalArguments});
 
   @override
   dynamic get invalidValue => illegalArguments;
@@ -15,10 +12,7 @@ abstract class DatabaseError implements ArgumentError {
 }
 
 class DataAlreadyExistsError extends DatabaseError {
-  const DataAlreadyExistsError({
-    super.tableName,
-    super.illegalArguments,
-  });
+  const DataAlreadyExistsError({super.tableName, super.illegalArguments});
 
   @override
   String? get name => illegalArguments?.keys.join(', ');
@@ -31,10 +25,7 @@ class DataAlreadyExistsError extends DatabaseError {
 }
 
 class DataNotFoundError extends DatabaseError {
-  const DataNotFoundError({
-    super.tableName,
-    super.illegalArguments,
-  });
+  const DataNotFoundError({super.tableName, super.illegalArguments});
 
   @override
   String? get name => illegalArguments?.keys.join(', ');
@@ -47,10 +38,7 @@ class DataNotFoundError extends DatabaseError {
 }
 
 class IllegalDeletionError extends DatabaseError {
-  const IllegalDeletionError({
-    super.tableName,
-    super.illegalArguments,
-  });
+  const IllegalDeletionError({super.tableName, super.illegalArguments});
 
   @override
   String? get name => illegalArguments?.keys.join(', ');

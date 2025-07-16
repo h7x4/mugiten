@@ -33,105 +33,106 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
 
   // TODO: add compart link
   Widget _headerRow(KanjiSearchResult result) => Container(
-        margin: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const Flexible(
-              fit: FlexFit.tight,
-              child: SizedBox(),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: Center(child: Header(kanji: result.kanji)),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: Center(
-                child: (result.radical != null)
-                    ? Radical(radical: result.radical!.symbol)
-                    : const SizedBox(),
-              ),
-            ),
-          ],
+    margin: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        const Flexible(fit: FlexFit.tight, child: SizedBox()),
+        Flexible(
+          fit: FlexFit.tight,
+          child: Center(child: Header(kanji: result.kanji)),
         ),
-      );
+        Flexible(
+          fit: FlexFit.tight,
+          child: Center(
+            child: (result.radical != null)
+                ? Radical(radical: result.radical!.symbol)
+                : const SizedBox(),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _rankingColumn(KanjiSearchResult result) => Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
         children: [
-          Row(
-            children: [
-              const Text('JLPT: ', style: TextStyle(fontSize: 20.0)),
-              JlptLevel(jlptLevel: result.jlptLevel ?? '⨉'),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Grade: ', style: TextStyle(fontSize: 20.0)),
-              Grade(
-                  grade: {
-                1: '小1',
-                2: '小2',
-                3: '小3',
-                4: '小4',
-                5: '小5',
-                6: '小6',
-                8: '中',
-                9: '名',
-                10: '名',
-                null: null,
-              }[result.taughtIn]),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Rank: ', style: TextStyle(fontSize: 20.0)),
-              Rank(rank: result.newspaperFrequencyRank),
-            ],
+          const Text('JLPT: ', style: TextStyle(fontSize: 20.0)),
+          JlptLevel(jlptLevel: result.jlptLevel ?? '⨉'),
+        ],
+      ),
+      Row(
+        children: [
+          const Text('Grade: ', style: TextStyle(fontSize: 20.0)),
+          Grade(
+            grade: {
+              1: '小1',
+              2: '小2',
+              3: '小3',
+              4: '小4',
+              5: '小5',
+              6: '小6',
+              8: '中',
+              9: '名',
+              10: '名',
+              null: null,
+            }[result.taughtIn],
           ),
         ],
-      );
+      ),
+      Row(
+        children: [
+          const Text('Rank: ', style: TextStyle(fontSize: 20.0)),
+          Rank(rank: result.newspaperFrequencyRank),
+        ],
+      ),
+    ],
+  );
 
   String _gifUri(String kanji) {
-    final String charcode =
-        kanji.characters.first.codeUnits.map((c) => c.toRadixString(16)).join();
+    final String charcode = kanji.characters.first.codeUnits
+        .map((c) => c.toRadixString(16))
+        .join();
     return "https://raw.githubusercontent.com/mistval/kanji_images/master/gifs/$charcode.gif";
   }
 
   Widget _body(KanjiSearchResult result) {
     return Scaffold(
-      appBar: AppBar(actions: [
-        if (incognitoModeEnabled)
+      appBar: AppBar(
+        actions: [
+          if (incognitoModeEnabled)
+            IconButton(
+              icon: const Icon(Mdi.incognito),
+              onPressed: () =>
+                  showSnackbar(context, 'History tracking is disabled'),
+            ),
           IconButton(
-            icon: const Icon(Mdi.incognito),
-            onPressed: () =>
-                showSnackbar(context, 'History tracking is disabled'),
+            icon: const Icon(Icons.star),
+            color: isFavourite ? Colors.yellow : null,
+            onPressed: () {
+              GetIt.instance
+                  .get<Database>()
+                  .libraryListToggleEntry(
+                    "favourites",
+                    jmdictEntryId: null,
+                    kanji: result.kanji,
+                  )
+                  .then((state) => setState(() => isFavourite = state));
+            },
           ),
-        IconButton(
-          icon: const Icon(Icons.star),
-          color: isFavourite ? Colors.yellow : null,
-          onPressed: () {
-            GetIt.instance
-                .get<Database>()
-                .libraryListToggleEntry(
-                  "favourites",
-                  jmdictEntryId: null,
-                  kanji: result.kanji,
-                )
-                .then((state) => setState(() => isFavourite = state));
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.bookmark),
-          onPressed: () => showAddToLibraryDialog(
-            context: context,
-            jmdictEntryId: null,
-            kanji: result.kanji,
+          IconButton(
+            icon: const Icon(Icons.bookmark),
+            onPressed: () => showAddToLibraryDialog(
+              context: context,
+              jmdictEntryId: null,
+              kanji: result.kanji,
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
       body: ListView(
         children: [
           _headerRow(result),
@@ -168,10 +169,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
 
     GetIt.instance
         .get<Database>()
-        .libraryListListContains(
-          "favourites",
-          kanji: widget.kanji,
-        )
+        .libraryListListContains("favourites", kanji: widget.kanji)
         .then((value) => setState(() => isFavourite = value));
 
     if (!incognitoModeEnabled && !addedToDatabase) {

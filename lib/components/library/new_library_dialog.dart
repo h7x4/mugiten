@@ -4,16 +4,16 @@ import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 void Function() showNewLibraryDialog(context) => () async {
-      final String? listName = await showDialog<String>(
-        context: context,
-        barrierDismissible: true,
-        builder: (_) => const NewLibraryDialog(),
-      );
+  final String? listName = await showDialog<String>(
+    context: context,
+    barrierDismissible: true,
+    builder: (_) => const NewLibraryDialog(),
+  );
 
-      if (listName == null) return;
+  if (listName == null) return;
 
-      await GetIt.instance.get<Database>().libraryListInsertList(listName);
-    };
+  await GetIt.instance.get<Database>().libraryListInsertList(listName);
+};
 
 class NewLibraryDialog extends StatefulWidget {
   const NewLibraryDialog({super.key});
@@ -22,13 +22,7 @@ class NewLibraryDialog extends StatefulWidget {
   State<NewLibraryDialog> createState() => _NewLibraryDialogState();
 }
 
-enum _NameState {
-  initial,
-  currentlyChecking,
-  invalid,
-  alreadyExists,
-  valid,
-}
+enum _NameState { initial, currentlyChecking, invalid, alreadyExists, valid }
 
 class _NewLibraryDialogState extends State<NewLibraryDialog> {
   final controller = TextEditingController();
@@ -54,9 +48,9 @@ class _NewLibraryDialogState extends State<NewLibraryDialog> {
   bool get errorStatus =>
       nameState == _NameState.invalid || nameState == _NameState.alreadyExists;
   String? get statusLabel => {
-        _NameState.invalid: 'Invalid Name',
-        _NameState.alreadyExists: 'Already Exists',
-      }[nameState];
+    _NameState.invalid: 'Invalid Name',
+    _NameState.alreadyExists: 'Already Exists',
+  }[nameState];
   bool get confirmButtonActive => nameState == _NameState.valid;
 
   @override

@@ -20,30 +20,21 @@ class BackupUserData extends InitializationStatus {
   final int progress;
   final int total;
 
-  BackupUserData({
-    required this.progress,
-    required this.total,
-  });
+  BackupUserData({required this.progress, required this.total});
 }
 
 class MigrateDatabase extends InitializationStatus {
   final int progress;
   final int total;
 
-  MigrateDatabase({
-    required this.progress,
-    required this.total,
-  });
+  MigrateDatabase({required this.progress, required this.total});
 }
 
 class RestoreUserData extends InitializationStatus {
   final int progress;
   final int total;
 
-  RestoreUserData({
-    required this.progress,
-    required this.total,
-  });
+  RestoreUserData({required this.progress, required this.total});
 }
 
 class DatabaseUpdateFinished extends InitializationStatus {}

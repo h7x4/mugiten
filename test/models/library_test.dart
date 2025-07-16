@@ -21,10 +21,12 @@ Future<Database> createDatabaseCopy({
   }
 
   // Make a copy of jadbPath
-  final random_suffix =
-      Random().nextInt((pow(2, 32) - 1) as int).toRadixString(16);
-  final jadbCopyPath =
-      jadbFile.parent.uri.resolve("jadb_copy_$random_suffix.sqlite").path;
+  final random_suffix = Random()
+      .nextInt((pow(2, 32) - 1) as int)
+      .toRadixString(16);
+  final jadbCopyPath = jadbFile.parent.uri
+      .resolve("jadb_copy_$random_suffix.sqlite")
+      .path;
 
   await jadbFile.copy(jadbCopyPath);
 
@@ -76,10 +78,12 @@ void main() {
       throw Exception("JADB_PATH environment variable is not set.");
     }
 
-    libsqlitePath = File(Platform.environment["LIBSQLITE_PATH"]!)
-        .resolveSymbolicLinksSync();
-    jadbPath =
-        File(Platform.environment["JADB_PATH"]!).resolveSymbolicLinksSync();
+    libsqlitePath = File(
+      Platform.environment["LIBSQLITE_PATH"]!,
+    ).resolveSymbolicLinksSync();
+    jadbPath = File(
+      Platform.environment["JADB_PATH"]!,
+    ).resolveSymbolicLinksSync();
   });
 
   // Setup sqflite_common_ffi for flutter test

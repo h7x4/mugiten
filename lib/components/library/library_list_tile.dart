@@ -43,9 +43,9 @@ class LibraryListTile extends StatelessWidget {
                   backgroundColor: Colors.red,
                   icon: Icons.delete,
                   onPressed: (_) async {
-                    await GetIt.instance
-                        .get<Database>()
-                        .libraryListDeleteList(library.name);
+                    await GetIt.instance.get<Database>().libraryListDeleteList(
+                      library.name,
+                    );
                     onDelete?.call();
                   },
                 ),
@@ -53,11 +53,8 @@ class LibraryListTile extends StatelessWidget {
       ),
       child: ListTile(
         leading: leading,
-        onTap: () => Navigator.pushNamed(
-          context,
-          Routes.library,
-          arguments: library,
-        ),
+        onTap: () =>
+            Navigator.pushNamed(context, Routes.library, arguments: library),
         title: Row(
           children: [
             Expanded(child: Text(library.name)),

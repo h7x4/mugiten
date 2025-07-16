@@ -50,15 +50,15 @@ class KanjiBox extends StatelessWidget {
     this.foreground,
     this.background,
     this.borderRadius = defaultBorderRadius,
-  })  : assert(
-          kanji.length == 1,
-          'KanjiBox can not show more than one character at a time',
-        ),
-        assert(
-          contentPaddingRatio != null || (fontSize != null && padding != null),
-          'Either contentPaddingRatio or both the fontSize and padding need to be '
-          'explicitly defined in order for the box to be able to render correctly',
-        );
+  }) : assert(
+         kanji.length == 1,
+         'KanjiBox can not show more than one character at a time',
+       ),
+       assert(
+         contentPaddingRatio != null || (fontSize != null && padding != null),
+         'Either contentPaddingRatio or both the fontSize and padding need to be '
+         'explicitly defined in order for the box to be able to render correctly',
+       );
 
   const factory KanjiBox.withFontSizeAndPadding({
     required String kanji,
@@ -76,15 +76,14 @@ class KanjiBox extends StatelessWidget {
     Color? foreground,
     Color? background,
     double borderRadius = defaultBorderRadius,
-  }) =>
-      KanjiBox._(
-        kanji: kanji,
-        fontSize: fontSize,
-        padding: pow(ratio * (1 / fontSize), -1).toDouble(),
-        foreground: foreground,
-        background: background,
-        borderRadius: borderRadius,
-      );
+  }) => KanjiBox._(
+    kanji: kanji,
+    fontSize: fontSize,
+    padding: pow(ratio * (1 / fontSize), -1).toDouble(),
+    foreground: foreground,
+    background: background,
+    borderRadius: borderRadius,
+  );
 
   factory KanjiBox.withPadding({
     required String kanji,
@@ -93,15 +92,14 @@ class KanjiBox extends StatelessWidget {
     Color? foreground,
     Color? background,
     double borderRadius = defaultBorderRadius,
-  }) =>
-      KanjiBox._(
-        kanji: kanji,
-        fontSize: ratio * padding,
-        padding: padding,
-        foreground: foreground,
-        background: background,
-        borderRadius: borderRadius,
-      );
+  }) => KanjiBox._(
+    kanji: kanji,
+    fontSize: ratio * padding,
+    padding: padding,
+    foreground: foreground,
+    background: background,
+    borderRadius: borderRadius,
+  );
 
   factory KanjiBox.expanded({
     required String kanji,
@@ -109,14 +107,13 @@ class KanjiBox extends StatelessWidget {
     Color? foreground,
     Color? background,
     double borderRadius = defaultBorderRadius,
-  }) =>
-      KanjiBox._(
-        kanji: kanji,
-        contentPaddingRatio: ratio,
-        foreground: foreground,
-        background: background,
-        borderRadius: borderRadius,
-      );
+  }) => KanjiBox._(
+    kanji: kanji,
+    contentPaddingRatio: ratio,
+    foreground: foreground,
+    background: background,
+    borderRadius: borderRadius,
+  );
 
   /// A shortcut
   factory KanjiBox.headline4({
@@ -126,15 +123,14 @@ class KanjiBox extends StatelessWidget {
     Color? foreground,
     Color? background,
     double borderRadius = defaultBorderRadius,
-  }) =>
-      KanjiBox.withFontSize(
-        kanji: kanji,
-        fontSize: Theme.of(context).textTheme.displaySmall!.fontSize!,
-        ratio: ratio,
-        foreground: foreground,
-        background: background,
-        borderRadius: borderRadius,
-      );
+  }) => KanjiBox.withFontSize(
+    kanji: kanji,
+    fontSize: Theme.of(context).textTheme.displaySmall!.fontSize!,
+    ratio: ratio,
+    foreground: foreground,
+    background: background,
+    borderRadius: borderRadius,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +142,10 @@ class KanjiBox extends StatelessWidget {
             background ?? state.theme.menuGreyLight.background;
         return LayoutBuilder(
           builder: (context, constraints) {
-            final sizeConstraint =
-                min(constraints.maxHeight, constraints.maxWidth);
+            final sizeConstraint = min(
+              constraints.maxHeight,
+              constraints.maxWidth,
+            );
             final calculatedFontSize =
                 fontSize ?? sizeConstraint * fontSizeFactor;
             final calculatedPadding =

@@ -44,10 +44,12 @@ class _DrawingBoardState extends State<DrawingBoard> {
   static const double fontSize = 30;
   static const double suggestionCirclePadding = 13;
 
-  late ColorSet panelColor =
-      BlocProvider.of<ThemeBloc>(context).state.theme.menuGreyLight;
-  late ColorSet barColor =
-      BlocProvider.of<ThemeBloc>(context).state.theme.menuGreyNormal;
+  late ColorSet panelColor = BlocProvider.of<ThemeBloc>(
+    context,
+  ).state.theme.menuGreyLight;
+  late ColorSet barColor = BlocProvider.of<ThemeBloc>(
+    context,
+  ).state.theme.menuGreyNormal;
 
   late final SignatureController controller = SignatureController(
     penColor: panelColor.foreground,
@@ -55,11 +57,13 @@ class _DrawingBoardState extends State<DrawingBoard> {
       strokes.add([]);
       undoQueue.clear();
     },
-    onDrawMove: () => strokes.last.add(StrokePoint(
-      t: DateTime.now().millisecondsSinceEpoch,
-      x: controller.points.last.offset.dx,
-      y: controller.points.last.offset.dy,
-    )),
+    onDrawMove: () => strokes.last.add(
+      StrokePoint(
+        t: DateTime.now().millisecondsSinceEpoch,
+        x: controller.points.last.offset.dx,
+        y: controller.points.last.offset.dy,
+      ),
+    ),
     onDrawEnd: () => updateSuggestions(),
   );
 
@@ -92,9 +96,9 @@ class _DrawingBoardState extends State<DrawingBoard> {
     const katakanaR = r'\p{Script=Katakana}';
 
     final kanjiSuggestions = await GetIt.instance.get<Database>().filterKanji(
-          suggestions,
-          deduplicate: true,
-        );
+      suggestions,
+      deduplicate: true,
+    );
     final hiraganaSuggestions = suggestions
         .where((s) => RegExp(hiraganaR).hasMatch(s))
         .toSet()
@@ -105,40 +109,40 @@ class _DrawingBoardState extends State<DrawingBoard> {
         .toList();
 
     return {
-      if (widget.allowKanji) ...kanjiSuggestions,
-      if (widget.allowHiragana) ...hiraganaSuggestions,
-      if (widget.allowKatakana) ...katakanaSuggestions,
-    }
+          if (widget.allowKanji) ...kanjiSuggestions,
+          if (widget.allowHiragana) ...hiraganaSuggestions,
+          if (widget.allowKatakana) ...katakanaSuggestions,
+        }
         .where((s) => !widget.onlyOneCharacterSuggestions || s.length == 1)
         .toList();
   }
 
   Widget kanjiChip(String kanji) => InkWell(
-        onTap: () => widget.onSuggestionChosen?.call(kanji),
-        child: BlocBuilder<ThemeBloc, ThemeState>(
-          builder: (context, state) {
-            final colors = state.theme.menuGreyLight;
+    onTap: () => widget.onSuggestionChosen?.call(kanji),
+    child: BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, state) {
+        final colors = state.theme.menuGreyLight;
 
-            return Container(
-              height: fontSize + 2 * suggestionCirclePadding,
-              width: fontSize + 2 * suggestionCirclePadding,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colors.background,
-              ),
-              child: Center(
-                child: Text(
-                  kanji,
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    color: colors.foreground,
-                  ).merge(japaneseFont.textStyle),
-                ),
-              ),
-            );
-          },
-        ),
-      );
+        return Container(
+          height: fontSize + 2 * suggestionCirclePadding,
+          width: fontSize + 2 * suggestionCirclePadding,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colors.background,
+          ),
+          child: Center(
+            child: Text(
+              kanji,
+              style: TextStyle(
+                fontSize: fontSize,
+                color: colors.foreground,
+              ).merge(japaneseFont.textStyle),
+            ),
+          ),
+        );
+      },
+    ),
+  );
 
   Widget suggestionBar() {
     const padding = EdgeInsets.symmetric(horizontal: 10, vertical: 5);
@@ -176,7 +180,8 @@ class _DrawingBoardState extends State<DrawingBoard> {
 
           // TODO: calculate dynamically
           constraints: BoxConstraints(
-            minHeight: 8 +
+            minHeight:
+                8 +
                 suggestionCirclePadding * 2 +
                 fontSize +
                 (2 * 4) +
@@ -194,50 +199,50 @@ class _DrawingBoardState extends State<DrawingBoard> {
   }
 
   Widget buttonRow() => Container(
-        color: panelColor.background,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              onPressed: () => setState(() {
-                controller.clear();
-                strokes.clear();
-                suggestions.clear();
-              }),
-              icon: const Icon(Icons.delete),
-            ),
-            IconButton(
-              onPressed: () {
-                if (strokes.isNotEmpty) {
-                  undoQueue.add(strokes.removeLast());
-                  controller.undo();
-                  updateSuggestions();
-                }
-              },
-              icon: const Icon(Icons.undo),
-            ),
-            IconButton(
-              onPressed: () {
-                if (undoQueue.isNotEmpty) {
-                  strokes.add(undoQueue.removeLast());
-                  controller.redo();
-                  updateSuggestions();
-                }
-              },
-              icon: const Icon(Icons.redo),
-            ),
-            if (!widget.onlyOneCharacterSuggestions)
-              IconButton(
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('TODO: implement scrolling page feature!'),
-                  ),
-                ),
-                icon: const Icon(Icons.arrow_forward),
-              ),
-          ],
+    color: panelColor.background,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          onPressed: () => setState(() {
+            controller.clear();
+            strokes.clear();
+            suggestions.clear();
+          }),
+          icon: const Icon(Icons.delete),
         ),
-      );
+        IconButton(
+          onPressed: () {
+            if (strokes.isNotEmpty) {
+              undoQueue.add(strokes.removeLast());
+              controller.undo();
+              updateSuggestions();
+            }
+          },
+          icon: const Icon(Icons.undo),
+        ),
+        IconButton(
+          onPressed: () {
+            if (undoQueue.isNotEmpty) {
+              strokes.add(undoQueue.removeLast());
+              controller.redo();
+              updateSuggestions();
+            }
+          },
+          icon: const Icon(Icons.redo),
+        ),
+        if (!widget.onlyOneCharacterSuggestions)
+          IconButton(
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('TODO: implement scrolling page feature!'),
+              ),
+            ),
+            icon: const Icon(Icons.arrow_forward),
+          ),
+      ],
+    ),
+  );
 
   Widget drawingPanel() {
     final board = AspectRatio(
@@ -273,12 +278,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
         panelColor = state.theme.menuGreyLight;
         barColor = state.theme.menuGreyDark;
       }),
-      child: Column(
-        children: [
-          suggestionBar(),
-          drawingPanel(),
-        ],
-      ),
+      child: Column(children: [suggestionBar(), drawingPanel()]),
     );
   }
 }

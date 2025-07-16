@@ -25,41 +25,29 @@ Future<Directory> tmpdir() async =>
 
 Future<Directory> unpackZipToTempDir(String zipFilePath) async {
   final outputDir = await tmpdir();
-  await extractFileToDisk(
-    zipFilePath,
-    outputDir.path,
-  );
+  await extractFileToDisk(zipFilePath, outputDir.path);
   return outputDir;
 }
 
-Future<File> packZip(
-  Directory dir, {
-  File? outputFile,
-}) async {
+Future<File> packZip(Directory dir, {File? outputFile}) async {
   if (outputFile == null || !outputFile.existsSync()) {
     final outputDir = await tmpdir();
     outputFile = File(outputDir.uri.resolve('mugiten_data.zip').toFilePath());
     outputFile.createSync();
   }
 
-  final archive = createArchiveFromDirectory(
-    dir,
-    includeDirName: false,
-  );
+  final archive = createArchiveFromDirectory(dir, includeDirName: false);
 
   final outputStream = OutputFileStream(outputFile.path);
-  ZipEncoder().encodeStream(
-    archive,
-    outputStream,
-    autoClose: true,
-  );
+  ZipEncoder().encodeStream(archive, outputStream, autoClose: true);
 
   return outputFile;
 }
 
 String getExportFileNameNoSuffix() {
   final DateTime today = DateTime.now();
-  final String formattedDate = '${today.year}'
+  final String formattedDate =
+      '${today.year}'
       '.${today.month.toString().padLeft(2, '0')}'
       '.${today.day.toString().padLeft(2, '0')}';
 
@@ -97,15 +85,13 @@ Future<void> importData(Database db, File zipFile) async {
 // HISTORY //
 /////////////
 
-Future<void> exportHistoryTo(
-  DatabaseExecutor db,
-  Directory dir,
-) async {
+Future<void> exportHistoryTo(DatabaseExecutor db, Directory dir) async {
   final file = dir.historyFile;
   file.createSync();
 
-  final List<Map<String, Object?>> jsonEntries =
-      (await db.historyEntryGetAll()).map((e) => e.toJson()).toList();
+  final List<Map<String, Object?>> jsonEntries = (await db.historyEntryGetAll())
+      .map((e) => e.toJson())
+      .toList();
 
   file.writeAsStringSync(jsonEncode(jsonEntries));
 }
@@ -123,14 +109,10 @@ Future<void> importHistoryFrom(Database db, File file) async {
 // LIBRARY LISTS //
 ///////////////////
 
-Future<void> exportLibraryListsTo(
-  DatabaseExecutor db,
-  Directory dir,
-) async {
-  final libraryNames = await db.query(
-    LibraryListTableNames.libraryList,
-    columns: ['name'],
-  ).then((result) => result.map((row) => row['name'] as String).toList());
+Future<void> exportLibraryListsTo(DatabaseExecutor db, Directory dir) async {
+  final libraryNames = await db
+      .query(LibraryListTableNames.libraryList, columns: ['name'])
+      .then((result) => result.map((row) => row['name'] as String).toList());
 
   await Future.wait([
     for (final libraryName in libraryNames)
@@ -147,33 +129,39 @@ Future<void> exportLibraryListTo(
   await file.create();
 
   // TODO: properly null check
-  final entries = (await db.libraryListGetListEntries(libraryName))!
-      .entries
-      .map((e) => e.toJson())
-      .toList();
+  final entries = (await db.libraryListGetListEntries(
+    libraryName,
+  ))!.entries.map((e) => e.toJson()).toList();
 
   await file.writeAsString(jsonEncode(entries));
 }
 
 // TODO: how do we handle lists that already exist? There seems to be no good way to merge them?
 Future<void> importLibraryListsFrom(
-    DatabaseExecutor db, Directory libraryListsDir) async {
+  DatabaseExecutor db,
+  Directory libraryListsDir,
+) async {
   for (final file in libraryListsDir.listSync()) {
     if (file is! File) continue;
 
     assert(file.path.endsWith('.json'));
 
-    final libraryName =
-        file.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), '');
+    final libraryName = file.uri.pathSegments.last.replaceFirst(
+      RegExp(r'\.json$'),
+      '',
+    );
 
     if (await db.libraryListExists(libraryName)) {
       if ((await db.libraryListGetList(libraryName))!.totalCount > 0) {
         print(
-            'Library list "$libraryName" already exists and is not empty. Skipping import.');
+          'Library list "$libraryName" already exists and is not empty. Skipping import.',
+        );
         continue;
       } else {
-        print('Library list "$libraryName" already exists but is empty. '
-            'Importing entries from file ${file.path}.');
+        print(
+          'Library list "$libraryName" already exists but is empty. '
+          'Importing entries from file ${file.path}.',
+        );
       }
     } else {
       await db.libraryListInsertList(libraryName);

@@ -20,10 +20,7 @@ const int invisibleItemsThreshold = 25;
 class WordSearchResultPage extends StatefulWidget {
   final String searchTerm;
 
-  const WordSearchResultPage({
-    required this.searchTerm,
-    super.key,
-  });
+  const WordSearchResultPage({required this.searchTerm, super.key});
 
   @override
   State<WordSearchResultPage> createState() => _WordSearchResultPageState();
@@ -54,9 +51,11 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
       GetIt.instance
           .get<Database>()
           .historyEntryInsertWord(widget.searchTerm)
-          .then((_) => GetIt.instance
-              .get<Database>()
-              .historyEntryGetWord(widget.searchTerm))
+          .then(
+            (_) => GetIt.instance.get<Database>().historyEntryGetWord(
+              widget.searchTerm,
+            ),
+          )
           .then(
             (entry) => setState(() {
               addedToDatabase = true;
@@ -123,10 +122,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
               Center(
                 child: Text(
                   'Found $searchCount results for "${widget.searchTerm}"',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
                 ),
               ),
               Expanded(
@@ -134,14 +130,14 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
                   controller: _pagingController,
                   builder: (context, state, fetchNextPage) =>
                       PagedListView<int, WordSearchResult>(
-                    state: state,
-                    fetchNextPage: fetchNextPage,
-                    builderDelegate: PagedChildBuilderDelegate(
-                      invisibleItemsThreshold: invisibleItemsThreshold,
-                      itemBuilder: (context, item, index) =>
-                          SearchResultCard(result: item),
-                    ),
-                  ),
+                        state: state,
+                        fetchNextPage: fetchNextPage,
+                        builderDelegate: PagedChildBuilderDelegate(
+                          invisibleItemsThreshold: invisibleItemsThreshold,
+                          itemBuilder: (context, item, index) =>
+                              SearchResultCard(result: item),
+                        ),
+                      ),
                 ),
               ),
             ],

@@ -27,14 +27,14 @@ class _GridItem extends StatelessWidget {
         : LightTheme.defaultMenuGreyNormal;
 
     final onTap = isNumber
-        ? () => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(text)),
-            )
+        ? () => ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(text)))
         : () => Navigator.popAndPushNamed(
-              context,
-              Routes.kanjiSearch,
-              arguments: text,
-            );
+            context,
+            Routes.kanjiSearch,
+            arguments: text,
+          );
 
     return InkWell(
       onTap: onTap,
@@ -57,19 +57,19 @@ class _GridItem extends StatelessWidget {
 }
 
 class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
-  Future<Map<int, Map<int, List<Widget>>>> get gradeWidgets async => compute<
-          Map<int, Map<int, List<String>>>, Map<int, Map<int, List<Widget>>>>(
+  Future<Map<int, Map<int, List<Widget>>>> get gradeWidgets async =>
+      compute<
+        Map<int, Map<int, List<String>>>,
+        Map<int, Map<int, List<Widget>>>
+      >(
         (gs) => gs.map(
           (grade, sortedByStrokes) => MapEntry(
             grade,
             sortedByStrokes.map<int, List<Widget>>(
-              (strokeCount, kanji) => MapEntry(
-                strokeCount,
-                [
-                  _GridItem(text: strokeCount.toString(), isNumber: true),
-                  ...kanji.map((k) => _GridItem(text: k)),
-                ],
-              ),
+              (strokeCount, kanji) => MapEntry(strokeCount, [
+                _GridItem(text: strokeCount.toString(), isNumber: true),
+                ...kanji.map((k) => _GridItem(text: k)),
+              ]),
             ),
           ),
         ),
@@ -77,32 +77,30 @@ class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
       );
 
   Future<Widget> get makeGrids async => SingleChildScrollView(
-        child: Column(
-          children: (await Future.wait(
-            JOUYOU_KANJI_BY_GRADE_AND_STROKE_COUNT.keys.map(
-              (grade) async => ExpansionTile(
-                title: Text(grade == 7 ? 'Junior Highschool' : 'Grade $grade'),
-                maintainState: true,
-                children: [
-                  GridView.count(
-                    crossAxisCount: 6,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    padding: const EdgeInsets.all(10),
-                    children: (await gradeWidgets)[grade]!
-                        .values
-                        .expand((l) => l)
-                        .toList(),
-                  )
-                ],
+    child: Column(
+      children: (await Future.wait(
+        JOUYOU_KANJI_BY_GRADE_AND_STROKE_COUNT.keys.map(
+          (grade) async => ExpansionTile(
+            title: Text(grade == 7 ? 'Junior Highschool' : 'Grade $grade'),
+            maintainState: true,
+            children: [
+              GridView.count(
+                crossAxisCount: 6,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                padding: const EdgeInsets.all(10),
+                children: (await gradeWidgets)[grade]!.values
+                    .expand((l) => l)
+                    .toList(),
               ),
-            ),
-          ))
-              .toList(),
+            ],
+          ),
         ),
-      );
+      )).toList(),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

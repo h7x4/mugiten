@@ -13,10 +13,7 @@ class KanjiGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 20.0,
-        horizontal: 40.0,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 40.0),
       child: GridView.count(
         shrinkWrap: true,
         crossAxisCount: 3,

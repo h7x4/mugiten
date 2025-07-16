@@ -8,14 +8,12 @@ class DebugView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: GetIt.instance.get<Database>().rawQuery(
-        """
+      future: GetIt.instance.get<Database>().rawQuery("""
         SELECT name, type
         FROM sqlite_master
         WHERE name NOT LIKE 'sqlite_%'
         ORDER BY name
-        """,
-      ),
+        """),
       builder: (context, snapshot) {
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
         if (!snapshot.hasData) {
@@ -23,14 +21,13 @@ class DebugView extends StatelessWidget {
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Debug View'),
-          ),
+          appBar: AppBar(title: const Text('Debug View')),
           body: ListView.builder(
             itemCount: (snapshot.data as List<Map<String, dynamic>>).length,
             itemBuilder: (context, index) {
               final data = (snapshot.data as List<Map<String, dynamic>>)[index];
-              final tableName = (data['name'] as String) +
+              final tableName =
+                  (data['name'] as String) +
                   (data['type'] == 'table' ? '' : ' (${data['type']})');
               return ListTile(
                 title: Text(tableName),

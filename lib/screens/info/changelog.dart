@@ -11,9 +11,7 @@ class ChangelogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Changelog'),
-      ),
+      appBar: AppBar(title: const Text('Changelog')),
       body: FutureBuilder<List<String>>(
         future: _fetchChangelogs(),
         builder: (context, snapshot) {
@@ -31,26 +29,34 @@ class ChangelogView extends StatelessWidget {
   }
 
   Future<List<String>> _fetchChangelogs() async {
-    final String assetManifest =
-        await rootBundle.loadString('AssetManifest.json');
+    final String assetManifest = await rootBundle.loadString(
+      'AssetManifest.json',
+    );
 
     final List<String> changelogs =
-        (jsonDecode(assetManifest) as Map<String, Object?>)
-            .keys
+        (jsonDecode(assetManifest) as Map<String, Object?>).keys
             .where(
               (assetPath) =>
                   RegExp(r'^docs/changelog/v.*\.md$').hasMatch(assetPath),
             )
-            .map((assetPath) => assetPath
-                .replaceFirst('docs/changelog/', '')
-                .replaceFirst('.md', ''))
+            .map(
+              (assetPath) => assetPath
+                  .replaceFirst('docs/changelog/', '')
+                  .replaceFirst('.md', ''),
+            )
             .toList();
 
     changelogs.sort((a, b) {
-      final aVersion =
-          a.replaceFirst(RegExp('^v'), '').split('.').map(int.parse).toList();
-      final bVersion =
-          b.replaceFirst(RegExp('^v'), '').split('.').map(int.parse).toList();
+      final aVersion = a
+          .replaceFirst(RegExp('^v'), '')
+          .split('.')
+          .map(int.parse)
+          .toList();
+      final bVersion = b
+          .replaceFirst(RegExp('^v'), '')
+          .split('.')
+          .map(int.parse)
+          .toList();
       for (int i = 0; i < aVersion.length && i < bVersion.length; i++) {
         if (aVersion[i] != bVersion[i]) {
           return bVersion[i].compareTo(aVersion[i]);
@@ -70,10 +76,7 @@ class ChangelogView extends StatelessWidget {
         return ListTile(
           title: Text(version),
           onTap: () {
-            Navigator.push(
-              context,
-              _buildChangelogDetailRoute(version),
-            );
+            Navigator.push(context, _buildChangelogDetailRoute(version));
           },
         );
       },
@@ -89,9 +92,7 @@ class ChangelogView extends StatelessWidget {
   MaterialPageRoute _buildChangelogDetailRoute(String version) {
     return MaterialPageRoute(
       builder: (context) => Scaffold(
-        appBar: AppBar(
-          title: Text(version),
-        ),
+        appBar: AppBar(title: Text(version)),
         body: FutureBuilder<String>(
           future: rootBundle.loadString('docs/changelog/$version.md'),
           builder: (context, snapshot) {
@@ -103,8 +104,10 @@ class ChangelogView extends StatelessWidget {
             }
 
             return SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 20.0,
+              ),
               physics: const AlwaysScrollableScrollPhysics(),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),

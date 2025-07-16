@@ -23,9 +23,9 @@ class _LanguageSelectorState extends State<LanguageSelector> {
   }
 
   Future<void> _updateSelectedStatus() async => prefs.setStringList(
-        'languageSelectorStatus',
-        isSelected.map((b) => b ? '1' : '0').toList(),
-      );
+    'languageSelectorStatus',
+    isSelected.map((b) => b ? '1' : '0').toList(),
+  );
 
   List<bool>? _getSelectedStatus() => prefs
       .getStringList('languageSelectorStatus')
@@ -33,13 +33,10 @@ class _LanguageSelectorState extends State<LanguageSelector> {
       .toList();
 
   Widget _languageOption(String language, {TextStyle? style}) => Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-        child: Text(
-          language,
-          style: style,
-        ),
-      );
+    alignment: Alignment.center,
+    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+    child: Text(language, style: style),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +46,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
       children: [
         _languageOption('Auto'),
         _languageOption('日本語', style: japaneseFont.textStyle),
-        _languageOption('English')
+        _languageOption('English'),
       ],
       onPressed: (buttonIndex) {
         setState(() {

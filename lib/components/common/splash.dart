@@ -10,9 +10,7 @@ class SplashScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(color: AppTheme.mugitenWheat.background),
       child: const Center(
-        child: Image(
-          image: AssetImage('assets/images/logo/mugi.png'),
-        ),
+        child: Image(image: AssetImage('assets/images/logo/mugi.png')),
       ),
     );
   }

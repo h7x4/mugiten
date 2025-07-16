@@ -6,13 +6,10 @@ class Notes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Notes:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text(notes.join(', ')),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text('Notes:', style: TextStyle(fontWeight: FontWeight.bold)),
+      Text(notes.join(', ')),
+    ],
+  );
 }

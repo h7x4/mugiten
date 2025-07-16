@@ -68,9 +68,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => themeBloc),
-      ],
+      providers: [BlocProvider(create: (context) => themeBloc)],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) => MaterialApp(
           title: '麦典',

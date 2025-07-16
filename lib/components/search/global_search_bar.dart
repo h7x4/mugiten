@@ -12,11 +12,8 @@ class GlobalSearchBar extends StatelessWidget {
 
   GlobalSearchBar({super.key});
 
-  void _search(BuildContext context, String text) => Navigator.pushNamed(
-        context,
-        Routes.search,
-        arguments: text,
-      );
+  void _search(BuildContext context, String text) =>
+      Navigator.pushNamed(context, Routes.search, arguments: text);
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +45,7 @@ class GlobalSearchBar extends StatelessWidget {
                       _search(context, text);
                     }
                   },
-                  icon: const Icon(
-                    Icons.search,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.search, color: Colors.white),
                 ),
               ),
             ),
@@ -70,8 +64,8 @@ class GlobalSearchBar extends StatelessWidget {
                       final pos = textController.selection.baseOffset;
                       textController.text =
                           textController.text.substring(0, pos) +
-                              result +
-                              textController.text.substring(pos);
+                          result +
+                          textController.text.substring(pos);
                       textController.selection = TextSelection.fromPosition(
                         TextPosition(offset: pos + result.length),
                       );
@@ -84,9 +78,9 @@ class GlobalSearchBar extends StatelessWidget {
                     }
                   }
                 },
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -102,10 +96,8 @@ class GlobalSearchBar extends StatelessWidget {
               const Expanded(child: Column()),
               DrawingBoard(
                 onlyOneCharacterSuggestions: true,
-                onSuggestionChosen: (suggestion) => Navigator.pop(
-                  context,
-                  suggestion,
-                ),
+                onSuggestionChosen: (suggestion) =>
+                    Navigator.pop(context, suggestion),
               ),
             ],
           ),

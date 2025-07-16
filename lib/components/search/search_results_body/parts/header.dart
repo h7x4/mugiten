@@ -28,10 +28,7 @@ class JapaneseHeader extends StatelessWidget {
                   style: japaneseFont.textStyle,
                 )
               : const Text(''),
-          Text(
-            baseWord,
-            style: japaneseFont.textStyle,
-          ),
+          Text(baseWord, style: japaneseFont.textStyle),
         ],
       ),
     );

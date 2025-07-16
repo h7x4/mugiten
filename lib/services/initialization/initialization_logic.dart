@@ -45,15 +45,12 @@ Future<void> setupSharedPreferences() async {
   GetIt.instance.registerSingleton<SharedPreferences>(prefs);
 }
 
-void registerExtraLicenses() => LicenseRegistry.addLicense(
-      () async* {
-        final jsonString = await rootBundle.loadString('assets/licenses.json');
-        final Map<String, dynamic> jsonData = jsonDecode(jsonString);
-        for (final license in jsonData.entries) {
-          yield LicenseEntryWithLineBreaks(
-            [license.key],
-            await rootBundle.loadString(license.value as String),
-          );
-        }
-      },
-    );
+void registerExtraLicenses() => LicenseRegistry.addLicense(() async* {
+  final jsonString = await rootBundle.loadString('assets/licenses.json');
+  final Map<String, dynamic> jsonData = jsonDecode(jsonString);
+  for (final license in jsonData.entries) {
+    yield LicenseEntryWithLineBreaks([
+      license.key,
+    ], await rootBundle.loadString(license.value as String));
+  }
+});

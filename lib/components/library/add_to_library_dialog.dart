@@ -11,15 +11,12 @@ Future<void> showAddToLibraryDialog({
   required BuildContext context,
   required int? jmdictEntryId,
   required String? kanji,
-}) =>
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (_) => AddToLibraryDialog(
-        jmdictEntryId: jmdictEntryId,
-        kanji: kanji,
-      ),
-    );
+}) => showDialog(
+  context: context,
+  barrierDismissible: true,
+  builder: (_) =>
+      AddToLibraryDialog(jmdictEntryId: jmdictEntryId, kanji: kanji),
+);
 
 class AddToLibraryDialog extends StatefulWidget {
   final int? jmdictEntryId;
@@ -61,10 +58,10 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
     setState(() => toggleLock = true);
 
     await GetIt.instance.get<Database>().libraryListToggleEntry(
-          libraryName,
-          jmdictEntryId: widget.jmdictEntryId,
-          kanji: widget.kanji,
-        );
+      libraryName,
+      jmdictEntryId: widget.jmdictEntryId,
+      kanji: widget.kanji,
+    );
 
     setState(() {
       toggleLock = false;
@@ -93,9 +90,9 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
                       style: Theme.of(context).textTheme.displayMedium,
                     )
                   : FutureBuilder(
-                      future: GetIt.instance
-                          .get<Database>()
-                          .jadbGetWordById(widget.jmdictEntryId!),
+                      future: GetIt.instance.get<Database>().jadbGetWordById(
+                        widget.jmdictEntryId!,
+                      ),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
                           return ErrorWidget(snapshot.error!);
@@ -139,8 +136,9 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
                         final checked = e.value;
                         return ListTile(
                           onTap: () => toggleEntry(libraryName),
-                          contentPadding:
-                              const EdgeInsets.symmetric(vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 5,
+                          ),
                           title: Row(
                             children: [
                               Checkbox(

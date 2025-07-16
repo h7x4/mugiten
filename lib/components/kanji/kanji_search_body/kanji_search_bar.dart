@@ -57,12 +57,11 @@ class KanjiSearchBarState extends State<KanjiSearchBar> {
       style: japaneseFont.textStyle,
       decoration: InputDecoration(
         hintText: 'Search',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
         isDense: false,
-        suffixIcon:
-            (button == TextFieldButton.clear) ? clearButton : pasteButton,
+        suffixIcon: (button == TextFieldButton.clear)
+            ? clearButton
+            : pasteButton,
       ),
     );
   }

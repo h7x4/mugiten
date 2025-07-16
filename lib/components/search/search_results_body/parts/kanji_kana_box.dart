@@ -26,16 +26,14 @@ class KanjiKanaBox extends StatelessWidget {
     this.centerFurigana = true,
     this.furiganaFontsize,
     this.kanjiFontsize,
-    this.margin = const EdgeInsets.symmetric(
-      horizontal: 5.0,
-      vertical: 5.0,
-    ),
+    this.margin = const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
     this.padding = const EdgeInsets.all(5.0),
   });
 
   @override
   Widget build(BuildContext context) {
-    final fFontsize = furiganaFontsize ??
+    final fFontsize =
+        furiganaFontsize ??
         ((kanjiFontsize != null) ? 0.8 * kanjiFontsize! : null);
 
     return Container(
@@ -53,14 +51,15 @@ class KanjiKanaBox extends StatelessWidget {
                     romajiEnabled
                         ? transliterateKanaToLatin(furigana!)
                         : furigana!,
-                    style: TextStyle(
-                      fontSize: fFontsize,
-                      color: colors.foreground,
-                    ).merge(
-                      romajiEnabled && autoTransliterateRomaji
-                          ? null
-                          : japaneseFont.textStyle,
-                    ),
+                    style:
+                        TextStyle(
+                          fontSize: fFontsize,
+                          color: colors.foreground,
+                        ).merge(
+                          romajiEnabled && autoTransliterateRomaji
+                              ? null
+                              : japaneseFont.textStyle,
+                        ),
                   )
                 : Text(
                     'あ',
@@ -71,13 +70,12 @@ class KanjiKanaBox extends StatelessWidget {
                   ),
             DefaultTextStyle.merge(
               child: Text(baseWord),
-              style: TextStyle(fontSize: kanjiFontsize)
-                  .merge(japaneseFont.textStyle),
+              style: TextStyle(
+                fontSize: kanjiFontsize,
+              ).merge(japaneseFont.textStyle),
             ),
             if (romajiEnabled && showRomajiBelow)
-              Text(
-                transliterateKanaToLatin(furigana ?? baseWord),
-              )
+              Text(transliterateKanaToLatin(furigana ?? baseWord)),
           ],
         ),
         style: TextStyle(color: colors.foreground),

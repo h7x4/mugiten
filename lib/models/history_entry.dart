@@ -26,14 +26,18 @@ extension HistoryEntryExt on DatabaseExecutor {
     final entryId = result.first['entryId']! as int;
     final language = result.first['language'] as String?;
 
-    final List<DateTime> timestamps = (await query(
-      HistoryTableNames.historyEntryTimestamp,
-      where: 'entryId = ?',
-      whereArgs: [entryId],
-      orderBy: 'timestamp DESC',
-    ))
-        .map((e) => DateTime.fromMillisecondsSinceEpoch(e['timestamp']! as int))
-        .toList();
+    final List<DateTime> timestamps =
+        (await query(
+              HistoryTableNames.historyEntryTimestamp,
+              where: 'entryId = ?',
+              whereArgs: [entryId],
+              orderBy: 'timestamp DESC',
+            ))
+            .map(
+              (e) =>
+                  DateTime.fromMillisecondsSinceEpoch(e['timestamp']! as int),
+            )
+            .toList();
 
     // TODO: join with search result(s) if matching exactly one, or single search result
 
@@ -64,17 +68,22 @@ extension HistoryEntryExt on DatabaseExecutor {
 
     final entryId = result.first['entryId']! as int;
 
-    final List<DateTime> timestamps = (await query(
-      HistoryTableNames.historyEntryTimestamp,
-      where: 'entryId = ?',
-      whereArgs: [entryId],
-      orderBy: 'timestamp DESC',
-    ))
-        .map((e) => DateTime.fromMillisecondsSinceEpoch(e['timestamp']! as int))
-        .toList();
+    final List<DateTime> timestamps =
+        (await query(
+              HistoryTableNames.historyEntryTimestamp,
+              where: 'entryId = ?',
+              whereArgs: [entryId],
+              orderBy: 'timestamp DESC',
+            ))
+            .map(
+              (e) =>
+                  DateTime.fromMillisecondsSinceEpoch(e['timestamp']! as int),
+            )
+            .toList();
 
-    KanjiSearchResult? kanjiSearchResult =
-        includeSearchResult ? await jadbSearchKanji(kanji) : null;
+    KanjiSearchResult? kanjiSearchResult = includeSearchResult
+        ? await jadbSearchKanji(kanji)
+        : null;
 
     return HistoryEntry(
       id: entryId,
@@ -109,10 +118,7 @@ extension HistoryEntryExt on DatabaseExecutor {
         ${pageSize != null ? 'LIMIT ?' : ''}
         ${page != null ? 'OFFSET ?' : ''}
       ''',
-      [
-        if (pageSize != null) pageSize,
-        if (page != null) page * pageSize!,
-      ],
+      [if (pageSize != null) pageSize, if (page != null) page * pageSize!],
     );
 
     final List<HistoryEntry> entries = result.map((e) {
@@ -152,12 +158,10 @@ extension HistoryEntryExt on DatabaseExecutor {
       );
       count = result.firstOrNull?['count'] as int? ?? 0;
     } else {
-      final result = await rawQuery(
-        '''
+      final result = await rawQuery('''
           SELECT COUNT(*) AS count
           FROM "${HistoryTableNames.historyEntryTimestamp}"
-        ''',
-      );
+        ''');
       count = result.firstOrNull?['count'] as int? ?? 0;
     }
 
@@ -185,21 +189,15 @@ extension HistoryEntryExt on DatabaseExecutor {
         {},
         nullColumnHack: 'id',
       );
-      await insert(
-        HistoryTableNames.historyEntryKanji,
-        {
-          'entryId': id,
-          'kanji': kanji,
-        },
-      );
+      await insert(HistoryTableNames.historyEntryKanji, {
+        'entryId': id,
+        'kanji': kanji,
+      });
     }
 
     await insert(
       HistoryTableNames.historyEntryTimestamp,
-      {
-        'entryId': id,
-        'timestamp': timestamp.millisecondsSinceEpoch,
-      },
+      {'entryId': id, 'timestamp': timestamp.millisecondsSinceEpoch},
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
   }
@@ -223,27 +221,17 @@ extension HistoryEntryExt on DatabaseExecutor {
         {},
         nullColumnHack: 'id',
       );
-      await insert(
-        HistoryTableNames.historyEntryWord,
-        {
-          'entryId': id,
-          'word': word,
-          // TODO: use an enum?
-          'language': {
-            null: null,
-            'japanese': 'j',
-            'english': 'e',
-          }[language]
-        },
-      );
+      await insert(HistoryTableNames.historyEntryWord, {
+        'entryId': id,
+        'word': word,
+        // TODO: use an enum?
+        'language': {null: null, 'japanese': 'j', 'english': 'e'}[language],
+      });
     }
 
     await insert(
       HistoryTableNames.historyEntryTimestamp,
-      {
-        'entryId': id,
-        'timestamp': timestamp.millisecondsSinceEpoch,
-      },
+      {'entryId': id, 'timestamp': timestamp.millisecondsSinceEpoch},
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
   }
@@ -294,10 +282,7 @@ extension HistoryEntryExt on DatabaseExecutor {
     final result = await delete(
       HistoryTableNames.historyEntryTimestamp,
       where: 'entryId = ? AND timestamp = ?',
-      whereArgs: [
-        entryId,
-        timestamp.millisecondsSinceEpoch,
-      ],
+      whereArgs: [entryId, timestamp.millisecondsSinceEpoch],
     );
 
     if (result == 0) {
@@ -351,15 +336,13 @@ extension HistoryEntryExt on DatabaseExecutor {
       } else {
         id = existingEntry.first['entryId']! as int;
       }
-      final List<int> timestamps =
-          (jsonObject['timestamps']! as List).map((ts) => ts as int).toList();
+      final List<int> timestamps = (jsonObject['timestamps']! as List)
+          .map((ts) => ts as int)
+          .toList();
       for (final timestamp in timestamps) {
         b.insert(
           HistoryTableNames.historyEntryTimestamp,
-          {
-            'entryId': id,
-            'timestamp': timestamp,
-          },
+          {'entryId': id, 'timestamp': timestamp},
           conflictAlgorithm: ConflictAlgorithm.ignore,
         );
       }
@@ -388,36 +371,33 @@ class HistoryEntry {
     this.wordSearchResult,
     this.kanji,
     this.kanjiSearchResult,
-  })  : assert(
-          (word != null && kanji == null) || (word == null && kanji != null),
-          'HistoryEntry must have either a word or a kanji, but not both',
-        ),
-        assert(
-          (language == null || word != null),
-          'If language is provided, word must not be null',
-        ),
-        assert(
-          (kanjiSearchResult == null || kanji != null),
-          'If kanjiSearchResult is provided, kanji must not be null',
-        ),
-        assert(
-          (wordSearchResult == null || word != null),
-          'If wordSearchResult is provided, word must not be null',
-        ),
-        assert(
-          kanji == null || kanji.runes.length == 1,
-          'Kanji must be a single character',
-        ),
-        // TODO: This has not always been the case, so we should add a migration
-        //       or something to clean up the data.
-        // assert(
-        //   word == null || word == word.trim(),
-        //   'Word must not contain leading or trailing whitespace',
-        // ),
-        assert(
-          timestamps.isNotEmpty,
-          'Timestamps must not be empty',
-        );
+  }) : assert(
+         (word != null && kanji == null) || (word == null && kanji != null),
+         'HistoryEntry must have either a word or a kanji, but not both',
+       ),
+       assert(
+         (language == null || word != null),
+         'If language is provided, word must not be null',
+       ),
+       assert(
+         (kanjiSearchResult == null || kanji != null),
+         'If kanjiSearchResult is provided, kanji must not be null',
+       ),
+       assert(
+         (wordSearchResult == null || word != null),
+         'If wordSearchResult is provided, word must not be null',
+       ),
+       assert(
+         kanji == null || kanji.runes.length == 1,
+         'Kanji must be a single character',
+       ),
+       // TODO: This has not always been the case, so we should add a migration
+       //       or something to clean up the data.
+       // assert(
+       //   word == null || word == word.trim(),
+       //   'Word must not contain leading or trailing whitespace',
+       // ),
+       assert(timestamps.isNotEmpty, 'Timestamps must not be empty');
 
   bool get isKanji => word == null;
   int get timestampCount => timestamps.length;

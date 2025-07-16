@@ -12,10 +12,7 @@ const int invisibleItemsThreshold = 25;
 
 class LibraryContentView extends StatefulWidget {
   final LibraryList library;
-  const LibraryContentView({
-    super.key,
-    required this.library,
-  });
+  const LibraryContentView({super.key, required this.library});
 
   @override
   State<LibraryContentView> createState() => _LibraryContentViewState();
@@ -60,9 +57,9 @@ class _LibraryContentViewState extends State<LibraryContentView> {
               );
               if (!userIsSure) return;
 
-              await GetIt.instance
-                  .get<Database>()
-                  .libraryListDeleteAllEntries(widget.library.name);
+              await GetIt.instance.get<Database>().libraryListDeleteAllEntries(
+                widget.library.name,
+              );
 
               _pagingController.refresh();
             },
@@ -74,30 +71,25 @@ class _LibraryContentViewState extends State<LibraryContentView> {
         controller: _pagingController,
         builder: (context, state, fetchNextPage) =>
             PagedListView<int, LibraryListEntry>.separated(
-          state: state,
-          fetchNextPage: fetchNextPage,
-          builderDelegate: PagedChildBuilderDelegate<LibraryListEntry>(
-            invisibleItemsThreshold: invisibleItemsThreshold,
-            itemBuilder: (context, entry, index) => LibraryListEntryTile(
-              index: index,
-              entry: entry,
-              library: widget.library,
-              onDelete: () => _pagingController.refresh(),
-              onUpdate: () => _pagingController.refresh(),
+              state: state,
+              fetchNextPage: fetchNextPage,
+              builderDelegate: PagedChildBuilderDelegate<LibraryListEntry>(
+                invisibleItemsThreshold: invisibleItemsThreshold,
+                itemBuilder: (context, entry, index) => LibraryListEntryTile(
+                  index: index,
+                  entry: entry,
+                  library: widget.library,
+                  onDelete: () => _pagingController.refresh(),
+                  onUpdate: () => _pagingController.refresh(),
+                ),
+                firstPageErrorIndicatorBuilder: (_) =>
+                    ErrorWidget(_pagingController.error!),
+                noItemsFoundIndicatorBuilder: (_) =>
+                    const Center(child: Text('List is empty')),
+              ),
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 0, indent: 10, endIndent: 10),
             ),
-            firstPageErrorIndicatorBuilder: (_) => ErrorWidget(
-              _pagingController.error!,
-            ),
-            noItemsFoundIndicatorBuilder: (_) => const Center(
-              child: Text('List is empty'),
-            ),
-          ),
-          separatorBuilder: (_, __) => const Divider(
-            height: 0,
-            indent: 10,
-            endIndent: 10,
-          ),
-        ),
       ),
     );
   }

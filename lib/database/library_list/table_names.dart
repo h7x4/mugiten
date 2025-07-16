@@ -22,8 +22,8 @@ abstract class LibraryListTableNames {
   static const String libraryListOrdered = 'Mugiten_LibraryList_Ordered';
 
   static Set<String> get allTables => {
-        libraryList,
-        libraryListEntry,
-        libraryListOrdered,
-      };
+    libraryList,
+    libraryListEntry,
+    libraryListOrdered,
+  };
 }

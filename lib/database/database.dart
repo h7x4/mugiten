@@ -57,10 +57,7 @@ class DatabaseMigration {
   final String path;
   final String content;
 
-  const DatabaseMigration({
-    required this.path,
-    required this.content,
-  });
+  const DatabaseMigration({required this.path, required this.content});
 
   int get version {
     final String fileName = basenameWithoutExtension(path);
@@ -76,12 +73,12 @@ class DatabaseMigration {
 Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
   log('Reading migrations from assets...');
 
-  final String assetManifest =
-      await rootBundle.loadString('AssetManifest.json');
+  final String assetManifest = await rootBundle.loadString(
+    'AssetManifest.json',
+  );
 
   final List<String> migrations =
-      (jsonDecode(assetManifest) as Map<String, Object?>)
-          .keys
+      (jsonDecode(assetManifest) as Map<String, Object?>).keys
           .where(
             (assetPath) =>
                 RegExp(r'^migrations\/\d{4}.*\.sql$').hasMatch(assetPath),
@@ -96,12 +93,10 @@ Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
   }
 
   return Future.wait(
-    migrations.map(
-      (migration) async {
-        final content = await rootBundle.loadString(migration, cache: false);
-        return DatabaseMigration(path: migration, content: content);
-      },
-    ),
+    migrations.map((migration) async {
+      final content = await rootBundle.loadString(migration, cache: false);
+      return DatabaseMigration(path: migration, content: content);
+    }),
   );
 }
 
@@ -164,8 +159,11 @@ Future<Database> openAndMigrateDatabase(
     onUpgrade: (db, oldVersion, newVersion) async {
       log('Migrating database from v$oldVersion to v$newVersion...');
       final migrationsToRun = migrations
-          .where((migration) =>
-              migration.version > oldVersion && migration.version <= newVersion)
+          .where(
+            (migration) =>
+                migration.version > oldVersion &&
+                migration.version <= newVersion,
+          )
           .toList();
 
       await migrate(db, migrationsToRun);
@@ -194,7 +192,9 @@ Future<void> setupDatabase() async {
   final String dbPath = await databasePath();
 
   assert(
-      await File(dbPath).exists(), 'Database file should exist at this point');
+    await File(dbPath).exists(),
+    'Database file should exist at this point',
+  );
 
   final database = await openDatabaseWithoutMigrations(
     dbPath,
@@ -202,8 +202,10 @@ Future<void> setupDatabase() async {
     verifyTables: true,
   );
 
-  assert(await database.getVersion() == expectedDatabaseVersion,
-      'Database version should be $expectedDatabaseVersion');
+  assert(
+    await database.getVersion() == expectedDatabaseVersion,
+    'Database version should be $expectedDatabaseVersion',
+  );
 
   log('Registering database in GetIt...');
   GetIt.instance.registerSingleton<Database>(database);
@@ -235,5 +237,6 @@ Future<void> extractJadbFromAssets(String path) async {
 
   ByteData data = await rootBundle.load('assets/jadb.sqlite');
   await jadbFile.writeAsBytes(
-      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+    data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+  );
 }

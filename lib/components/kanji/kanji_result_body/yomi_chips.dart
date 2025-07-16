@@ -7,11 +7,7 @@ import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';
 import '../../../settings.dart';
 
-enum YomiType {
-  onyomi,
-  kunyomi,
-  meaning,
-}
+enum YomiType { onyomi, kunyomi, meaning }
 
 extension on YomiType {
   String get title {
@@ -44,11 +40,7 @@ class YomiChips extends StatelessWidget {
   final List<String> yomi;
   final YomiType type;
 
-  const YomiChips({
-    required this.yomi,
-    required this.type,
-    super.key,
-  });
+  const YomiChips({required this.yomi, required this.type, super.key});
 
   bool get isExpandable => yomi.length > 6;
 
@@ -58,30 +50,26 @@ class YomiChips extends StatelessWidget {
     required ColorSet colors,
     bool searchable = true,
     TextStyle? extraTextStyle,
-  }) =>
-      InkWell(
-        onTap: searchable
-            ? () => Navigator.pushNamed(context, Routes.search, arguments: yomi)
-            : null,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 5),
-          padding: const EdgeInsets.symmetric(
-            vertical: 10.0,
-            horizontal: 10.0,
-          ),
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Text(
-            yomi,
-            style: TextStyle(
-              fontSize: 20.0,
-              color: colors.foreground,
-            ).merge(extraTextStyle),
-          ),
-        ),
-      );
+  }) => InkWell(
+    onTap: searchable
+        ? () => Navigator.pushNamed(context, Routes.search, arguments: yomi)
+        : null,
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 5),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Text(
+        yomi,
+        style: TextStyle(
+          fontSize: 20.0,
+          color: colors.foreground,
+        ).merge(extraTextStyle),
+      ),
+    ),
+  );
 
   Widget yomiWrapper(BuildContext context) {
     final yomiCards = yomi
@@ -109,7 +97,7 @@ class YomiChips extends StatelessWidget {
             background: Colors.transparent,
           ),
         ),
-      ...yomiCards
+      ...yomiCards,
     ];
 
     final wrap = Wrap(
@@ -141,10 +129,7 @@ class YomiChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 10.0,
-        vertical: 5.0,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       alignment: Alignment.centerLeft,
       child: yomiWrapper(context),
     );

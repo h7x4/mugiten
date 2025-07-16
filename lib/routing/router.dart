@@ -28,9 +28,7 @@ Route<Widget> generateRoute(RouteSettings settings) {
     case Routes.kanjiSearch:
       final searchTerm = args! as String;
       return MaterialPageRoute(
-        builder: (_) => KanjiSearchResultPage(
-          kanji: searchTerm,
-        ),
+        builder: (_) => KanjiSearchResultPage(kanji: searchTerm),
       );
 
     case Routes.kanjiSearchDraw:
@@ -63,8 +61,10 @@ Route<Widget> generateRoute(RouteSettings settings) {
     default:
       return MaterialPageRoute(
         builder: (_) => Scaffold(
-          appBar:
-              AppBar(title: const Text('Error'), backgroundColor: Colors.red),
+          appBar: AppBar(
+            title: const Text('Error'),
+            backgroundColor: Colors.red,
+          ),
           body: Center(child: ErrorWidget('Some kind of error occured')),
         ),
       );

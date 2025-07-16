@@ -4,12 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final SharedPreferences _prefs = GetIt.instance.get<SharedPreferences>();
 
-enum JapaneseFont {
-  none,
-  droidSansJapanese,
-  notoSansCJK,
-  notoSerifCJK,
-}
+enum JapaneseFont { none, droidSansJapanese, notoSansCJK, notoSerifCJK }
 
 extension Methods on JapaneseFont {
   TextStyle get textStyle {

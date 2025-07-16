@@ -6,36 +6,32 @@ class LicensesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<PackageInfo>(
-        future: PackageInfo.fromPlatform(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    future: PackageInfo.fromPlatform(),
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      }
+      if (!snapshot.hasData) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-          final packageInfo = snapshot.data!;
-          return _buildLicensePage(packageInfo);
-        },
-      );
+      final packageInfo = snapshot.data!;
+      return _buildLicensePage(packageInfo);
+    },
+  );
 
   Widget _buildLicensePage(PackageInfo packageInfo) => LicensePage(
-        applicationName: '麦典',
-        applicationVersion: 'Version: ${packageInfo.version}',
-        applicationIcon: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30),
-          child: Row(
-            children: [
-              const Expanded(child: SizedBox()),
-              Expanded(
-                child: Image.asset(
-                  'assets/images/logo/mugi.png',
-                ),
-              ),
-              const Expanded(child: SizedBox()),
-            ],
-          ),
-        ),
-      );
+    applicationName: '麦典',
+    applicationVersion: 'Version: ${packageInfo.version}',
+    applicationIcon: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      child: Row(
+        children: [
+          const Expanded(child: SizedBox()),
+          Expanded(child: Image.asset('assets/images/logo/mugi.png')),
+          const Expanded(child: SizedBox()),
+        ],
+      ),
+    ),
+  );
 }

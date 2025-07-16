@@ -4,11 +4,7 @@ class CircleBadge extends StatelessWidget {
   final Widget? child;
   final Color color;
 
-  const CircleBadge({
-    super.key,
-    this.child,
-    required this.color,
-  });
+  const CircleBadge({super.key, this.child, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +13,7 @@ class CircleBadge extends StatelessWidget {
       width: 30,
       height: 30,
       margin: const EdgeInsets.symmetric(horizontal: 2),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       child: FittedBox(child: child),
     );
   }

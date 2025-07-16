@@ -25,11 +25,9 @@ class _HistoryViewState extends State<HistoryView> {
     getNextPageKey: (state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
     fetchPage: (pageKey) async {
-      List<HistoryEntry?> result =
-          await GetIt.instance.get<Database>().historyEntryGetAll(
-                page: pageKey - 1,
-                pageSize: pageSize,
-              );
+      List<HistoryEntry?> result = await GetIt.instance
+          .get<Database>()
+          .historyEntryGetAll(page: pageKey - 1, pageSize: pageSize);
 
       // Insert a null entry at the start in order to prepend a separator to the first actual entry.
       if (pageKey == 1) {
@@ -65,10 +63,7 @@ class _HistoryViewState extends State<HistoryView> {
                 child: Center(
                   child: Text(
                     '$amountOfEntries distinct searches made',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ),
               ),
@@ -77,48 +72,48 @@ class _HistoryViewState extends State<HistoryView> {
                   controller: _pagingController,
                   builder: (context, state, fetchNextPage) =>
                       PagedListView<int, HistoryEntry?>.separated(
-                    state: state,
-                    fetchNextPage: fetchNextPage,
-                    separatorBuilder: (context, index) {
-                      if (index == 0) {
-                        final firstItemDate =
-                            _pagingController.items![1]!.lastTimestamp;
-                        return _dateDivider(firstItemDate);
-                      }
+                        state: state,
+                        fetchNextPage: fetchNextPage,
+                        separatorBuilder: (context, index) {
+                          if (index == 0) {
+                            final firstItemDate =
+                                _pagingController.items![1]!.lastTimestamp;
+                            return _dateDivider(firstItemDate);
+                          }
 
-                      final data = _pagingController.items!;
+                          final data = _pagingController.items!;
 
-                      final HistoryEntry search = data[index]!;
-                      // Previous in the sense of time, but it is the next item in the list.
-                      final HistoryEntry? previousSearch =
-                          data.length >= index + 1 ? data[index + 1] : null;
+                          final HistoryEntry search = data[index]!;
+                          // Previous in the sense of time, but it is the next item in the list.
+                          final HistoryEntry? previousSearch =
+                              data.length >= index + 1 ? data[index + 1] : null;
 
-                      if (previousSearch != null &&
-                          !dateIsEqual(
-                            search.lastTimestamp,
-                            previousSearch.lastTimestamp,
-                          )) {
-                        return _dateDivider(previousSearch.lastTimestamp);
-                      }
+                          if (previousSearch != null &&
+                              !dateIsEqual(
+                                search.lastTimestamp,
+                                previousSearch.lastTimestamp,
+                              )) {
+                            return _dateDivider(previousSearch.lastTimestamp);
+                          }
 
-                      return _divider();
-                    },
-                    builderDelegate: PagedChildBuilderDelegate<HistoryEntry?>(
-                      invisibleItemsThreshold: invisibleItemsThreshold,
-                      itemBuilder: (context, entry, index) => index == 0
-                          ? SizedBox.shrink()
-                          : HistoryEntryTile(
-                              entry: entry!,
-                              objectKey: entry.id,
-                              onDelete: () => _pagingController.refresh(),
+                          return _divider();
+                        },
+                        builderDelegate: PagedChildBuilderDelegate<HistoryEntry?>(
+                          invisibleItemsThreshold: invisibleItemsThreshold,
+                          itemBuilder: (context, entry, index) => index == 0
+                              ? SizedBox.shrink()
+                              : HistoryEntryTile(
+                                  entry: entry!,
+                                  objectKey: entry.id,
+                                  onDelete: () => _pagingController.refresh(),
+                                ),
+                          noItemsFoundIndicatorBuilder: (context) => const Center(
+                            child: Text(
+                              'The history is empty.\nTry searching for something!',
                             ),
-                      noItemsFoundIndicatorBuilder: (context) => const Center(
-                        child: Text(
-                          'The history is empty.\nTry searching for something!',
+                          ),
                         ),
                       ),
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -131,9 +126,5 @@ class _HistoryViewState extends State<HistoryView> {
   Widget _dateDivider(DateTime date) =>
       TextDivider(text: formatDate(roundToDay(date)));
 
-  Widget _divider() => const Divider(
-        height: 0,
-        indent: 10,
-        endIndent: 10,
-      );
+  Widget _divider() => const Divider(height: 0, indent: 10, endIndent: 10);
 }

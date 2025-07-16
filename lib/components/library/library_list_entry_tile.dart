@@ -37,10 +37,9 @@ class LibraryListEntryTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Text(
         (index + 1).toString(),
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium!
-            .merge(japaneseFont.textStyle),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium!.merge(japaneseFont.textStyle),
       ),
     );
   }
@@ -51,10 +50,10 @@ class LibraryListEntryTile extends StatelessWidget {
       icon: Icons.delete,
       onPressed: (_) async {
         await GetIt.instance.get<Database>().libraryListDeleteEntry(
-              library.name,
-              jmdictEntryId: entry.jmdictEntryId,
-              kanji: entry.kanji,
-            );
+          library.name,
+          jmdictEntryId: entry.jmdictEntryId,
+          kanji: entry.kanji,
+        );
         onDelete?.call();
       },
     );
@@ -76,10 +75,12 @@ class LibraryListEntryTile extends StatelessWidget {
           );
           onUpdate?.call();
         },
-        title: Row(children: [
-          SizedBox(width: 15),
-          KanjiBox.headline4(context: context, kanji: kanji),
-        ]),
+        title: Row(
+          children: [
+            SizedBox(width: 15),
+            KanjiBox.headline4(context: context, kanji: kanji),
+          ],
+        ),
       ),
     );
   }

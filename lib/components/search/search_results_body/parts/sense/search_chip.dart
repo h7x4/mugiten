@@ -16,14 +16,14 @@ class SearchChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: colors.background,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(color: colors.foreground).merge(extraTextStyle),
-        ),
-      );
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: colors.background,
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(color: colors.foreground).merge(extraTextStyle),
+    ),
+  );
 }

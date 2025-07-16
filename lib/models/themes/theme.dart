@@ -43,10 +43,7 @@ class ColorSet {
   final Color foreground;
   final Color background;
 
-  const ColorSet({
-    required this.foreground,
-    required this.background,
-  });
+  const ColorSet({required this.foreground, required this.background});
 }
 
 /// Source: https://blog.usejournal.com/creating-a-custom-color-swatch-in-flutter-554bcdcb27f3

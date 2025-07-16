@@ -28,46 +28,43 @@ class HistoryEntryTile extends StatelessWidget {
 
   void Function() _onTap(context) => entry.isKanji
       ? () => Navigator.pushNamed(
-            context,
-            Routes.kanjiSearch,
-            arguments: entry.kanji,
-          )
-      : () => Navigator.pushNamed(
-            context,
-            Routes.search,
-            arguments: entry.word,
-          );
+          context,
+          Routes.kanjiSearch,
+          arguments: entry.kanji,
+        )
+      : () =>
+            Navigator.pushNamed(context, Routes.search, arguments: entry.word);
 
   MaterialPageRoute get timestamps => MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(title: const Text('Last searched')),
-          body: ListView(
-            children: entry.timestamps
-                .map(
-                  (ts) => ListTile(
-                    title: Text('${formatDate(ts)}    ${formatTime(ts)}'),
-                  ),
-                )
-                .toList(),
-          ),
-        ),
-      );
+    builder: (context) => Scaffold(
+      appBar: AppBar(title: const Text('Last searched')),
+      body: ListView(
+        children: entry.timestamps
+            .map(
+              (ts) => ListTile(
+                title: Text('${formatDate(ts)}    ${formatTime(ts)}'),
+              ),
+            )
+            .toList(),
+      ),
+    ),
+  );
 
   List<SlidableAction> _actions(context) => [
-        SlidableAction(
-          backgroundColor: Colors.blue,
-          icon: Icons.access_time,
-          onPressed: (_) => Navigator.push(context, timestamps),
-        ),
-        SlidableAction(
-          backgroundColor: Colors.red,
-          icon: Icons.delete,
-          onPressed: (_) async {
-            await GetIt.instance.get<Database>().historyEntryDelete(entry.id);
-            onDelete?.call();
-          },
-        ),
-      ];
+    SlidableAction(
+      backgroundColor: Colors.blue,
+      icon: Icons.access_time,
+      onPressed: (_) => Navigator.push(context, timestamps),
+    ),
+    SlidableAction(
+      backgroundColor: Colors.red,
+      icon: Icons.delete,
+      onPressed: (_) async {
+        await GetIt.instance.get<Database>().historyEntryDelete(entry.id);
+        onDelete?.call();
+      },
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -88,13 +85,11 @@ class HistoryEntryTile extends StatelessWidget {
                 child: Text(formatTime(entry.lastTimestamp)),
               ),
               DefaultTextStyle.merge(
-                  style: japaneseFont.textStyle,
-                  child: entry.isKanji
-                      ? KanjiBox.headline4(
-                          context: context,
-                          kanji: entry.kanji!,
-                        )
-                      : Expanded(child: Text(entry.word!))),
+                style: japaneseFont.textStyle,
+                child: entry.isKanji
+                    ? KanjiBox.headline4(context: context, kanji: entry.kanji!)
+                    : Expanded(child: Text(entry.word!)),
+              ),
               if (entry.isKanji) Expanded(child: SizedBox.shrink()),
               if (entry.timestampCount > 1)
                 Padding(
