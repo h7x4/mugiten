@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' show ExtensionSet;
+import 'package:url_launcher/url_launcher.dart';
 
 class ChangelogView extends StatelessWidget {
   const ChangelogView({super.key});
@@ -37,7 +38,7 @@ class ChangelogView extends StatelessWidget {
         (jsonDecode(assetManifest) as Map<String, Object?>).keys
             .where(
               (assetPath) =>
-                  RegExp(r'^docs/changelog/v.*\.md$').hasMatch(assetPath),
+                  RegExp(r'^docs/changelog/.*\.md$').hasMatch(assetPath),
             )
             .map(
               (assetPath) => assetPath
@@ -49,11 +50,13 @@ class ChangelogView extends StatelessWidget {
     changelogs.sort((a, b) {
       final aVersion = a
           .replaceFirst(RegExp('^v'), '')
+          .replaceFirst(RegExp(r' - .*$'), '') // Replace date
           .split('.')
           .map(int.parse)
           .toList();
       final bVersion = b
           .replaceFirst(RegExp('^v'), '')
+          .replaceFirst(RegExp(r' - .*$'), '') // Replace date
           .split('.')
           .map(int.parse)
           .toList();
@@ -89,12 +92,12 @@ class ChangelogView extends StatelessWidget {
     return filteredLines.join('\n');
   }
 
-  MaterialPageRoute _buildChangelogDetailRoute(String version) {
+  MaterialPageRoute _buildChangelogDetailRoute(String versionAndDate) {
     return MaterialPageRoute(
       builder: (context) => Scaffold(
-        appBar: AppBar(title: Text(version)),
+        appBar: AppBar(title: Text(versionAndDate)),
         body: FutureBuilder<String>(
-          future: rootBundle.loadString('docs/changelog/$version.md'),
+          future: rootBundle.loadString('docs/changelog/$versionAndDate.md'),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
@@ -114,6 +117,11 @@ class ChangelogView extends StatelessWidget {
                 child: MarkdownBody(
                   data: _removeHeaders(snapshot.data!),
                   selectable: true,
+                  onTapLink: (text, href, title) {
+                    if (href != null && href.isNotEmpty) {
+                      launchUrl(Uri.parse(href));
+                    }
+                  },
                   extensionSet: ExtensionSet.gitHubFlavored,
                 ),
               ),
