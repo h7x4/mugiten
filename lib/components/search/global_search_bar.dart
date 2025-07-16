@@ -52,8 +52,15 @@ class GlobalSearchBar extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              IconButton(
+                icon: const Icon(Icons.close),
+                color: Colors.red,
+                onPressed: () {
+                  textController.clear();
+                },
+              ),
               const LanguageSelector(),
               IconButton(
                 icon: const Icon(Icons.mode),
