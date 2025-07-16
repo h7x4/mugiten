@@ -1,4 +1,3 @@
-import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -39,6 +38,26 @@ class _LibraryContentViewState extends State<LibraryContentView> {
     super.dispose();
   }
 
+  Future<bool> _confirm(BuildContext context, {required Widget content}) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            content: content,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +68,7 @@ class _LibraryContentViewState extends State<LibraryContentView> {
             onPressed: () async {
               final entryCount = widget.library.totalCount;
               if (!context.mounted) return;
-              final bool userIsSure = await confirm(
+              final bool userIsSure = await _confirm(
                 context,
                 content: Text(
                   'Are you sure that you want to clear all $entryCount entries?',

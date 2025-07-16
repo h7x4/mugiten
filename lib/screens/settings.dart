@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,6 +30,29 @@ class _SettingsViewState extends State<SettingsView> {
   final Database db = GetIt.instance.get<Database>();
   bool dataExportIsLoading = false;
   bool dataImportIsLoading = false;
+
+  Future<bool> confirm(
+    BuildContext context, {
+    required Widget content,
+  }) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: content,
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+  }
 
   Future<void> clearHistory(BuildContext context) async {
     final historyCount = await GetIt.instance
