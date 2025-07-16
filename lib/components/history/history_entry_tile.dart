@@ -26,7 +26,7 @@ class HistoryEntryTile extends StatelessWidget {
     super.key,
   });
 
-  void Function() _onTap(context) => entry.isKanji
+  void Function() _onTap(BuildContext context) => entry.isKanji
       ? () => Navigator.pushNamed(
           context,
           Routes.kanjiSearch,
@@ -50,7 +50,7 @@ class HistoryEntryTile extends StatelessWidget {
     ),
   );
 
-  List<SlidableAction> _actions(context) => [
+  List<SlidableAction> _actions(BuildContext context) => [
     SlidableAction(
       backgroundColor: Colors.blue,
       icon: Icons.access_time,

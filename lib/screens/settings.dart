@@ -32,7 +32,7 @@ class _SettingsViewState extends State<SettingsView> {
   bool dataExportIsLoading = false;
   bool dataImportIsLoading = false;
 
-  Future<void> clearHistory(context) async {
+  Future<void> clearHistory(BuildContext context) async {
     final historyCount = await GetIt.instance
         .get<Database>()
         .historyEntryAmount();
@@ -67,7 +67,7 @@ class _SettingsViewState extends State<SettingsView> {
     setState(() => autoThemeEnabled = b);
   }
 
-  Future<void> changeFont(context) async {
+  Future<void> changeFont(BuildContext context) async {
     final int? i = await _chooseFromList(
       list: [for (final font in JapaneseFont.values) font.name],
       chosen: japaneseFont.index,
@@ -79,7 +79,7 @@ class _SettingsViewState extends State<SettingsView> {
     }
   }
 
-  Future<void> exportHandler(context) async {
+  Future<void> exportHandler(BuildContext context) async {
     late final File zipfile;
     try {
       setState(() => dataExportIsLoading = true);
@@ -109,7 +109,7 @@ class _SettingsViewState extends State<SettingsView> {
     }
   }
 
-  Future<void> importHandler(context) async {
+  Future<void> importHandler(BuildContext context) async {
     final saveFile = await FilePicker.platform.pickFiles(
       dialogTitle: 'Import data',
       type: FileType.custom,

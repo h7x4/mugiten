@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-void Function() showNewLibraryDialog(context) => () async {
+void Function() showNewLibraryDialog(BuildContext context) => () async {
   final String? listName = await showDialog<String>(
     context: context,
     barrierDismissible: true,
@@ -28,7 +28,7 @@ class _NewLibraryDialogState extends State<NewLibraryDialog> {
   final controller = TextEditingController();
   _NameState nameState = _NameState.initial;
 
-  Future<void> onNameUpdate(proposedListName) async {
+  Future<void> onNameUpdate(String proposedListName) async {
     setState(() => nameState = _NameState.currentlyChecking);
     if (proposedListName == '') {
       setState(() => nameState = _NameState.invalid);

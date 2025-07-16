@@ -57,10 +57,10 @@ JapaneseFont get japaneseFont {
   return (i != null) ? JapaneseFont.values[i] : _defaults['japaneseFont'];
 }
 
-set incognitoModeEnabled(b) => _prefs.setBool('incognitoModeEnabled', b);
-set romajiEnabled(b) => _prefs.setBool('romajiEnabled', b);
-set darkThemeEnabled(b) => _prefs.setBool('darkThemeEnabled', b);
-set autoThemeEnabled(b) => _prefs.setBool('autoThemeEnabled', b);
-set reduceKanjiDrawingBoardSize(b) =>
+set incognitoModeEnabled(bool b) => _prefs.setBool('incognitoModeEnabled', b);
+set romajiEnabled(bool b) => _prefs.setBool('romajiEnabled', b);
+set darkThemeEnabled(bool b) => _prefs.setBool('darkThemeEnabled', b);
+set autoThemeEnabled(bool b) => _prefs.setBool('autoThemeEnabled', b);
+set reduceKanjiDrawingBoardSize(bool b) =>
     _prefs.setBool('reduceKanjiDrawingBoardSize', b);
 set japaneseFont(JapaneseFont jf) => _prefs.setInt('japaneseFont', jf.index);
