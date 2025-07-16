@@ -37,7 +37,7 @@ class InitializationCubit extends Cubit<InitializationStatus> {
     emit(CheckDatabase());
     if (deleteDatabase || await databaseNeedsInitialization()) {
       final String dbPath = await databasePath();
-      final databaseAlreadyExists = await File(dbPath).exists();
+      final databaseAlreadyExists = File(dbPath).existsSync();
 
       late final File? tmpdirDataDump;
 

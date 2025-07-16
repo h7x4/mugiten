@@ -102,7 +102,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
                 icon: Icons.star,
                 onPressed: (_) =>
                     GetIt.instance.get<Database>().libraryListToggleEntry(
-                      "favourites",
+                      'favourites',
                       jmdictEntryId: widget.result.entryId,
                       kanji: null,
                     ),

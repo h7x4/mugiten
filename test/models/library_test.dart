@@ -17,7 +17,7 @@ Future<Database> createDatabaseCopy({
 }) async {
   final jadbFile = File(jadbPath);
   if (!jadbFile.existsSync()) {
-    throw Exception("JADB_PATH does not exist: $jadbPath");
+    throw Exception('JADB_PATH does not exist: $jadbPath');
   }
 
   // Make a copy of jadbPath
@@ -25,12 +25,12 @@ Future<Database> createDatabaseCopy({
       .nextInt((pow(2, 32) - 1) as int)
       .toRadixString(16);
   final jadbCopyPath = jadbFile.parent.uri
-      .resolve("jadb_copy_$random_suffix.sqlite")
+      .resolve('jadb_copy_$random_suffix.sqlite')
       .path;
 
   await jadbFile.copy(jadbCopyPath);
 
-  print("Using database copy: $jadbCopyPath");
+  print('Using database copy: $jadbCopyPath');
 
   // Initialize FFI
   sqfliteFfiInit();
@@ -48,19 +48,19 @@ Future<Database> createDatabaseCopy({
 }
 
 Future<void> insertTestData(Database db) async {
-  final libraryList1 = await db.libraryListInsertList("Test Library 1");
+  final libraryList1 = await db.libraryListInsertList('Test Library 1');
   assert(libraryList1 == true);
 
   await db.libraryListInsertEntry(
-    "Test Library 1",
+    'Test Library 1',
     jmdictEntryId: null,
-    kanji: "漢",
+    kanji: '漢',
   );
 
   await db.libraryListInsertEntry(
-    "Test Library 1",
+    'Test Library 1',
     jmdictEntryId: null,
-    kanji: "字",
+    kanji: '字',
   );
 }
 
@@ -70,19 +70,19 @@ void main() {
   late final Database database;
 
   setUpAll(() {
-    if (!Platform.environment.containsKey("LIBSQLITE_PATH")) {
-      throw Exception("LIBSQLITE_PATH environment variable is not set.");
+    if (!Platform.environment.containsKey('LIBSQLITE_PATH')) {
+      throw Exception('LIBSQLITE_PATH environment variable is not set.');
     }
 
-    if (!Platform.environment.containsKey("JADB_PATH")) {
-      throw Exception("JADB_PATH environment variable is not set.");
+    if (!Platform.environment.containsKey('JADB_PATH')) {
+      throw Exception('JADB_PATH environment variable is not set.');
     }
 
     libsqlitePath = File(
-      Platform.environment["LIBSQLITE_PATH"]!,
+      Platform.environment['LIBSQLITE_PATH']!,
     ).resolveSymbolicLinksSync();
     jadbPath = File(
-      Platform.environment["JADB_PATH"]!,
+      Platform.environment['JADB_PATH']!,
     ).resolveSymbolicLinksSync();
   });
 

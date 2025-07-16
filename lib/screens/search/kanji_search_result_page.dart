@@ -96,7 +96,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     final String charcode = kanji.characters.first.codeUnits
         .map((c) => c.toRadixString(16))
         .join();
-    return "https://raw.githubusercontent.com/mistval/kanji_images/master/gifs/$charcode.gif";
+    return 'https://raw.githubusercontent.com/mistval/kanji_images/master/gifs/$charcode.gif';
   }
 
   Widget _body(KanjiSearchResult result) {
@@ -116,7 +116,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
               GetIt.instance
                   .get<Database>()
                   .libraryListToggleEntry(
-                    "favourites",
+                    'favourites',
                     jmdictEntryId: null,
                     kanji: result.kanji,
                   )
@@ -169,7 +169,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
 
     GetIt.instance
         .get<Database>()
-        .libraryListListContains("favourites", kanji: widget.kanji)
+        .libraryListListContains('favourites', kanji: widget.kanji)
         .then((value) => setState(() => isFavourite = value));
 
     if (!incognitoModeEnabled && !addedToDatabase) {

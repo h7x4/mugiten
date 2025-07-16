@@ -81,7 +81,7 @@ extension HistoryEntryExt on DatabaseExecutor {
             )
             .toList();
 
-    KanjiSearchResult? kanjiSearchResult = includeSearchResult
+    final KanjiSearchResult? kanjiSearchResult = includeSearchResult
         ? await jadbSearchKanji(kanji)
         : null;
 
@@ -118,7 +118,7 @@ extension HistoryEntryExt on DatabaseExecutor {
         ${pageSize != null ? 'LIMIT ?' : ''}
         ${page != null ? 'OFFSET ?' : ''}
       ''',
-      [if (pageSize != null) pageSize, if (page != null) page * pageSize!],
+      [?pageSize, if (page != null) page * pageSize!],
     );
 
     final List<HistoryEntry> entries = result.map((e) {

@@ -48,7 +48,7 @@ class InitializationView extends StatelessWidget {
                     case CheckDatabase _:
                       return const Text('Checking for database updates...');
 
-                    case BackupUserData s:
+                    case final BackupUserData s:
                       return Column(
                         children: [
                           const Text('Backing up user data...'),
@@ -56,7 +56,7 @@ class InitializationView extends StatelessWidget {
                         ],
                       );
 
-                    case MigrateDatabase s:
+                    case final MigrateDatabase s:
                       return Column(
                         children: [
                           const Text('Performing database migrations...'),
@@ -64,7 +64,7 @@ class InitializationView extends StatelessWidget {
                         ],
                       );
 
-                    case RestoreUserData s:
+                    case final RestoreUserData s:
                       return Column(
                         children: [
                           const Text('Restoring user data...'),

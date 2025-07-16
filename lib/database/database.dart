@@ -27,7 +27,7 @@ Future<String> databasePath() async {
 Future<bool> databaseNeedsInitialization() async {
   final String dbPath = await databasePath();
 
-  if (!await File(dbPath).exists()) {
+  if (!File(dbPath).existsSync()) {
     return true;
   }
 
@@ -192,7 +192,7 @@ Future<void> setupDatabase() async {
   final String dbPath = await databasePath();
 
   assert(
-    await File(dbPath).exists(),
+    File(dbPath).existsSync(),
     'Database file should exist at this point',
   );
 
@@ -231,11 +231,9 @@ Future<void> resetDatabase() async {
 Future<void> extractJadbFromAssets(String path) async {
   final File jadbFile = File(path);
 
-  if (!await jadbFile.exists()) {
-    jadbFile.createSync();
-  }
+  jadbFile.createSync();
 
-  ByteData data = await rootBundle.load('assets/jadb.sqlite');
+  final ByteData data = await rootBundle.load('assets/jadb.sqlite');
   await jadbFile.writeAsBytes(
     data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
   );

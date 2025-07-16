@@ -25,7 +25,7 @@ extension LibraryListExt on DatabaseExecutor {
         ${pageSize != null ? 'LIMIT ?' : ''}
         ${page != null ? 'OFFSET ?' : ''}
       ''',
-      [if (pageSize != null) pageSize, if (page != null) page * pageSize!],
+      [?pageSize, if (page != null) page * pageSize!],
     );
 
     //   COUNT(*) AS "count"
@@ -137,7 +137,7 @@ extension LibraryListExt on DatabaseExecutor {
       [
         listName,
         listName,
-        if (pageSize != null) pageSize,
+        ?pageSize,
         if (page != null) page * pageSize!,
       ],
     );
@@ -289,7 +289,7 @@ extension LibraryListExt on DatabaseExecutor {
     bool doesNotExistOk = false,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
-    assert(listName != "favourites", 'Cannot delete the "favourites" list.');
+    assert(listName != 'favourites', 'Cannot delete the "favourites" list.');
 
     if (!doesNotExistOk && !(await libraryListExists(listName))) {
       return false;
@@ -602,7 +602,7 @@ extension LibraryListExt on DatabaseExecutor {
     String listName,
     List<Map<String, Object?>> jsonEntries,
   ) async {
-    List<LibraryListEntry> entries = jsonEntries
+    final List<LibraryListEntry> entries = jsonEntries
         .map((e) => LibraryListEntry.fromJson(e))
         .toList();
 
@@ -699,7 +699,7 @@ class LibraryListEntry {
     );
     assert(
       json.containsKey('lastModified'),
-      "Library entry must have a lastModified timestamp",
+      'Library entry must have a lastModified timestamp',
     );
 
     if (json.containsKey('kanji') && json['kanji'] != null) {
