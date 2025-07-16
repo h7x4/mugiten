@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
+import 'package:mugiten/components/search/search_results_body/search_card.dart';
 import 'package:sealed_languages/sealed_languages.dart';
 
 import '../../../../../bloc/theme/theme_bloc.dart';
-import 'antonyms.dart';
 import 'english_definitions.dart';
 
 final Map<String, String> languageNameMap = {
@@ -12,18 +12,14 @@ final Map<String, String> languageNameMap = {
     for (final lang in NaturalLanguage.list) lang.code: lang.name,
     for (final lang in NaturalLanguage.list)
       if (lang.bibliographicCode != null) lang.bibliographicCode!: lang.name,
-  }
+  },
 };
 
 class Sense extends StatelessWidget {
   final int index;
   final WordSearchSense sense;
 
-  const Sense({
-    super.key,
-    required this.index,
-    required this.sense,
-  });
+  const Sense({super.key, required this.index, required this.sense});
 
   String _capitalize(String str) {
     if (str.isEmpty) return str;
@@ -46,42 +42,69 @@ class Sense extends StatelessWidget {
           return 'From $languageName';
         }
       }),
-      ...sense.seeAlso.map((e) => 'See also: ${e.baseWord}'),
       ...sense.dialects.map((e) => '${_capitalize(e.description)} dialect'),
     ];
   }
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) => Container(
-          margin: const EdgeInsets.symmetric(vertical: 5),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: state.theme.menuGreyLight.background,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                '${index + 1}. ${sense.partsOfSpeech.map((pos) => _capitalize(pos.shortDescription)).join(', ')}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.left,
-              ),
-              EnglishDefinitions(
-                englishDefinitions: sense.englishDefinitions,
-                colors: state.theme.menuGreyNormal,
-              ),
-              if (_notes().isNotEmpty)
-                Container(
-                  margin: const EdgeInsets.only(top: 5),
-                  child: Text(
-                    _notes().join('\n'),
-                    style: const TextStyle(fontSize: 12),
+    builder: (context, state) => Container(
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: state.theme.menuGreyLight.background,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children:
+            <Widget>[
+                  Text(
+                    '${index + 1}. ${sense.partsOfSpeech.map((pos) => _capitalize(pos.shortDescription)).join(', ')}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
                   ),
-                ),
-              if (sense.antonyms.isNotEmpty) Antonyms(antonyms: sense.antonyms),
-            ]
+                  EnglishDefinitions(
+                    englishDefinitions: sense.englishDefinitions,
+                    colors: state.theme.menuGreyNormal,
+                  ),
+                  if (_notes().isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(top: 5),
+                      child: Text(
+                        _notes().join('\n'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  if (sense.antonyms.isNotEmpty &&
+                      sense.antonyms.first.xrefResult != null)
+                    Text(
+                      'Antonyms:',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ...sense.antonyms
+                      .where((antonym) => antonym.xrefResult != null)
+                      .map(
+                        (antonym) => SearchResultCard(
+                          result: antonym.xrefResult!,
+                          backgroundColor: Colors.black38,
+                        ),
+                      ),
+                  if (sense.seeAlso.isNotEmpty &&
+                      sense.seeAlso.first.xrefResult != null)
+                    Text(
+                      'See also:',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ...sense.seeAlso
+                      .where((seeAlso) => seeAlso.xrefResult != null)
+                      .map(
+                        (seeAlso) => SearchResultCard(
+                          result: seeAlso.xrefResult!,
+                          backgroundColor: Colors.black38,
+                        ),
+                      ),
+                ]
                 .map(
                   (e) => Container(
                     margin: const EdgeInsets.symmetric(vertical: 5),
@@ -89,7 +112,7 @@ class Sense extends StatelessWidget {
                   ),
                 )
                 .toList(),
-          ),
-        ),
-      );
+      ),
+    ),
+  );
 }

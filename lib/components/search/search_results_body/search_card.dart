@@ -18,11 +18,13 @@ class SearchResultCard extends StatefulWidget {
   final WordSearchResult result;
   final List<SlidableAction>? slidableActions;
   final Widget? leading;
+  final Color? backgroundColor;
 
   const SearchResultCard({
     required this.result,
     this.slidableActions,
     this.leading,
+    this.backgroundColor,
     super.key,
   });
 
@@ -45,68 +47,65 @@ class _SearchResultCardState extends State<SearchResultCard> {
       .toList();
 
   Widget get _header => IntrinsicWidth(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        JapaneseHeader(
+          baseWord: widget.result.japanese[0].base,
+          furigana: widget.result.japanese[0].furigana,
+        ),
+        Row(
           children: [
-            JapaneseHeader(
-              baseWord: widget.result.japanese[0].base,
-              furigana: widget.result.japanese[0].furigana,
-            ),
-            Row(
-              children: [
-                JLPTBadge(
-                    jlptLevel: widget.result.jlptLevel.toNullableString()),
-                CommonBadge(isCommon: widget.result.isCommon)
-              ],
-            )
+            JLPTBadge(jlptLevel: widget.result.jlptLevel.toNullableString()),
+            CommonBadge(isCommon: widget.result.isCommon),
           ],
         ),
-      );
+      ],
+    ),
+  );
 
   static const _margin = SizedBox(height: 20);
 
   List<Widget> _withMargin(Widget w) => [_margin, w];
 
   Widget _body() => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Senses(
-              senses: widget.result.senses,
-            ),
+    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Senses(senses: widget.result.senses),
 
-            if (widget.result.japanese.length > 1)
-              ..._withMargin(
-                  OtherForms(forms: widget.result.japanese.sublist(1))),
+        if (widget.result.japanese.length > 1)
+          ..._withMargin(OtherForms(forms: widget.result.japanese.sublist(1))),
 
-            // TODO:
-            // if (extendedData != null && extendedData.notes.isNotEmpty)
-            //   ..._withMargin(Notes(notes: extendedData.notes)),
-
-            if (kanji.isNotEmpty) ..._withMargin(KanjiRow(kanji: kanji)),
-          ],
-        ),
-      );
+        // TODO:
+        // if (extendedData != null && extendedData.notes.isNotEmpty)
+        //   ..._withMargin(Notes(notes: extendedData.notes)),
+        if (kanji.isNotEmpty) ..._withMargin(KanjiRow(kanji: kanji)),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final backgroundColor =
+        widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
 
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
-        children: widget.slidableActions ??
+        children:
+            widget.slidableActions ??
             [
               SlidableAction(
                 backgroundColor: Colors.yellow,
                 icon: Icons.star,
                 onPressed: (_) =>
                     GetIt.instance.get<Database>().libraryListToggleEntry(
-                          "favourites",
-                          jmdictEntryId: widget.result.entryId,
-                          kanji: null,
-                        ),
+                      "favourites",
+                      jmdictEntryId: widget.result.entryId,
+                      kanji: null,
+                    ),
               ),
               SlidableAction(
                 backgroundColor: Colors.blue,
