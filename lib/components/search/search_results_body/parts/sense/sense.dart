@@ -88,6 +88,9 @@ class Sense extends StatelessWidget {
                         (antonym) => SearchResultCard(
                           result: antonym.xrefResult!,
                           backgroundColor: Colors.black38,
+                          leading: antonym.ambiguous
+                              ? const Icon(Icons.question_mark)
+                              : null,
                         ),
                       ),
                   if (sense.seeAlso.isNotEmpty &&
@@ -102,6 +105,9 @@ class Sense extends StatelessWidget {
                         (seeAlso) => SearchResultCard(
                           result: seeAlso.xrefResult!,
                           backgroundColor: Colors.black38,
+                          leading: seeAlso.ambiguous
+                              ? const Icon(Icons.question_mark)
+                              : null,
                         ),
                       ),
                 ]
