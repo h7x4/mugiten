@@ -38,7 +38,7 @@ const Map<String, dynamic> _defaults = {
   'incognitoModeEnabled': false,
   'romajiEnabled': false,
   'darkThemeEnabled': false,
-  'autoThemeEnabled': false,
+  'autoThemeEnabled': true,
   'japaneseFont': JapaneseFont.droidSansJapanese,
   'reduceKanjiDrawingBoardSize': false,
 };
