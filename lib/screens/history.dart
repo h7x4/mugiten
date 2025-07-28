@@ -81,12 +81,16 @@ class _HistoryViewState extends State<HistoryView> {
                             return _dateDivider(firstItemDate);
                           }
 
+                          if (_pagingController.items!.length > index) {
+                            return _divider();
+                          }
+
                           final data = _pagingController.items!;
 
                           final HistoryEntry search = data[index]!;
                           // Previous in the sense of time, but it is the next item in the list.
                           final HistoryEntry? previousSearch =
-                              data.length >= index + 1 ? data[index + 1] : null;
+                              data.length > index + 1 ? data[index + 1] : null;
 
                           if (previousSearch != null &&
                               !dateIsEqual(
