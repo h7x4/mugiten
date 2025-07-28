@@ -62,12 +62,6 @@ class DarkTheme extends AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
       primarySwatch: createMaterialColor(AppTheme.mugitenWheat.background),
-      pageTransitionsTheme: const PageTransitionsTheme(
-        builders: {
-          // Use PredictiveBackPageTransitionsBuilder to get the predictive back route transition!
-          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
-        },
-      ),
     );
   }
 }
