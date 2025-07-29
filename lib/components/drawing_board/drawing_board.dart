@@ -12,6 +12,7 @@ import '../../settings.dart';
 
 class DrawingBoard extends StatefulWidget {
   final Function(String)? onSuggestionChosen;
+  final String? precedingText;
   final bool onlyOneCharacterSuggestions;
   final bool allowKanji;
   final bool allowHiragana;
@@ -20,6 +21,7 @@ class DrawingBoard extends StatefulWidget {
 
   const DrawingBoard({
     this.onSuggestionChosen,
+    this.precedingText,
     this.onlyOneCharacterSuggestions = false,
     this.allowKanji = true,
     this.allowHiragana = false,
@@ -72,6 +74,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
 
     final digitalInkRecognizer = DigitalInkRecognizer(languageCode: 'ja');
     final context = DigitalInkRecognitionContext(
+      preContext: widget.precedingText,
       writingArea: WritingArea(
         height: signatureW.currentContext!.size!.height,
         width: signatureW.currentContext!.size!.width,

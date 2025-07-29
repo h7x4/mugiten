@@ -65,7 +65,14 @@ class GlobalSearchBar extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.mode),
                 onPressed: () async {
-                  final result = await _drawKanji()(context);
+                  final precedingText = textController.selection.isValid
+                      ? textController.text.substring(
+                          textController.selection.baseOffset,
+                        )
+                      : null;
+
+                  final result = await _drawKanji(precedingText)(context);
+
                   if (result != null && result.isNotEmpty) {
                     if (textController.selection.isValid) {
                       final pos = textController.selection.baseOffset;
@@ -93,7 +100,7 @@ class GlobalSearchBar extends StatelessWidget {
     );
   }
 
-  Future<String?> Function(BuildContext) _drawKanji() {
+  Future<String?> Function(BuildContext) _drawKanji(String? precedingText) {
     final MaterialPageRoute<String> route = MaterialPageRoute(
       builder: (context) => Scaffold(
         appBar: AppBar(title: const Text('Draw a kanji')),
@@ -102,6 +109,7 @@ class GlobalSearchBar extends StatelessWidget {
             children: [
               const Expanded(child: Column()),
               DrawingBoard(
+                precedingText: precedingText,
                 onlyOneCharacterSuggestions: true,
                 onSuggestionChosen: (suggestion) =>
                     Navigator.pop(context, suggestion),
