@@ -365,7 +365,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "2803db9c124c05d75f6e352026e26bac8a1ecfb2"
+      resolved-ref: "45e81810413f8189097b86bc41f7def4dd66e93a"
       url: "https://git.pvv.ntnu.no/oysteikt/jadb.git"
     source: git
     version: "1.0.0"
@@ -381,10 +381,10 @@ packages:
     dependency: transitive
     description:
       name: l10n_languages
-      sha256: "2360da28a5e2d9eaec5ac93151f27b2173338871b5486f757d088fc92a3a2b62"
+      sha256: "1a1d12f57fdca91935701aa449f3a2f4d5f4d134f4dbc67e83bb9faad2a9cf5c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.2.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -605,10 +605,10 @@ packages:
     dependency: "direct main"
     description:
       name: sealed_languages
-      sha256: cd8b4b6ee911b00a95a5f760fa51527497e23a35b120f8ed50442b17a4524ec8
+      sha256: "1c301e847e2fabc0c8591011aa7aab04424bbba4554647bf029de4dbc91df3e4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.3.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -738,10 +738,10 @@ packages:
     dependency: transitive
     description:
       name: sqflite_common
-      sha256: "84731e8bfd8303a3389903e01fb2141b6e59b5973cacbb0929021df08dddbe8b"
+      sha256: "6ef422a4525ecc601db6c0a2233ff448c731307906e92cabc9ba292afaae16a6"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.5"
+    version: "2.5.6"
   sqflite_common_ffi:
     dependency: "direct main"
     description:
@@ -770,18 +770,18 @@ packages:
     dependency: transitive
     description:
       name: sqlite3
-      sha256: "608b56d594e4c8498c972c8f1507209f9fd74939971b948ddbbfbfd1c9cb3c15"
+      sha256: dd806fff004a0aeb01e208b858dbc649bc72104670d425a81a6dd17698535f6e
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.7"
+    version: "2.8.0"
   sqlite3_flutter_libs:
     dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
-      sha256: "8b4bd239bedd20ee628aed587b4c5b387328e85945c9ecbae19a93bdcd171524"
+      sha256: fd996da5515a73aacd0a04ae7063db5fe8df42670d974df4c3ee538c652eef2e
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.36"
+    version: "0.5.38"
   stack_trace:
     dependency: transitive
     description:
@@ -1007,5 +1007,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.8.0 <4.0.0"
+  dart: ">=3.8.1 <4.0.0"
   flutter: ">=3.27.1"
