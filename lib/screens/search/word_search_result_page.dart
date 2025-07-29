@@ -8,6 +8,7 @@ import 'package:mdi/mdi.dart';
 import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
 import 'package:mugiten/models/history_entry.dart';
+import 'package:mugiten/services/datetime.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqflite.dart';
@@ -96,9 +97,32 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: BlocBuilder<ThemeBloc, ThemeState>(
-                builder: (context, themeState) => CircleBadge(
-                  color: themeState.theme.menuGreyNormal.background,
-                  child: Text('${historyEntry!.timestampCount}'),
+                builder: (context, themeState) => GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                          appBar: AppBar(title: const Text('Last searched')),
+                          body: ListView(
+                            children: historyEntry!.timestamps
+                                .map(
+                                  (ts) => ListTile(
+                                    title: Text(
+                                      '${formatDate(ts)}    ${formatTime(ts)}',
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleBadge(
+                    color: themeState.theme.menuGreyNormal.background,
+                    child: Text('${historyEntry!.timestampCount}'),
+                  ),
                 ),
               ),
             ),
