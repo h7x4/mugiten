@@ -16,30 +16,21 @@
           android_sdk.accept_license = true;
           allowUnfree = true;
         };
-        overlays = [
-          # https://github.com/NixOS/nixpkgs/issues/425323
-          (final: prev: {
-            jdk8 = prev.jdk8.overrideAttrs {
-              separateDebugInfo = false;
-              __structuredAttrs = false;
-            };
-          })
-        ];
       };
       androidSdk = (pkgs.androidenv.composeAndroidPackages {
         buildToolsVersions = [ "33.0.1" "34.0.0" ];
-        platformVersions = [ "35" "34" ];
+        platformVersions = [ "35" "36" ];
         abiVersions = [ "armeabi-v7a" "arm64-v8a" ];
         cmakeVersions = [ "3.22.1" ];
         includeNDK = true;
-        ndkVersions = [ "26.3.11579264" ];
+        ndkVersions = [ "27.0.12077973" ];
       }).androidsdk;
     in f system pkgs androidSdk);
   in {
     devShells = forAllSystems (_: pkgs: androidSdk: {
       default = let
         flutter' = pkgs.flutter;
-        jdk' = pkgs.jdk17;
+        jdk' = pkgs.jdk21;
       in pkgs.mkShell {
         packages = [
           flutter'
