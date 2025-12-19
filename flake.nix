@@ -29,7 +29,7 @@
   in {
     devShells = forAllSystems (_: pkgs: androidSdk: {
       default = let
-        flutter' = pkgs.flutter;
+        flutter' = pkgs.flutter335;
         jdk' = pkgs.jdk21;
       in pkgs.mkShell {
         packages = [
