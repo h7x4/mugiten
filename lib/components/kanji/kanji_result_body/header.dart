@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mugiten/theme.dart';
 
-import '../../../bloc/theme/theme_bloc.dart';
 import '../../../settings.dart';
 
 class Header extends StatelessWidget {
@@ -10,27 +9,25 @@ class Header extends StatelessWidget {
   const Header({required this.kanji, super.key});
 
   @override
-  Widget build(BuildContext context) => AspectRatio(
-    aspectRatio: 1,
-    child: BlocBuilder<ThemeBloc, ThemeState>(
-      builder: (context, state) {
-        final colors = state.theme.kanjiResultColor;
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KanjiResultThemeExtension>()!;
 
-        return Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            color: colors.background,
-          ),
-          child: Text(
-            kanji,
-            style: TextStyle(
-              fontSize: 70.0,
-              color: colors.foreground,
-            ).merge(japaneseFont.textStyle),
-          ),
-        );
-      },
-    ),
-  );
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: colors.backgroundColor,
+        ),
+        child: Text(
+          kanji,
+          style: TextStyle(
+            fontSize: 70.0,
+            color: colors.foregroundColor,
+          ).merge(japaneseFont.textStyle),
+        ),
+      ),
+    );
+  }
 }

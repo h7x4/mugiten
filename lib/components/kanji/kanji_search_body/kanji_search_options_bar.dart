@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mugiten/theme.dart';
 
-import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';
 
 class KanjiSearchOptionsBar extends StatelessWidget {
@@ -43,12 +42,12 @@ class _IconButton extends StatelessWidget {
   const _IconButton({required this.icon, required this.onPressed});
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
-    builder: (context, state) => IconButton(
-      onPressed: onPressed,
-      icon: icon,
-      iconSize: 30,
-      color: state.theme.menuGreyDark.background,
-    ),
+  Widget build(BuildContext context) => IconButton(
+    onPressed: onPressed,
+    icon: icon,
+    iconSize: 30,
+    color: Theme.of(
+      context,
+    ).extension<MenuGreyDarkThemeExtension>()!.backgroundColor,
   );
 }

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mugiten/screens/initialization.dart';
 import 'package:mugiten/services/initialization/initialization_logic.dart';
+import 'package:mugiten/theme.dart';
 
-import 'bloc/theme/theme_bloc.dart';
 import 'routing/router.dart';
-import 'settings.dart';
 
 void runInitializationScreen(bool deleteDatabase) {
   runApp(
@@ -37,7 +36,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  final ThemeBloc themeBloc = ThemeBloc();
+  final themeController = ThemeController.create();
 
   @override
   void initState() {
@@ -47,6 +46,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    GetIt.instance.registerSingleton<ThemeController>(themeController);
   }
 
   @override
@@ -57,27 +57,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangePlatformBrightness() {
-    if (autoThemeEnabled) {
-      final themeIsDark =
-          View.of(context).platformDispatcher.platformBrightness ==
-          Brightness.dark;
-      themeBloc.add(SetTheme(themeIsDark: themeIsDark));
-    }
     super.didChangePlatformBrightness();
+    themeController.updateThemeMode();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [BlocProvider(create: (context) => themeBloc)],
-      child: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, themeState) => MaterialApp(
+    return ValueListenableBuilder<AppThemeMode>(
+      valueListenable: themeController.themeMode,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
           title: '麦典',
-          theme: themeState.theme.getMaterialTheme(),
+          theme: themeMode.lightThemeData,
+          darkTheme: themeMode.darkThemeData,
+          themeMode: themeMode.themeMode,
           initialRoute: '/',
           onGenerateRoute: generateRoute,
-        ),
-      ),
+        );
+      },
     );
   }
 }

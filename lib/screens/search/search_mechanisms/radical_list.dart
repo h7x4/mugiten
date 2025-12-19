@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/const_data/radicals.dart';
 import 'package:jadb/search.dart';
-import 'package:mugiten/models/themes/theme.dart';
+import 'package:mugiten/theme.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../../../bloc/theme/theme_bloc.dart';
 import '../../../../routing/routes.dart';
 import '../../../settings.dart';
 
@@ -85,11 +83,16 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
   }
 
   Widget radicalGridElement(String radical, {bool isNumber = false}) {
-    final color = isNumber
-        ? LightTheme.defaultMenuGreyDark
+    final foregroundColor = isNumber
+        ? lightTheme.extension<MenuGreyDarkThemeExtension>()!.foregroundColor
         : radicalToggles[radical]!
-        ? AppTheme.mugitenWheat
-        : LightTheme.defaultMenuGreyNormal;
+        ? mugitenWheatForeground
+        : lightTheme.extension<MenuGreyNormalThemeExtension>()!.foregroundColor;
+    final backgroundColor = isNumber
+        ? lightTheme.extension<MenuGreyDarkThemeExtension>()!.backgroundColor
+        : radicalToggles[radical]!
+        ? mugitenWheatBackground
+        : lightTheme.extension<MenuGreyNormalThemeExtension>()!.backgroundColor;
 
     return InkWell(
       onTap: isNumber
@@ -103,11 +106,11 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: color.background,
+          color: backgroundColor,
         ),
         child: Text(
           radical,
-          style: TextStyle(color: color.foreground, fontSize: fontSize),
+          style: TextStyle(color: foregroundColor, fontSize: fontSize),
         ),
       ),
     );
@@ -121,7 +124,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
         resetAllowedToggles();
       }),
       icon: const Icon(Icons.restore),
-      color: AppTheme.mugitenWheat.background,
+      color: mugitenWheatBackground,
       iconSize: fontSize * 1.3,
     ),
     ...RADICALS.values
@@ -146,7 +149,8 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
   ];
 
   Widget kanjiGridElement(String kanji) {
-    const color = LightTheme.defaultMenuGreyNormal;
+    // const color = LightTheme.defaultMenuGreyNormal;
+    final colors = lightTheme.extension<MenuGreyNormalThemeExtension>()!;
     return InkWell(
       onTap: () => Navigator.popAndPushNamed(
         context,
@@ -156,12 +160,12 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: color.background,
+          color: colors.backgroundColor,
         ),
         alignment: Alignment.center,
         child: Text(
           kanji,
-          style: TextStyle(color: color.foreground, fontSize: fontSize),
+          style: TextStyle(color: colors.foregroundColor, fontSize: fontSize),
         ),
       ),
     );
@@ -169,6 +173,8 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<MenuGreyNormalThemeExtension>()!;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Choose by radicals')),
       body: DefaultTextStyle.merge(
@@ -178,13 +184,11 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
             Expanded(
               child: (suggestions.isEmpty)
                   ? Center(
-                      child: BlocBuilder<ThemeBloc, ThemeState>(
-                        builder: (context, state) => Text(
-                          'Toggle a radical to start',
-                          style: TextStyle(
-                            fontSize: fontSize * 0.8,
-                            color: state.theme.menuGreyNormal.background,
-                          ),
+                      child: Text(
+                        'Toggle a radical to start',
+                        style: TextStyle(
+                          fontSize: fontSize * 0.8,
+                          color: colors.backgroundColor,
                         ),
                       ),
                     )
@@ -199,7 +203,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
                     ),
             ),
             Divider(
-              color: AppTheme.mugitenWheat.background,
+              color: mugitenWheatBackground,
               thickness: 3,
               height: 30,
               indent: 5,

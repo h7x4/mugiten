@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
 import 'package:mugiten/components/search/search_results_body/search_card.dart';
+import 'package:mugiten/theme.dart';
 import 'package:sealed_languages/sealed_languages.dart';
 
-import '../../../../../bloc/theme/theme_bloc.dart';
 import 'english_definitions.dart';
 
 final Map<String, String> languageNameMap = {
@@ -47,12 +46,18 @@ class Sense extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<ThemeBloc, ThemeState>(
-    builder: (context, state) => Container(
+  Widget build(BuildContext context) {
+    final lightColors = Theme.of(
+      context,
+    ).extension<MenuGreyLightThemeExtension>()!;
+    final normalColors = Theme.of(
+      context,
+    ).extension<MenuGreyNormalThemeExtension>()!;
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: state.theme.menuGreyLight.background,
+        color: lightColors.backgroundColor,
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Column(
@@ -66,7 +71,7 @@ class Sense extends StatelessWidget {
                   ),
                   EnglishDefinitions(
                     englishDefinitions: sense.englishDefinitions,
-                    colors: state.theme.menuGreyNormal,
+                    colors: normalColors,
                   ),
                   if (_notes().isNotEmpty)
                     Container(
@@ -119,6 +124,6 @@ class Sense extends StatelessWidget {
                 )
                 .toList(),
       ),
-    ),
-  );
+    );
+  }
 }

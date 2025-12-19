@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jadb/const_data/kanji_grades.dart';
+import 'package:mugiten/theme.dart';
 
-// import '../../../../data/grades.dart';
-import '../../../../models/themes/theme.dart';
 import '../../../../routing/routes.dart';
 import '../../../components/common/loading.dart';
 import '../../../settings.dart';
@@ -22,9 +21,9 @@ class _GridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isNumber
-        ? LightTheme.defaultMenuGreyDark
-        : LightTheme.defaultMenuGreyNormal;
+    final ForegroundBackgroundThemeExtension colors = isNumber
+        ? lightTheme.extension<MenuGreyDarkThemeExtension>()!
+        : lightTheme.extension<MenuGreyNormalThemeExtension>()!;
 
     final onTap = isNumber
         ? () => ScaffoldMessenger.of(
@@ -41,13 +40,13 @@ class _GridItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: color.background,
+          color: colors.backgroundColor,
         ),
         alignment: Alignment.center,
         child: Text(
           text,
           style: TextStyle(
-            color: color.foreground,
+            color: colors.foregroundColor,
             fontSize: 25,
           ).merge(japaneseFont.textStyle),
         ),

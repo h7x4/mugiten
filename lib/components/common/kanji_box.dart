@@ -1,9 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mugiten/theme.dart';
 
-import '../../bloc/theme/theme_bloc.dart';
 import '../../settings.dart';
 
 /// The ratio is defined as 'the amount of space the text should take'
@@ -134,44 +133,43 @@ class KanjiBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ThemeBloc, ThemeState>(
-      builder: (context, state) {
-        final calculatedForeground =
-            foreground ?? state.theme.menuGreyLight.foreground;
-        final calculatedBackground =
-            background ?? state.theme.menuGreyLight.background;
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final sizeConstraint = min(
-              constraints.maxHeight,
-              constraints.maxWidth,
-            );
-            final calculatedFontSize =
-                fontSize ?? sizeConstraint * fontSizeFactor;
-            final calculatedPadding =
-                oneSidePadding ?? (sizeConstraint * paddingSizeFactor) / 2;
+    final calculatedForeground =
+        foreground ??
+        Theme.of(
+          context,
+        ).extension<MenuGreyLightThemeExtension>()!.foregroundColor;
+    final calculatedBackground =
+        background ??
+        Theme.of(
+          context,
+        ).extension<MenuGreyLightThemeExtension>()!.backgroundColor;
 
-            return Container(
-              padding: EdgeInsets.all(calculatedPadding),
-              alignment: Alignment.center,
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: calculatedBackground,
-                borderRadius: BorderRadius.circular(borderRadius),
-              ),
-              child: FittedBox(
-                child: Text(
-                  kanji,
-                  textScaler: TextScaler.linear(1),
-                  style: TextStyle(
-                    color: calculatedForeground,
-                    fontSize: calculatedFontSize,
-                  ).merge(japaneseFont.textStyle),
-                ),
-              ),
-            );
-          },
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sizeConstraint = min(constraints.maxHeight, constraints.maxWidth);
+        final calculatedFontSize = fontSize ?? sizeConstraint * fontSizeFactor;
+        final calculatedPadding =
+            oneSidePadding ?? (sizeConstraint * paddingSizeFactor) / 2;
+
+        return Container(
+          padding: EdgeInsets.all(calculatedPadding),
+          alignment: Alignment.center,
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: calculatedBackground,
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          child: FittedBox(
+            child: Text(
+              kanji,
+              textScaler: TextScaler.linear(1),
+              style: TextStyle(
+                color: calculatedForeground,
+                fontSize: calculatedFontSize,
+              ).merge(japaneseFont.textStyle),
+            ),
+          ),
         );
       },
     );

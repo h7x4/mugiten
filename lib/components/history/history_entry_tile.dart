@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/services/clipboard.dart';
+import 'package:mugiten/theme.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import '../../routing/routes.dart';
@@ -75,6 +74,8 @@ class HistoryEntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<MenuGreyNormalThemeExtension>()!;
+
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
@@ -102,11 +103,9 @@ class HistoryEntryTile extends StatelessWidget {
               if (entry.timestampCount > 1)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: BlocBuilder<ThemeBloc, ThemeState>(
-                    builder: (context, themeState) => CircleBadge(
-                      color: themeState.theme.menuGreyNormal.background,
-                      child: Text('${entry.timestampCount}'),
-                    ),
+                  child: CircleBadge(
+                    color: colors.backgroundColor!,
+                    child: Text('${entry.timestampCount}'),
                   ),
                 ),
             ],

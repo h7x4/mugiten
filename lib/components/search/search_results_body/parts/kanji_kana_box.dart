@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
+import 'package:mugiten/theme.dart';
 
-import '../../../../models/themes/theme.dart';
 import '../../../../settings.dart';
 
 class KanjiKanaBox extends StatelessWidget {
   final String baseWord;
   final String? furigana;
   final bool showRomajiBelow;
-  final ColorSet colors;
+  final ForegroundBackgroundThemeExtension colors;
   final bool autoTransliterateRomaji;
   final bool centerFurigana;
   final double? furiganaFontsize;
@@ -20,8 +20,8 @@ class KanjiKanaBox extends StatelessWidget {
     super.key,
     required this.baseWord,
     required this.furigana,
+    required this.colors,
     this.showRomajiBelow = false,
-    this.colors = LightTheme.defaultMenuGreyNormal,
     this.autoTransliterateRomaji = true,
     this.centerFurigana = true,
     this.furiganaFontsize,
@@ -39,7 +39,7 @@ class KanjiKanaBox extends StatelessWidget {
     return Container(
       margin: margin,
       padding: padding,
-      color: colors.background,
+      color: colors.backgroundColor,
       child: DefaultTextStyle.merge(
         child: Column(
           crossAxisAlignment: centerFurigana
@@ -54,7 +54,7 @@ class KanjiKanaBox extends StatelessWidget {
                     style:
                         TextStyle(
                           fontSize: fFontsize,
-                          color: colors.foreground,
+                          color: colors.foregroundColor,
                         ).merge(
                           romajiEnabled && autoTransliterateRomaji
                               ? null
@@ -78,7 +78,7 @@ class KanjiKanaBox extends StatelessWidget {
               Text(transliterateKanaToLatin(furigana ?? baseWord)),
           ],
         ),
-        style: TextStyle(color: colors.foreground),
+        style: TextStyle(color: colors.foregroundColor),
       ),
     );
   }

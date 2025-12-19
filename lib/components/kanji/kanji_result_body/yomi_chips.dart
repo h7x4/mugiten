@@ -1,37 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
-import 'package:mugiten/models/themes/theme.dart';
+import 'package:mugiten/theme.dart';
 
-import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';
 import '../../../settings.dart';
 
 enum YomiType { onyomi, kunyomi, meaning }
 
 extension on YomiType {
-  String get title {
+  // String get title {
+  //   switch (this) {
+  //     case YomiType.onyomi:
+  //       return 'Onyomi';
+  //     case YomiType.kunyomi:
+  //       return 'Kunyomi';
+  //     case YomiType.meaning:
+  //       return 'Meanings';
+  //   }
+  // }
+
+  Color getColor(BuildContext context) {
     switch (this) {
       case YomiType.onyomi:
-        return 'Onyomi';
+        return Theme.of(context).extension<YomiThemeExtension>()!.onyomiColor!;
       case YomiType.kunyomi:
-        return 'Kunyomi';
+        return Theme.of(context).extension<YomiThemeExtension>()!.kunyomiColor!;
       case YomiType.meaning:
-        return 'Meanings';
-    }
-  }
-
-  ColorSet getColors(BuildContext context) {
-    // TODO: convert this into a blocbuilder or bloclistener
-    final theme = BlocProvider.of<ThemeBloc>(context).state.theme;
-
-    switch (this) {
-      case YomiType.onyomi:
-        return theme.onyomiColor;
-      case YomiType.kunyomi:
-        return theme.kunyomiColor;
-      case YomiType.meaning:
-        return theme.menuGreyNormal;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 }
@@ -45,7 +40,7 @@ class YomiChips extends StatelessWidget {
   Widget yomiCard({
     required BuildContext context,
     required String yomi,
-    required ColorSet colors,
+    required Color? color,
     bool searchable = true,
     TextStyle? extraTextStyle,
   }) => InkWell(
@@ -56,14 +51,14 @@ class YomiChips extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 5),
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
       decoration: BoxDecoration(
-        color: colors.background,
+        color: color,
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Text(
         yomi,
         style: TextStyle(
           fontSize: 20.0,
-          color: colors.foreground,
+          color: Theme.of(context).colorScheme.onPrimary,
         ).merge(extraTextStyle),
       ),
     ),
@@ -76,7 +71,7 @@ class YomiChips extends StatelessWidget {
           (y) => yomiCard(
             context: context,
             yomi: y,
-            colors: type.getColors(context),
+            color: type.getColor(context),
             extraTextStyle: type != YomiType.meaning && !romajiEnabled
                 ? japaneseFont.textStyle
                 : null,
@@ -93,10 +88,7 @@ class YomiChips extends StatelessWidget {
             context: context,
             yomi: type == YomiType.kunyomi ? 'Kun:' : 'On:',
             searchable: false,
-            colors: ColorSet(
-              foreground: type.getColors(context).background,
-              background: Colors.transparent,
-            ),
+            color: type.getColor(context),
           ),
         ...yomiCards,
       ],

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart' hide Ink;
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:jadb/search.dart';
-import 'package:mugiten/models/themes/theme.dart';
+import 'package:mugiten/theme.dart';
 import 'package:signature/signature.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../bloc/theme/theme_bloc.dart';
 import '../../settings.dart';
 
 class DrawingBoard extends StatefulWidget {
@@ -46,15 +44,15 @@ class _DrawingBoardState extends State<DrawingBoard> {
   static const double fontSize = 30;
   static const double suggestionCirclePadding = 13;
 
-  late ColorSet panelColor = BlocProvider.of<ThemeBloc>(
+  late final panelColor = Theme.of(
     context,
-  ).state.theme.menuGreyLight;
-  late ColorSet barColor = BlocProvider.of<ThemeBloc>(
+  ).extension<MenuGreyLightThemeExtension>()!;
+  late final barColor = Theme.of(
     context,
-  ).state.theme.menuGreyNormal;
+  ).extension<MenuGreyNormalThemeExtension>()!;
 
   late final SignatureController controller = SignatureController(
-    penColor: panelColor.foreground,
+    penColor: panelColor.foregroundColor!,
     onDrawStart: () {
       strokes.add([]);
       undoQueue.clear();
@@ -122,28 +120,22 @@ class _DrawingBoardState extends State<DrawingBoard> {
 
   Widget kanjiChip(String kanji) => InkWell(
     onTap: () => widget.onSuggestionChosen?.call(kanji),
-    child: BlocBuilder<ThemeBloc, ThemeState>(
-      builder: (context, state) {
-        final colors = state.theme.menuGreyLight;
-
-        return Container(
-          height: fontSize + 2 * suggestionCirclePadding,
-          width: fontSize + 2 * suggestionCirclePadding,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colors.background,
-          ),
-          child: Center(
-            child: Text(
-              kanji,
-              style: TextStyle(
-                fontSize: fontSize,
-                color: colors.foreground,
-              ).merge(japaneseFont.textStyle),
-            ),
-          ),
-        );
-      },
+    child: Container(
+      height: fontSize + 2 * suggestionCirclePadding,
+      width: fontSize + 2 * suggestionCirclePadding,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: panelColor.backgroundColor,
+      ),
+      child: Center(
+        child: Text(
+          kanji,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: panelColor.foregroundColor,
+          ).merge(japaneseFont.textStyle),
+        ),
+      ),
     ),
   );
 
@@ -157,7 +149,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
             (!snapshot.hasError && (snapshot.data?.isEmpty ?? false))) {
           return Container(
             key: suggestionBarW,
-            color: barColor.background,
+            color: barColor.backgroundColor,
             alignment: Alignment.center,
             padding: padding,
             child: const Text('No suggestions'),
@@ -177,7 +169,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
 
         return Container(
           key: suggestionBarW,
-          color: barColor.background,
+          color: barColor.backgroundColor,
           alignment: Alignment.center,
           padding: padding,
 
@@ -202,7 +194,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   }
 
   Widget buttonRow() => Container(
-    color: panelColor.background,
+    color: panelColor.backgroundColor,
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -257,7 +249,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
             child: Signature(
               key: signatureW,
               controller: controller,
-              backgroundColor: panelColor.background,
+              backgroundColor: panelColor.backgroundColor!,
             ),
           ),
           buttonRow(),
@@ -276,12 +268,6 @@ class _DrawingBoardState extends State<DrawingBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ThemeBloc, ThemeState>(
-      listener: (context, state) => setState(() {
-        panelColor = state.theme.menuGreyLight;
-        barColor = state.theme.menuGreyDark;
-      }),
-      child: Column(children: [suggestionBar(), drawingPanel()]),
-    );
+    return Column(children: [suggestionBar(), drawingPanel()]);
   }
 }

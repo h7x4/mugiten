@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mugiten/theme.dart';
 
-import '../../../bloc/theme/theme_bloc.dart';
 import '../../../routing/routes.dart';
 import '../../../settings.dart';
 
@@ -31,31 +30,28 @@ class _GridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<MenuGreyLightThemeExtension>()!;
+
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, Routes.kanjiSearch, arguments: kanji);
       },
-      child: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) {
-          final menuColors = state.theme.menuGreyLight;
-          return Container(
-            decoration: BoxDecoration(
-              color: menuColors.background,
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Container(
-              margin: const EdgeInsets.all(10.0),
-              child: FittedBox(
-                child: Text(
-                  kanji,
-                  style: japaneseFont.textStyle.merge(
-                    TextStyle(color: menuColors.foreground),
-                  ),
-                ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.backgroundColor,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(10.0),
+          child: FittedBox(
+            child: Text(
+              kanji,
+              style: japaneseFont.textStyle.merge(
+                TextStyle(color: colors.foregroundColor),
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/themes/theme.dart';
 import '../../settings.dart';
 
 class LanguageSelector extends StatefulWidget {
@@ -41,7 +41,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
   @override
   Widget build(BuildContext context) {
     return ToggleButtons(
-      selectedColor: AppTheme.mugitenWheat.background,
+      selectedColor: mugitenWheatBackground,
       isSelected: isSelected,
       children: [
         _languageOption('Auto'),

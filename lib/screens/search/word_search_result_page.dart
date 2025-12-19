@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart' show JaDBConnection;
 import 'package:mdi/mdi.dart';
-import 'package:mugiten/bloc/theme/theme_bloc.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/services/datetime.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
+import 'package:mugiten/theme.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../components/search/search_results_body/search_card.dart';
@@ -83,6 +82,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<MenuGreyNormalThemeExtension>()!;
     return Scaffold(
       appBar: AppBar(
         title: Text('"${widget.searchTerm}"'),
@@ -96,33 +96,31 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
           if (historyEntry != null && historyEntry!.timestampCount > 1)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: BlocBuilder<ThemeBloc, ThemeState>(
-                builder: (context, themeState) => GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Scaffold(
-                          appBar: AppBar(title: const Text('Last searched')),
-                          body: ListView(
-                            children: historyEntry!.timestamps
-                                .map(
-                                  (ts) => ListTile(
-                                    title: Text(
-                                      '${formatDate(ts)}    ${formatTime(ts)}',
-                                    ),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        appBar: AppBar(title: const Text('Last searched')),
+                        body: ListView(
+                          children: historyEntry!.timestamps
+                              .map(
+                                (ts) => ListTile(
+                                  title: Text(
+                                    '${formatDate(ts)}    ${formatTime(ts)}',
                                   ),
-                                )
-                                .toList(),
-                          ),
+                                ),
+                              )
+                              .toList(),
                         ),
                       ),
-                    );
-                  },
-                  child: CircleBadge(
-                    color: themeState.theme.menuGreyNormal.background,
-                    child: Text('${historyEntry!.timestampCount}'),
-                  ),
+                    ),
+                  );
+                },
+                child: CircleBadge(
+                  color: colors.backgroundColor!,
+                  child: Text('${historyEntry!.timestampCount}'),
                 ),
               ),
             ),

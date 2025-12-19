@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:mugiten/models/themes/theme.dart';
+import 'package:mugiten/theme.dart';
 import 'search_chip.dart';
 
 class EnglishDefinitions extends StatelessWidget {
   final List<String> englishDefinitions;
-  final ColorSet colors;
+  final ForegroundBackgroundThemeExtension colors;
 
   const EnglishDefinitions({
     super.key,
     required this.englishDefinitions,
-    this.colors = LightTheme.defaultMenuGreyNormal,
+    required this.colors,
   });
 
   @override

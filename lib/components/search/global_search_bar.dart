@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mugiten/components/drawing_board/drawing_board.dart';
+import 'package:mugiten/theme.dart';
 
-import '../../models/themes/theme.dart';
 import '../../routing/routes.dart';
 import '../../settings.dart';
 import 'language_selector.dart';
@@ -37,7 +37,7 @@ class GlobalSearchBar extends StatelessWidget {
                   topRight: Radius.circular(10.0),
                   bottomRight: Radius.circular(10.0),
                 ),
-                color: AppTheme.mugitenWheat.background,
+                color: mugitenWheatBackground,
                 child: IconButton(
                   onPressed: () {
                     final text = textController.text.trim();

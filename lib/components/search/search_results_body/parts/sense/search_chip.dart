@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-
-import '../../../../../models/themes/theme.dart';
+import 'package:mugiten/theme.dart';
 
 class SearchChip extends StatelessWidget {
   final String text;
-  final ColorSet colors;
+  final ForegroundBackgroundThemeExtension colors;
   final TextStyle? extraTextStyle;
 
   const SearchChip({
     super.key,
     required this.text,
-    this.colors = LightTheme.defaultMenuGreyNormal,
+    required this.colors,
     this.extraTextStyle,
   });
 
@@ -18,12 +17,12 @@ class SearchChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(10),
     decoration: BoxDecoration(
-      color: colors.background,
+      color: colors.backgroundColor,
       borderRadius: BorderRadius.circular(10.0),
     ),
     child: Text(
       text,
-      style: TextStyle(color: colors.foreground).merge(extraTextStyle),
+      style: TextStyle(color: colors.foregroundColor).merge(extraTextStyle),
     ),
   );
 }
