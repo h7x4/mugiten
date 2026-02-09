@@ -39,7 +39,7 @@ dependencies:
   package_info_plus: ^9.0.0
   flutter_markdown_plus: ^1.0.3
   markdown: ^7.3.0
-  sealed_languages: ^2.1.0
+  sealed_languages: ^3.0.0
   infinite_scroll_pagination: ^5.1.0
 
 dev_dependencies:

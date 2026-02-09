@@ -23,13 +23,13 @@
         abiVersions = [ "armeabi-v7a" "arm64-v8a" ];
         cmakeVersions = [ "3.22.1" ];
         includeNDK = true;
-        ndkVersions = [ "27.0.12077973" ];
+        ndkVersions = [ "28.2.13676358" ];
       });
     in f system pkgs androidPkgs);
   in {
     devShells = forAllSystems (_: pkgs: androidPkgs: {
       default = let
-        flutter' = pkgs.flutter335;
+        flutter' = pkgs.flutter341;
         jdk' = pkgs.jdk21;
       in pkgs.mkShell {
         packages = [
