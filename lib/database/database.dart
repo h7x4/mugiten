@@ -73,17 +73,17 @@ class DatabaseMigration {
 Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
   log('Reading migrations from assets...');
 
-  final String assetManifest = await rootBundle.loadString(
-    'AssetManifest.json',
-  );
+  final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
 
-  final List<String> migrations =
-      (jsonDecode(assetManifest) as Map<String, Object?>).keys
-          .where(
-            (assetPath) =>
-                RegExp(r'^migrations\/\d{4}.*\.sql$').hasMatch(assetPath),
-          )
-          .toList();
+  final List<String> migrations = assetManifest
+      .listAssets()
+      .where(
+        (assetPath) =>
+            RegExp(r'^migrations\/\d{4}.*\.sql$').hasMatch(assetPath),
+      )
+      .toList();
+
+  assert(migrations.isNotEmpty, 'No migration files found in assets');
 
   migrations.sort();
 
@@ -191,10 +191,7 @@ Future<void> setupDatabase() async {
 
   final String dbPath = await databasePath();
 
-  assert(
-    File(dbPath).existsSync(),
-    'Database file should exist at this point',
-  );
+  assert(File(dbPath).existsSync(), 'Database file should exist at this point');
 
   final database = await openDatabaseWithoutMigrations(
     dbPath,
