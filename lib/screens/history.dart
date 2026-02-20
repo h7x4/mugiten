@@ -70,55 +70,57 @@ class _HistoryViewState extends State<HistoryView> {
               Expanded(
                 child: PagingListener(
                   controller: _pagingController,
-                  builder: (context, state, fetchNextPage) => PagedListView<int, HistoryEntry?>.separated(
-                    state: state,
-                    fetchNextPage: fetchNextPage,
-                    separatorBuilder: (context, index) {
-                      // The first item in _pagingController.items is a dummy shrinkbox,
-                      // we always insert a date divider before it with the date of the next entry.
-                      //
-                      // We know this entry always exists, because we set noItemsFoundIndicatorBuilder below,
-                      // which ensures this code is never called with an empty list.
-                      if (index == 0) {
-                        final firstItemDate =
-                            _pagingController.items![1]!.lastTimestamp;
-                        return _dateDivider(firstItemDate);
-                      }
+                  builder: (context, state, fetchNextPage) =>
+                      PagedListView<int, HistoryEntry?>.separated(
+                        state: state,
+                        fetchNextPage: fetchNextPage,
+                        separatorBuilder: (context, index) {
+                          if (index == 0) {
+                            if (_pagingController.items == null ||
+                                _pagingController.items!.length < 2) {
+                              // No history entries, or the items has not been loaded yet.
+                              return SizedBox.shrink();
+                            } else {
+                              final firstItemDate =
+                                  _pagingController.items![1]!.lastTimestamp;
+                              return _dateDivider(firstItemDate);
+                            }
+                          }
 
-                      final data = _pagingController.items!;
+                          final data = _pagingController.items!;
 
-                      final HistoryEntry search = data[index]!;
+                          final HistoryEntry search = data[index]!;
 
-                      // Previous in the sense of time, but it is the next item in the list.
-                      final HistoryEntry? previousSearch =
-                          data.length > index + 1 ? data[index + 1] : null;
+                          // Previous in the sense of time, but it is the next item in the list.
+                          final HistoryEntry? previousSearch =
+                              data.length > index + 1 ? data[index + 1] : null;
 
-                      if (previousSearch != null &&
-                          !dateIsEqual(
-                            search.lastTimestamp,
-                            previousSearch.lastTimestamp,
-                          )) {
-                        return _dateDivider(previousSearch.lastTimestamp);
-                      }
+                          if (previousSearch != null &&
+                              !dateIsEqual(
+                                search.lastTimestamp,
+                                previousSearch.lastTimestamp,
+                              )) {
+                            return _dateDivider(previousSearch.lastTimestamp);
+                          }
 
-                      return _divider();
-                    },
-                    builderDelegate: PagedChildBuilderDelegate<HistoryEntry?>(
-                      invisibleItemsThreshold: invisibleItemsThreshold,
-                      itemBuilder: (context, entry, index) => index == 0
-                          ? SizedBox.shrink()
-                          : HistoryEntryTile(
-                              entry: entry!,
-                              objectKey: entry.id,
-                              onDelete: () => _pagingController.refresh(),
+                          return _divider();
+                        },
+                        builderDelegate: PagedChildBuilderDelegate<HistoryEntry?>(
+                          invisibleItemsThreshold: invisibleItemsThreshold,
+                          itemBuilder: (context, entry, index) => index == 0
+                              ? SizedBox.shrink()
+                              : HistoryEntryTile(
+                                  entry: entry!,
+                                  objectKey: entry.id,
+                                  onDelete: () => _pagingController.refresh(),
+                                ),
+                          noItemsFoundIndicatorBuilder: (context) => const Center(
+                            child: Text(
+                              'The history is empty.\nTry searching for something!',
                             ),
-                      noItemsFoundIndicatorBuilder: (context) => const Center(
-                        child: Text(
-                          'The history is empty.\nTry searching for something!',
+                          ),
                         ),
                       ),
-                    ),
-                  ),
                 ),
               ),
             ],
