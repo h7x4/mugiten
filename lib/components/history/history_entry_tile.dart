@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
@@ -26,6 +27,7 @@ class HistoryEntryTile extends StatelessWidget {
     super.key,
   });
 
+  /// Perform the search again when the entry is tapped.
   void Function() _onTap(BuildContext context) => entry.isKanji
       ? () => Navigator.pushNamed(
           context,
@@ -34,6 +36,24 @@ class HistoryEntryTile extends StatelessWidget {
         )
       : () =>
             Navigator.pushNamed(context, Routes.search, arguments: entry.word);
+
+  /// Copy the kanji/searchword to the clipboard when the entry is long-pressed.
+  void Function() _onLongPress(BuildContext context) => () {
+    final String clipboardContent;
+    if (entry.isKanji) {
+      clipboardContent = entry.kanji!;
+    } else {
+      clipboardContent = entry.word!;
+    }
+    Clipboard.setData(ClipboardData(text: clipboardContent));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Copied \'$clipboardContent\''),
+        duration: const Duration(milliseconds: 500),
+      ),
+    );
+  };
 
   MaterialPageRoute get timestamps => MaterialPageRoute(
     builder: (context) => Scaffold(
@@ -77,6 +97,7 @@ class HistoryEntryTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: ListTile(
           onTap: _onTap(context),
+          onLongPress: _onLongPress(context),
           contentPadding: EdgeInsets.zero,
           title: Row(
             children: [
