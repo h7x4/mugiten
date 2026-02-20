@@ -6,6 +6,7 @@ import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import '../../routing/routes.dart';
+import '../../services/clipboard.dart';
 import '../../settings.dart';
 import '../common/kanji_box.dart';
 
@@ -75,6 +76,7 @@ class LibraryListEntryTile extends StatelessWidget {
           );
           onUpdate?.call();
         },
+        onLongPress: () => copyToClipboard(context, kanji),
         title: Row(
           children: [
             SizedBox(width: 15),
