@@ -50,9 +50,9 @@ class ColorSet {
 MaterialColor createMaterialColor(Color color) {
   final List<double> strengths = [.05];
   final swatch = <int, Color>{};
-  final int r = color.red;
-  final int g = color.green;
-  final int b = color.blue;
+  final int r = (color.r * 255.0).round().clamp(0, 255);
+  final int g = (color.g * 255.0).round().clamp(0, 255);
+  final int b = (color.b * 255.0).round().clamp(0, 255);
 
   for (int i = 1; i < 10; i++) {
     strengths.add(0.1 * i);
@@ -67,5 +67,5 @@ MaterialColor createMaterialColor(Color color) {
       1,
     );
   }
-  return MaterialColor(color.value, swatch);
+  return MaterialColor(color.toARGB32(), swatch);
 }

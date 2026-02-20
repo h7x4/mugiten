@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/database.dart';
 import 'package:mugiten/models/library_list.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqlite3/open.dart';
 
@@ -21,11 +20,11 @@ Future<Database> createDatabaseCopy({
   }
 
   // Make a copy of jadbPath
-  final random_suffix = Random()
+  final randomSuffix = Random()
       .nextInt((pow(2, 32) - 1) as int)
       .toRadixString(16);
   final jadbCopyPath = jadbFile.parent.uri
-      .resolve('jadb_copy_$random_suffix.sqlite')
+      .resolve('jadb_copy_$randomSuffix.sqlite')
       .path;
 
   await jadbFile.copy(jadbCopyPath);
@@ -34,7 +33,7 @@ Future<Database> createDatabaseCopy({
 
   // Initialize FFI
   sqfliteFfiInit();
-  databaseFactory = await createDatabaseFactoryFfi(
+  databaseFactory = createDatabaseFactoryFfi(
     ffiInit: () =>
         open.overrideForAll(() => DynamicLibrary.open(libsqlitePath)),
   );
