@@ -42,6 +42,7 @@ dependencies:
   markdown: ^7.3.0
   sealed_languages: ^3.0.0
   infinite_scroll_pagination: ^5.1.0
+  google_fonts: ^8.0.2
 
 dev_dependencies:
   flutter_test:
@@ -68,11 +69,3 @@ flutter:
     - family: Droid Sans Japanese
       fonts:
         - asset: assets/fonts/DroidSansJapanese.ttf
-
-    - family: Noto Sans CJK
-      fonts:
-        - asset: assets/fonts/NotoSansCJK-Regular.ttc
-
-    - family: Noto Serif CJK
-      fonts:
-        - asset: assets/fonts/NotoSerifCJK-Regular.ttc

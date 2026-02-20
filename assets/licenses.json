@@ -1,4 +1,12 @@
 {
-    "droid-fonts": "assets/licenses/droid-fonts.txt",
-    "noto-fonts": "assets/licenses/noto-fonts.txt"
+  "droid-sans-japanese": "assets/licenses/apache-2.0.txt",
+  "hina-mincho": "assets/licenses/ofl-1.1.txt",
+  "ibm-plex-sans-japanese": "assets/licenses/ofl-1.1.txt",
+  "klee-one": "assets/licenses/ofl-1.1.txt",
+  "kosugi": "assets/licenses/apache-2.0.txt",
+  "m-plus-2": "assets/licenses/ofl-1.1.txt",
+  "m-plus-rounded-1c": "assets/licenses/ofl-1.1.txt",
+  "noto-sans-japanese": "assets/licenses/ofl-1.1.txt",
+  "noto-serif-japanese": "assets/licenses/ofl-1.1.txt",
+  "zen-kurenaido": "assets/licenses/ofl-1.1.txt"
 }

@@ -1,37 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final SharedPreferences _prefs = GetIt.instance.get<SharedPreferences>();
 
-enum JapaneseFont { none, droidSansJapanese, notoSansCJK, notoSerifCJK }
+enum JapaneseFont {
+  system,
+  droidSansJapanese,
+  hinaMincho,
+  ibmPlexSansJP,
+  kleeOne,
+  kosugi,
+  mPlus2,
+  mPlusRounded1c,
+  notoSansJapanese,
+  notoSerifJapanese,
+  zenKurenaido,
+}
 
 extension Methods on JapaneseFont {
   TextStyle get textStyle {
-    String? fontFamily;
     switch (this) {
       case JapaneseFont.droidSansJapanese:
-        fontFamily = 'Droid Sans Japanese';
-        break;
-      case JapaneseFont.notoSansCJK:
-        fontFamily = 'Noto Sans CJK';
-        break;
-      case JapaneseFont.notoSerifCJK:
-        fontFamily = 'Noto Serif CJK';
-        break;
-      case JapaneseFont.none:
+        TextStyle(fontFamily: 'Droid Sans Japanese');
+      case JapaneseFont.notoSansJapanese:
+        return GoogleFonts.notoSansJp();
+      case JapaneseFont.notoSerifJapanese:
+        return GoogleFonts.notoSerifJp();
+      case JapaneseFont.hinaMincho:
+        return GoogleFonts.hinaMincho();
+      case JapaneseFont.ibmPlexSansJP:
+        return GoogleFonts.ibmPlexSansJp();
+      case JapaneseFont.kleeOne:
+        return GoogleFonts.kleeOne();
+      case JapaneseFont.kosugi:
+        return GoogleFonts.kosugi();
+      case JapaneseFont.mPlus2:
+        return GoogleFonts.mPlus2();
+      case JapaneseFont.mPlusRounded1c:
+        return GoogleFonts.mPlusRounded1c();
+      case JapaneseFont.zenKurenaido:
+        return GoogleFonts.zenTokyoZoo();
+      case JapaneseFont.system:
     }
-    return TextStyle(fontFamily: fontFamily);
+
+    return const TextStyle();
   }
 
-  String get name =>
-      {
-        JapaneseFont.none: 'Default',
-        JapaneseFont.droidSansJapanese: 'Droid Sans Japanese',
-        JapaneseFont.notoSansCJK: 'Noto Sans CJK',
-        JapaneseFont.notoSerifCJK: 'Noto Serif CJK',
-      }[this] ??
-      '';
+  String get name => switch (this) {
+    JapaneseFont.system => 'System Default',
+    JapaneseFont.droidSansJapanese => 'Droid Sans Japanese',
+    JapaneseFont.notoSansJapanese => 'Noto Sans Japanese',
+    JapaneseFont.notoSerifJapanese => 'Noto Serif Japanese',
+    JapaneseFont.hinaMincho => 'Hina Mincho',
+    JapaneseFont.ibmPlexSansJP => 'IBM Plex Sans JP',
+    JapaneseFont.kleeOne => 'Klee One',
+    JapaneseFont.kosugi => 'Kosugi',
+    JapaneseFont.mPlus2 => 'M PLUS 2',
+    JapaneseFont.mPlusRounded1c => 'M PLUS Rounded 1c',
+    JapaneseFont.zenKurenaido => 'Zen Kurenaido',
+  };
 }
 
 const Map<String, dynamic> _defaults = {
