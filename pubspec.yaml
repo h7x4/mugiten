@@ -34,6 +34,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.6.0+eol
   sqflite_common_ffi: ^2.3.4+4
   ruby_text: ^3.0.3
+  sqlite3: ^3.0.0
   google_mlkit_digital_ink_recognition: ^0.14.1
   archive: ^4.0.7
   package_info_plus: ^9.0.0
