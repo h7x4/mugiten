@@ -22,7 +22,10 @@ dependencies:
   http: ^1.3.0
   jadb:
     git:
-      url: https://git.pvv.ntnu.no/oysteikt/jadb.git
+      url: https://git.pvv.ntnu.no/mugiten/jadb.git
+  kanimaji:
+    git:
+      url: https://git.pvv.ntnu.no/mugiten/kanimaji-dart.git
   mdi: ^5.0.0-nullsafety.0
   path: ^1.9.0
   path_provider: ^2.1.5
@@ -61,6 +64,7 @@ flutter:
     - assets/images/components/
     - assets/images/links/
     - assets/images/logo/
+    - assets/kanjivg/kanji/
     - assets/licenses/
     - docs/changelog/
     - migrations/

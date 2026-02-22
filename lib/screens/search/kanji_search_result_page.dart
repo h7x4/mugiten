@@ -92,12 +92,12 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     ],
   );
 
-  String _gifUri(String kanji) {
-    final String charcode = kanji.characters.first.codeUnits
-        .map((c) => c.toRadixString(16))
-        .join();
-    return 'https://raw.githubusercontent.com/mistval/kanji_images/master/gifs/$charcode.gif';
-  }
+  // String _gifUri(String kanji) {
+  //   final String charcode = kanji.characters.first.codeUnits
+  //       .map((c) => c.toRadixString(16))
+  //       .join();
+  //   return 'https://raw.githubusercontent.com/mistval/kanji_images/master/gifs/$charcode.gif';
+  // }
 
   Widget _body(KanjiSearchResult result) {
     return Scaffold(
@@ -141,11 +141,12 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
             YomiChips(yomi: result.onyomi, type: YomiType.onyomi),
           if (result.kunyomi.isNotEmpty)
             YomiChips(yomi: result.kunyomi, type: YomiType.kunyomi),
+          SizedBox(height: 20),
           IntrinsicHeight(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                StrokeOrderGif(uri: _gifUri(result.kanji)),
+                StrokeOrderGif(kanji: result.kanji),
                 _rankingColumn(result),
               ],
             ),

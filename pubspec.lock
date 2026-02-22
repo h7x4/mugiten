@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  bisection:
+    dependency: transitive
+    description:
+      name: bisection
+      sha256: "207d68e5168529adb5388c8cbb815a0cb00f51e3efc0c41c8ea91fd38ae6a357"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.3+1"
   bloc:
     dependency: transitive
     description:
@@ -406,7 +414,7 @@ packages:
       path: "."
       ref: HEAD
       resolved-ref: "1783338b2ac69d504743eba006f5e8203bad6580"
-      url: "https://git.pvv.ntnu.no/oysteikt/jadb.git"
+      url: "https://git.pvv.ntnu.no/mugiten/jadb.git"
     source: git
     version: "1.0.0"
   json_annotation:
@@ -417,6 +425,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.11.0"
+  kanimaji:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "89652c401fe6d89348d537bddb52a851d1dbfed5"
+      url: "https://git.pvv.ntnu.no/mugiten/kanimaji-dart.git"
+    source: git
+    version: "0.0.1"
   l10n_languages:
     dependency: transitive
     description:
