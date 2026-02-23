@@ -1,4 +1,7 @@
 {
+  "JMDICT": "assets/licenses/edrdg.txt",
+  "KANJIDIC2": "assets/licenses/edrdg.txt",
+  "RADKFILE/KRADFILE": "assets/licenses/edrdg.txt",
   "droid-sans-japanese": "assets/licenses/apache-2.0.txt",
   "hina-mincho": "assets/licenses/ofl-1.1.txt",
   "ibm-plex-sans-japanese": "assets/licenses/ofl-1.1.txt",
