@@ -95,6 +95,11 @@ class _LibraryContentViewState extends State<LibraryContentView> {
               builderDelegate: PagedChildBuilderDelegate<LibraryListEntry>(
                 invisibleItemsThreshold: invisibleItemsThreshold,
                 itemBuilder: (context, entry, index) => LibraryListEntryTile(
+                  key: ValueKey(
+                    entry.jmdictEntryId != null
+                        ? 'jmdict-${entry.jmdictEntryId}'
+                        : 'kanji-${entry.kanji}',
+                  ),
                   index: index,
                   entry: entry,
                   library: widget.library,

@@ -46,6 +46,7 @@ class _LibraryViewState extends State<LibraryView> {
                 .skip(1)
                 .map(
                   (e) => LibraryListTile(
+                    key: ValueKey(e.name),
                     library: e,
                     onDelete: getEntriesFromDatabase,
                     onUpdate: getEntriesFromDatabase,

@@ -77,6 +77,7 @@ class ChangelogView extends StatelessWidget {
       itemBuilder: (context, index) {
         final version = versions[index];
         return ListTile(
+          key: ValueKey(version),
           title: Text(version),
           onTap: () {
             Navigator.push(context, _buildChangelogDetailRoute(version));
