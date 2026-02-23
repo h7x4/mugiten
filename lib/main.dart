@@ -59,7 +59,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void didChangePlatformBrightness() {
     if (autoThemeEnabled) {
       final themeIsDark =
-          WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+          View.of(context).platformDispatcher.platformBrightness ==
+          Brightness.dark;
       themeBloc.add(SetTheme(themeIsDark: themeIsDark));
     }
     super.didChangePlatformBrightness();

@@ -31,26 +31,23 @@ class _SettingsViewState extends State<SettingsView> {
   bool dataExportIsLoading = false;
   bool dataImportIsLoading = false;
 
-  Future<bool> confirm(
-    BuildContext context, {
-    required Widget content,
-  }) async {
+  Future<bool> confirm(BuildContext context, {required Widget content}) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: content,
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+          context: context,
+          builder: (context) => AlertDialog(
+            content: content,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    ) ??
+        ) ??
         false;
   }
 
@@ -77,9 +74,10 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   // ignore: avoid_positional_boolean_parameters
-  void toggleAutoTheme(bool b) {
+  void toggleAutoTheme(BuildContext context, bool b) {
     final bool newThemeIsDark = b
-        ? WidgetsBinding.instance.window.platformBrightness == Brightness.dark
+        ? View.of(context).platformDispatcher.platformBrightness ==
+              Brightness.dark
         : darkThemeEnabled;
 
     BlocProvider.of<ThemeBloc>(
@@ -233,7 +231,7 @@ class _SettingsViewState extends State<SettingsView> {
                 title: const Text('Automatic theme'),
                 description: const Text('Let theme be determined by system'),
                 leading: const Icon(Icons.brightness_auto),
-                onToggle: toggleAutoTheme,
+                onToggle: (b) => toggleAutoTheme(context, b),
                 initialValue: autoThemeEnabled,
                 // theme: theme,
                 activeSwitchColor: AppTheme.mugitenWheat.background,
