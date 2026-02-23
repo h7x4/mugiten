@@ -124,12 +124,17 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
       color: AppTheme.mugitenWheat.background,
       iconSize: fontSize * 1.3,
     ),
+    ...RADICALS.values
+        .expand((l) => l)
+        .where((k) => radicalToggles[k] ?? false)
+        .map((k) => radicalGridElement(k.toString())),
+
     ...RADICALS
         .map(
           (key, value) => MapEntry(
             key,
             value
-                .where((r) => allowedToggles[r]!)
+                .where((r) => !radicalToggles[r]! && allowedToggles[r]!)
                 .map((r) => radicalGridElement(r))
                 .toList()
               ..insert(0, radicalGridElement(key.toString(), isNumber: true)),
