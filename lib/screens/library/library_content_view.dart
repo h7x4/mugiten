@@ -106,7 +106,7 @@ class _LibraryContentViewState extends State<LibraryContentView> {
                 noItemsFoundIndicatorBuilder: (_) =>
                     const Center(child: Text('List is empty')),
               ),
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   const Divider(height: 0, indent: 10, endIndent: 10),
             ),
       ),

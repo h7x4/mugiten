@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
+import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart';
+import 'package:jadb/search/word_search/word_search.dart';
 import 'package:mdi/mdi.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
+import 'package:mugiten/components/search/search_results_body/search_card.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/services/snackbar.dart';
@@ -27,9 +31,37 @@ class KanjiSearchResultPage extends StatefulWidget {
   State<KanjiSearchResultPage> createState() => _KanjiSearchResultPageState();
 }
 
+const int pageSize = 50;
+const int invisibleItemsThreshold = 25;
+
 class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   bool addedToDatabase = false;
   bool isFavourite = false;
+
+  late final _pagingController = PagingController<int, WordSearchResult>(
+    getNextPageKey: (state) =>
+        state.lastPageIsEmpty ? null : state.nextIntPageKey,
+    fetchPage: (pageKey) => GetIt.instance
+        .get<Database>()
+        .jadbSearchWord(
+          widget.kanji,
+          page: pageKey - 1,
+          pageSize: pageSize,
+          searchMode: SearchMode.Kanji,
+        )
+        .then((page) {
+          if (pageKey == 1 && page != null && page.isNotEmpty) {
+            page.insert(0, WordSearchResult.empty());
+          }
+          return page ?? <WordSearchResult>[];
+        }),
+  );
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
 
   // TODO: add compart link
   Widget _headerRow(KanjiSearchResult result) => Container(
@@ -92,12 +124,30 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     ],
   );
 
-  // String _gifUri(String kanji) {
-  //   final String charcode = kanji.characters.first.codeUnits
-  //       .map((c) => c.toRadixString(16))
-  //       .join();
-  //   return 'https://raw.githubusercontent.com/mistval/kanji_images/master/gifs/$charcode.gif';
-  // }
+  Widget _topBody(KanjiSearchResult result) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _headerRow(result),
+      YomiChips(yomi: result.meanings, type: YomiType.meaning),
+      if (result.onyomi.isNotEmpty)
+        YomiChips(yomi: result.onyomi, type: YomiType.onyomi),
+      if (result.kunyomi.isNotEmpty)
+        YomiChips(yomi: result.kunyomi, type: YomiType.kunyomi),
+      const SizedBox(height: 20),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          StrokeOrderGif(kanji: result.kanji),
+          _rankingColumn(result),
+        ],
+      ),
+      const SizedBox(height: 30),
+      const Padding(
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 20.0),
+        child: Text('Examples:', style: TextStyle(fontSize: 20.0)),
+      ),
+    ],
+  );
 
   Widget _body(KanjiSearchResult result) {
     return Scaffold(
@@ -133,31 +183,43 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          _headerRow(result),
-          YomiChips(yomi: result.meanings, type: YomiType.meaning),
-          if (result.onyomi.isNotEmpty)
-            YomiChips(yomi: result.onyomi, type: YomiType.onyomi),
-          if (result.kunyomi.isNotEmpty)
-            YomiChips(yomi: result.kunyomi, type: YomiType.kunyomi),
-          SizedBox(height: 20),
-          IntrinsicHeight(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                StrokeOrderGif(kanji: result.kanji),
-                _rankingColumn(result),
-              ],
-            ),
-          ),
+      body: PagingListener(
+        controller: _pagingController,
+        builder: (context, state, fetchNextPage) {
+          return PagedListView<int, WordSearchResult>.separated(
+            state: state,
+            fetchNextPage: fetchNextPage,
+            builderDelegate: PagedChildBuilderDelegate<WordSearchResult>(
+              invisibleItemsThreshold: invisibleItemsThreshold,
+              itemBuilder: (context, entry, index) {
+                if (index == 0) {
+                  return _topBody(result);
+                } else {
+                  return SearchResultCard(
+                    result: entry,
+                    key: ValueKey(entry.entryId),
+                  );
+                }
+              },
+              firstPageErrorIndicatorBuilder: (_) => ListView(
+                children: [
+                  _topBody(result),
+                  ErrorWidget(_pagingController.error!),
+                ],
+              ),
 
-          // TODO:
-          // Examples(
-          //   onyomi: resultData.onyomiExamples,
-          //   kunyomi: resultData.kunyomiExamples,
-          // ),
-        ],
+              noItemsFoundIndicatorBuilder: (_) => ListView(
+                children: [
+                  _topBody(result),
+                  const Center(child: Text('No examples found')),
+                ],
+              ),
+            ),
+            separatorBuilder: (_, index) => index == 0
+                ? SizedBox.shrink()
+                : const Divider(height: 0, indent: 10, endIndent: 10),
+          );
+        },
       ),
     );
   }
