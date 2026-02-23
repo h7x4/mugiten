@@ -5,6 +5,7 @@ import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/util/text_filtering.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
 import 'package:mugiten/models/library_list.dart';
+import 'package:mugiten/services/clipboard.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import './parts/common_badge.dart';
@@ -91,40 +92,44 @@ class _SearchResultCardState extends State<SearchResultCard> {
     final backgroundColor =
         widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
 
-    return Slidable(
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children:
-            widget.slidableActions ??
-            [
-              SlidableAction(
-                backgroundColor: Colors.yellow,
-                icon: Icons.star,
-                onPressed: (_) =>
-                    GetIt.instance.get<Database>().libraryListToggleEntry(
-                      'favourites',
-                      jmdictEntryId: widget.result.entryId,
-                      kanji: null,
-                    ),
-              ),
-              SlidableAction(
-                backgroundColor: Colors.blue,
-                icon: Icons.bookmark,
-                onPressed: (context) => showAddToLibraryDialog(
-                  context: context,
-                  jmdictEntryId: widget.result.entryId,
-                  kanji: null,
+    return GestureDetector(
+      onLongPress: () =>
+          copyToClipboard(context, widget.result.japanese.firstOrNull?.base),
+      child: Slidable(
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          children:
+              widget.slidableActions ??
+              [
+                SlidableAction(
+                  backgroundColor: Colors.yellow,
+                  icon: Icons.star,
+                  onPressed: (_) =>
+                      GetIt.instance.get<Database>().libraryListToggleEntry(
+                        'favourites',
+                        jmdictEntryId: widget.result.entryId,
+                        kanji: null,
+                      ),
                 ),
-              ),
-            ],
-      ),
-      child: ExpansionTile(
-        leading: widget.leading,
-        collapsedBackgroundColor: backgroundColor,
-        backgroundColor: backgroundColor,
-        // onExpansionChanged: (b) async { },
-        title: _header,
-        children: [_body()],
+                SlidableAction(
+                  backgroundColor: Colors.blue,
+                  icon: Icons.bookmark,
+                  onPressed: (context) => showAddToLibraryDialog(
+                    context: context,
+                    jmdictEntryId: widget.result.entryId,
+                    kanji: null,
+                  ),
+                ),
+              ],
+        ),
+        child: ExpansionTile(
+          leading: widget.leading,
+          collapsedBackgroundColor: backgroundColor,
+          backgroundColor: backgroundColor,
+          // onExpansionChanged: (b) async { },
+          title: _header,
+          children: [_body()],
+        ),
       ),
     );
   }
