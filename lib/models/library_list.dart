@@ -134,12 +134,7 @@ extension LibraryListExt on DatabaseExecutor {
         ${page != null ? 'OFFSET ?' : ''}
 
       ''',
-      [
-        listName,
-        listName,
-        ?pageSize,
-        if (page != null) page * pageSize!,
-      ],
+      [listName, listName, ?pageSize, if (page != null) page * pageSize!],
     );
 
     Map<int, WordSearchResult>? wordResults;
@@ -233,6 +228,46 @@ extension LibraryListExt on DatabaseExecutor {
     );
 
     return (result.firstOrNull?['exists'] as int? ?? 0) == 1;
+  }
+
+  Future<void> libraryListRenameList(String oldName, String newName) async {
+    if (oldName.isEmpty) {
+      throw ArgumentError('Old library list name must not be empty.');
+    }
+
+    if (newName.isEmpty) {
+      throw ArgumentError('New library list name must not be empty.');
+    }
+
+    if (oldName == 'favourites') {
+      throw ArgumentError('Cannot rename the "favourites" list.');
+    }
+
+    if (!await libraryListExists(oldName)) {
+      throw ArgumentError('Library list "$oldName" does not exist.');
+    }
+
+    if (await libraryListExists(newName)) {
+      throw ArgumentError('Library list "$newName" already exists.');
+    }
+
+    final b = batch();
+
+    b.update(
+      LibraryListTableNames.libraryList,
+      {'name': newName},
+      where: '"name" = ?',
+      whereArgs: [oldName],
+    );
+
+    b.update(
+      LibraryListTableNames.libraryListEntry,
+      {'listName': newName},
+      where: '"listName" = ?',
+      whereArgs: [oldName],
+    );
+
+    await b.commit();
   }
 
   Future<int> libraryListAmount() async {
