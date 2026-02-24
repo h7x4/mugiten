@@ -326,6 +326,13 @@ class _SettingsViewState extends State<SettingsView> {
           onPressed: (c) => Navigator.pushNamed(context, Routes.aboutLicenses),
         ),
         SettingsTile(
+          leading: const Icon(Mdi.database),
+          title: const Text('Datasources'),
+          description: const Text('List of datasources used in Mugiten'),
+          onPressed: (c) =>
+              Navigator.pushNamed(context, Routes.aboutDatasources),
+        ),
+        SettingsTile(
           leading: const Icon(Icons.notes),
           title: const Text('Changelog'),
           onPressed: (c) => Navigator.pushNamed(context, Routes.aboutChangelog),

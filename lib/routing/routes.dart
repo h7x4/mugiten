@@ -7,6 +7,7 @@ abstract class Routes {
   static const String kanjiSearchRadicals = '/kanjiSearch/radicals';
   static const String aboutLicenses = '/info/licenses';
   static const String aboutChangelog = '/info/changelog';
+  static const String aboutDatasources = '/info/datasources';
   static const String errorNotFound = '/error/404';
   static const String errorNetwork = '/error/network';
   static const String errorOther = '/error/other';

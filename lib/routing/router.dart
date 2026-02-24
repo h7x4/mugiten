@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/screens/info/changelog.dart';
+import 'package:mugiten/screens/info/datasources.dart';
 import 'package:mugiten/screens/library/library_content_view.dart';
 import 'package:mugiten/screens/search/kanji_search_result_page.dart';
 import 'package:mugiten/screens/search/word_search_result_page.dart';
@@ -53,6 +54,8 @@ Route<Widget> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const LicensesView());
     case Routes.aboutChangelog:
       return MaterialPageRoute(builder: (_) => const ChangelogView());
+    case Routes.aboutDatasources:
+      return MaterialPageRoute(builder: (_) => const DataSourcesView());
 
     // TODO: Add more specific error screens.
     case Routes.errorNotFound:
