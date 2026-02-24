@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -30,22 +28,18 @@ class ChangelogView extends StatelessWidget {
   }
 
   Future<List<String>> _fetchChangelogs() async {
-    final String assetManifest = await rootBundle.loadString(
-      'AssetManifest.json',
-    );
-
-    final List<String> changelogs =
-        (jsonDecode(assetManifest) as Map<String, Object?>).keys
-            .where(
-              (assetPath) =>
-                  RegExp(r'^docs/changelog/.*\.md$').hasMatch(assetPath),
-            )
-            .map(
-              (assetPath) => assetPath
-                  .replaceFirst('docs/changelog/', '')
-                  .replaceFirst('.md', ''),
-            )
-            .toList();
+    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    final List<String> changelogs = assetManifest
+        .listAssets()
+        .where(
+          (assetPath) => RegExp(r'^docs/changelog/.*\.md$').hasMatch(assetPath),
+        )
+        .map(
+          (assetPath) => assetPath
+              .replaceFirst('docs/changelog/', '')
+              .replaceFirst('.md', ''),
+        )
+        .toList();
 
     changelogs.sort((a, b) {
       final aVersion = a
