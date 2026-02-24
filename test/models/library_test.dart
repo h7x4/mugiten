@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -8,7 +7,6 @@ import 'package:get_it/get_it.dart';
 import 'package:mugiten/database/database.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqlite3/open.dart';
 
 Future<Database> createDatabaseCopy({
   required String libsqlitePath,
@@ -33,10 +31,7 @@ Future<Database> createDatabaseCopy({
 
   // Initialize FFI
   sqfliteFfiInit();
-  databaseFactory = createDatabaseFactoryFfi(
-    ffiInit: () =>
-        open.overrideForAll(() => DynamicLibrary.open(libsqlitePath)),
-  );
+  databaseFactory = createDatabaseFactoryFfi();
 
   WidgetsFlutterBinding.ensureInitialized();
 
