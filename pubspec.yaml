@@ -20,6 +20,7 @@ dependencies:
 
   animated_size_and_fade: ^5.1.1
   archive: ^4.0.7
+  async: ^2.13.0
   collection: ^1.19.0
   cupertino_icons: ^1.0.8
   division: ^0.9.0

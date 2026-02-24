@@ -33,10 +33,9 @@ class _LibraryViewState extends State<LibraryView> {
     return Column(
       children: [
         LibraryListTile(
+          key: ValueKey(libraries!.first.name),
           library: libraries!.first,
           leading: const Icon(Icons.star),
-          onDelete: getEntriesFromDatabase,
-          onUpdate: getEntriesFromDatabase,
           isEditable: false,
         ),
         Expanded(
@@ -49,7 +48,7 @@ class _LibraryViewState extends State<LibraryView> {
                     key: ValueKey(e.name),
                     library: e,
                     onDelete: getEntriesFromDatabase,
-                    onUpdate: getEntriesFromDatabase,
+                    onRename: (_, _) => getEntriesFromDatabase(),
                   ),
                 )
                 .toList(),
