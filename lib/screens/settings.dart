@@ -271,7 +271,7 @@ class _SettingsViewState extends State<SettingsView> {
           leading: const Icon(Mdi.incognito),
           title: const Text('Disable history tracking'),
           description: const Text(
-            'Useful for reviewing history for library lists without cluttering the order',
+            'Useful for reviewing search history without creating clutter',
           ),
           onToggle: (b) => setState(() => incognitoModeEnabled = b),
           initialValue: incognitoModeEnabled,
@@ -294,14 +294,14 @@ class _SettingsViewState extends State<SettingsView> {
             'Reinitialize application',
             style: TextStyle(color: Colors.red),
           ),
-          description: const Text(
-            'Reinstall dictionary data and set up internal workings anew',
-          ),
+          description: const Text('Reinstall dictionary data and reset state'),
           onPressed: (_) async {
             if (!await confirm(
               context,
               content: const Text(
-                'Are you sure you want to reinitialize the application?',
+                'Are you sure you want to reinitialize the application?'
+                '\n\n'
+                'Note that this will attempt not to delete user data, but it is recommended to backup data before proceeding.',
               ),
             )) {
               return;
@@ -320,9 +320,7 @@ class _SettingsViewState extends State<SettingsView> {
         SettingsTile(
           leading: const Icon(Icons.copyright),
           title: const Text('About'),
-          description: const Text(
-            'Information about Mugiten and licenses used',
-          ),
+          description: const Text('Info about Mugiten and its dependencies'),
           onPressed: (c) => Navigator.pushNamed(context, Routes.aboutLicenses),
         ),
         SettingsTile(
@@ -335,6 +333,9 @@ class _SettingsViewState extends State<SettingsView> {
         SettingsTile(
           leading: const Icon(Icons.notes),
           title: const Text('Changelog'),
+          description: const Text(
+            'See what changed between different versions of the application',
+          ),
           onPressed: (c) => Navigator.pushNamed(context, Routes.aboutChangelog),
         ),
         SettingsTile(
