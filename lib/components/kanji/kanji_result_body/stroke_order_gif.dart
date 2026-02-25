@@ -32,7 +32,7 @@ class StrokeOrderGif extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.0),
         child: Kanimaji(
           kanji: kanji,
-          strokeColor: kanjiResultColors.foregroundColor!,
+          strokeColor: Theme.of(context).colorScheme.onSurface,
           strokeUnfilledColor: menuGreyLightColors.foregroundColor!.withAlpha(
             0x40,
           ),
