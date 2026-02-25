@@ -39,9 +39,10 @@ fi
 declare -r PACKAGE_API_ENDPOINT="https://git.pvv.ntnu.no/api/packages/mugiten/generic/mugiten/$VERSION/mugiten.apk"
 
 declare -r PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+declare -r APK_PATH="$PROJECT_ROOT/build/app/outputs/flutter-apk/app-release.apk"
 
-if [[ ! -f "$PROJECT_ROOT/build/app/outputs/apk/release/app-release.apk" ]]; then
-    echo "$PROJECT_ROOT/build/app/outputs/apk/release/app-release.apk does not exist"
+if [[ ! -f "$APK_PATH" ]]; then
+    echo "$APK_PATH does not exist"
     exit 1
 fi
 
@@ -55,6 +56,6 @@ else
     -X PUT \
     --user "$GITEA_USER:$GITEA_TOKEN" \
     --progress-bar \
-    --upload-file "$PROJECT_ROOT/build/app/outputs/apk/release/app-release.apk" \
+    --upload-file "$APK_PATH" \
     "$PACKAGE_API_ENDPOINT"
 fi
