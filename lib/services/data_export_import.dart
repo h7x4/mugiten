@@ -16,6 +16,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 //     - listb.json
 
 extension ArchiveFormat on Directory {
+  File get versionFile => File(uri.resolve('version.txt').toFilePath());
   File get historyFile => File(uri.resolve('history.json').toFilePath());
   Directory get libraryDir => Directory(uri.resolve('library').toFilePath());
 }
@@ -61,6 +62,7 @@ Future<File> exportData(DatabaseExecutor db) async {
   libraryDir.createSync();
 
   await Future.wait([
+    exportDataFormatVersionTo(dir),
     exportHistoryTo(db, dir),
     exportLibraryListsTo(db, libraryDir),
   ]);
@@ -79,6 +81,23 @@ Future<void> importData(Database db, File zipFile) async {
   ]);
 
   dir.deleteSync(recursive: true);
+}
+
+/////////////////////////
+// DATA FORMAT VERSION //
+/////////////////////////
+
+const int expectedDataFormatVersion = 1;
+
+Future<void> exportDataFormatVersionTo(Directory dir) async {
+  final file = dir.versionFile;
+  file.createSync();
+  file.writeAsStringSync(expectedDataFormatVersion.toString());
+}
+
+Future<int> importDataFormatVersionFrom(File file) async {
+  final String content = file.readAsStringSync();
+  return int.parse(content);
 }
 
 /////////////
