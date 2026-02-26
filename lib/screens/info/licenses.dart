@@ -21,8 +21,9 @@ class LicensesView extends StatelessWidget {
   );
 
   Widget _buildLicensePage(PackageInfo packageInfo) => LicensePage(
-    applicationName: '麦典',
+    applicationName: '麦典 - Mugiten',
     applicationVersion: 'Version: ${packageInfo.version}',
+    applicationLegalese: 'Copyright (c) 2024, h7x4 <mugiten@nani.wtf>\nLicensed under GPL-3.0-only',
     applicationIcon: Padding(
       padding: const EdgeInsets.symmetric(vertical: 30),
       child: Row(
