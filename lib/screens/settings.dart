@@ -9,6 +9,7 @@ import 'package:mugiten/components/common/denshi_jisho_background.dart';
 import 'package:mugiten/database/history/table_names.dart';
 import 'package:mugiten/main.dart';
 import 'package:mugiten/models/history_entry.dart';
+import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/services/data_export_import.dart';
 import 'package:mugiten/services/snackbar.dart';
@@ -79,6 +80,25 @@ class _SettingsViewState extends State<SettingsView> {
     if (i != null) {
       setState(() {
         japaneseFont = JapaneseFont.values[i];
+      });
+    }
+  }
+
+  Future<void> changeQuickAddLibraryList(BuildContext context) async {
+    final libraryLists = await GetIt.instance
+        .get<Database>()
+        .libraryListGetLists();
+    if (!context.mounted) return;
+    final int? i = await _chooseFromList(
+      list: ['None', ...libraryLists.map((e) => e.name)],
+      chosen: quickAddLibraryList == null
+          ? 0
+          : libraryLists.indexWhere((l) => l.name == quickAddLibraryList) + 1,
+      title: 'Choose library for quick add',
+    )(context);
+    if (i != null) {
+      setState(() {
+        quickAddLibraryList = i == 0 ? null : libraryLists[i - 1].name;
       });
     }
   }
@@ -203,6 +223,15 @@ class _SettingsViewState extends State<SettingsView> {
           // subtitle:
           //     'Which font to use for japanese text. This might be useful if your phone shows kanji with a Chinese font.',
           // subtitleMaxLines: 3,
+        ),
+        SettingsTile(
+          title: const Text('Quick Add Library List'),
+          leading: const Icon(Icons.bookmark),
+          onPressed: changeQuickAddLibraryList,
+          trailing: Text(quickAddLibraryList ?? 'None'),
+          description: const Text(
+            'Which library to add words on double tapping in search results',
+          ),
         ),
       ],
     ),
