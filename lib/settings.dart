@@ -122,6 +122,13 @@ class AutoThemeEnabled extends SharedPrefItem<bool> {
 
 final autoThemeEnabled = AutoThemeEnabled();
 
+/// Whether to emphasize the matched spans in the search results with a different text style.
+class EmphasizeMatchSpans extends SharedPrefItem<bool> {
+  EmphasizeMatchSpans() : super('emphasizeMatchSpans', true);
+}
+
+final emphasizeMatchSpans = EmphasizeMatchSpans();
+
 /// Whether to reduce the size of the kanji drawing board.
 ///
 /// This is a workaround for an issue where it's easy to activate the 'go back' gesture when

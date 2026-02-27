@@ -224,6 +224,17 @@ class _SettingsViewState extends State<SettingsView> {
           //     'Which font to use for japanese text. This might be useful if your phone shows kanji with a Chinese font.',
           // subtitleMaxLines: 3,
         ),
+
+        SettingsTile.switchTile(
+          title: const Text('Emphasize search matches'),
+          description: const Text(
+            'Underline the part of the word that matched the search query.',
+          ),
+          leading: const Icon(Icons.horizontal_rule),
+          onToggle: (final b) => setState(() => emphasizeMatchSpans.value = b),
+          initialValue: emphasizeMatchSpans.value,
+          activeSwitchColor: mugitenWheatBackground,
+        ),
         SettingsTile(
           title: const Text('Quick Add Library List'),
           leading: const Icon(Icons.bookmark),

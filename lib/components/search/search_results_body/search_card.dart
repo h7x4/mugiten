@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
+import 'package:jadb/models/word_search/word_search_match_span.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/util/text_filtering.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
@@ -75,62 +76,94 @@ class _SearchResultCardState extends State<SearchResultCard> {
       .toSet()
       .toList();
 
-  Widget get _header => Row(
-    children: [
-      Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  Widget get _header {
+    final firstMatchSpans =
+        widget.result.matchSpans
+            ?.where((final span) => span.index == 0)
+            .toList(growable: false) ??
+        [];
+    final colorSpanBase = firstMatchSpans
+        .where((final span) => span.spanType == WordSearchMatchSpanType.kanji)
+        .map((final span) => (span.start, span.end))
+        .firstOrNull;
+    final colorSpanFurigana = firstMatchSpans
+        .where((final span) => span.spanType == WordSearchMatchSpanType.kana)
+        .map((final span) => (span.start, span.end))
+        .firstOrNull;
+
+    return IntrinsicWidth(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // TODO: draw sizedbox to take up space instead
-          if (!quickAddLibraryList.contains('favourites'))
-            Icon(
-              Icons.bookmark,
-              color: isQuickListed ? Colors.blue : Colors.transparent,
-              size: 20,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // TODO: draw sizedbox to take up space instead
+              if (!quickAddLibraryList.contains('favourites'))
+                Icon(
+                  Icons.bookmark,
+                  color: isQuickListed ? Colors.blue : Colors.transparent,
+                  size: 20,
+                ),
+              Icon(
+                Icons.star,
+                color: isFavourited ? Colors.yellow : Colors.transparent,
+                size: 20,
+              ),
+            ],
+          ),
+          Expanded(
+            child: JapaneseHeader(
+              baseWord: widget.result.japanese[0].base,
+              furigana: widget.result.japanese[0].furigana,
+              dimBase: widget.result.hasUnusualKanji,
+              colorSpanBase: colorSpanBase,
+              colorSpanFurigana: colorSpanFurigana,
             ),
-          Icon(
-            Icons.star,
-            color: isFavourited ? Colors.yellow : Colors.transparent,
-            size: 20,
+          ),
+          Row(
+            children: [
+              JLPTBadge(jlptLevel: widget.result.jlptLevel.toNullableString()),
+              CommonBadge(isCommon: widget.result.isCommon),
+            ],
           ),
         ],
       ),
-      Expanded(
-        child: JapaneseHeader(
-          baseWord: widget.result.japanese[0].base,
-          furigana: widget.result.japanese[0].furigana,
-          dimBase: widget.result.hasUnusualKanji,
-        ),
-      ),
-      Row(
-        children: [
-          JLPTBadge(jlptLevel: widget.result.jlptLevel.toNullableString()),
-          CommonBadge(isCommon: widget.result.isCommon),
-        ],
-      ),
-    ],
-  );
+    );
+  }
 
   static const _margin = SizedBox(height: 20);
 
   List<Widget> _withMargin(final Widget w) => [_margin, w];
 
-  Widget _body() => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Senses(senses: widget.result.senses),
+  Widget _body() {
+    final List<WordSearchMatchSpan>? matchSpans = widget.result.matchSpans
+        ?.where((final span) => span.index != 0)
+        .toList(growable: false);
 
-        if (widget.result.japanese.length > 1)
-          ..._withMargin(OtherForms(forms: widget.result.japanese.sublist(1))),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Senses(senses: widget.result.senses),
 
-        // TODO:
-        // if (extendedData != null && extendedData.notes.isNotEmpty)
-        //   ..._withMargin(Notes(notes: extendedData.notes)),
-        if (kanji.isNotEmpty) ..._withMargin(KanjiRow(kanji: kanji)),
-      ],
-    ),
-  );
+          if (widget.result.japanese.length > 1)
+            ..._withMargin(
+              OtherForms(
+                forms: widget.result.japanese.sublist(1),
+                matchSpans: matchSpans,
+              ),
+            ),
+
+          // TODO:
+          // if (extendedData != null && extendedData.notes.isNotEmpty)
+          //   ..._withMargin(Notes(notes: extendedData.notes)),
+          if (kanji.isNotEmpty) ..._withMargin(KanjiRow(kanji: kanji)),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(final BuildContext context) {

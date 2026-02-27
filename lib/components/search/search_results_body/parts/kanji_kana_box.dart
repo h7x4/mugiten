@@ -6,6 +6,8 @@ import 'package:mugiten/theme.dart';
 class KanjiKanaBox extends StatelessWidget {
   final String baseWord;
   final String? furigana;
+  final (int, int)? colorSpanBase;
+  final (int, int)? colorSpanFurigana;
   final bool showRomajiBelow;
   final ForegroundBackgroundThemeExtension colors;
   final bool autoTransliterateRomaji;
@@ -20,6 +22,8 @@ class KanjiKanaBox extends StatelessWidget {
     required this.baseWord,
     required this.furigana,
     required this.colors,
+    this.colorSpanBase,
+    this.colorSpanFurigana,
     this.showRomajiBelow = false,
     this.autoTransliterateRomaji = true,
     this.centerFurigana = true,
@@ -46,19 +50,61 @@ class KanjiKanaBox extends StatelessWidget {
               : CrossAxisAlignment.start,
           children: [
             (furigana != null)
-                ? Text(
-                    romajiEnabled.value
-                        ? transliterateKanaToLatin(furigana!)
-                        : furigana!,
-                    style:
-                        TextStyle(
-                          fontSize: fFontsize,
-                          color: colors.foregroundColor,
-                        ).merge(
-                          romajiEnabled.value && autoTransliterateRomaji
-                              ? null
-                              : japaneseFont.value.textStyle,
-                        ),
+                ? Text.rich(
+                    TextSpan(
+                      children:
+                          colorSpanFurigana != null && !romajiEnabled.value && emphasizeMatchSpans.value
+                          ? [
+                              TextSpan(
+                                text: furigana!.substring(
+                                  0,
+                                  colorSpanFurigana!.$1,
+                                ),
+                                style: TextStyle(
+                                  fontSize: fFontsize,
+                                  color: colors.foregroundColor,
+                                ).merge(japaneseFont.value.textStyle),
+                              ),
+                              TextSpan(
+                                text: furigana!.substring(
+                                  colorSpanFurigana!.$1,
+                                  colorSpanFurigana!.$2,
+                                ),
+                                style: TextStyle(
+                                  fontSize: fFontsize,
+                                  decoration: TextDecoration.underline,
+                                ).merge(japaneseFont.value.textStyle),
+                              ),
+                              TextSpan(
+                                text: furigana!.substring(
+                                  colorSpanFurigana!.$2,
+                                ),
+                                style: TextStyle(
+                                  fontSize: fFontsize,
+                                  color: colors.foregroundColor,
+                                ).merge(japaneseFont.value.textStyle),
+                              ),
+                            ]
+                          : [
+                              TextSpan(
+                                text:
+                                    autoTransliterateRomaji &&
+                                        romajiEnabled.value
+                                    ? transliterateKanaToLatin(furigana!)
+                                    : furigana!,
+                                style:
+                                    TextStyle(
+                                      fontSize: fFontsize,
+                                      color: colors.foregroundColor,
+                                    ).merge(
+                                      autoTransliterateRomaji &&
+                                              romajiEnabled.value
+                                          ? null
+                                          : japaneseFont.value.textStyle,
+                                    ),
+                              ),
+                            ],
+                    ),
                   )
                 : Text(
                     'あ',
@@ -68,7 +114,27 @@ class KanjiKanaBox extends StatelessWidget {
                     ),
                   ),
             DefaultTextStyle.merge(
-              child: Text(baseWord),
+              child: Text.rich(
+                TextSpan(
+                  children: colorSpanBase != null && emphasizeMatchSpans.value
+                      ? [
+                          TextSpan(
+                            text: baseWord.substring(0, colorSpanBase!.$1),
+                          ),
+                          TextSpan(
+                            text: baseWord.substring(
+                              colorSpanBase!.$1,
+                              colorSpanBase!.$2,
+                            ),
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                            ).merge(japaneseFont.value.textStyle),
+                          ),
+                          TextSpan(text: baseWord.substring(colorSpanBase!.$2)),
+                        ]
+                      : [TextSpan(text: baseWord)],
+                ),
+              ),
               style: TextStyle(
                 fontSize: kanjiFontsize,
               ).merge(japaneseFont.value.textStyle),
