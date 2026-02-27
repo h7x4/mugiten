@@ -45,7 +45,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
       isSelected: isSelected,
       children: [
         _languageOption('Auto'),
-        _languageOption('日本語', style: japaneseFont.textStyle),
+        _languageOption('日本語', style: japaneseFont.value.textStyle),
         _languageOption('English'),
       ],
       onPressed: (buttonIndex) {

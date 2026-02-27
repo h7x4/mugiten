@@ -74,12 +74,12 @@ class _SettingsViewState extends State<SettingsView> {
 
   Future<void> changeFont(BuildContext context) async {
     final int? i = await _chooseFromList(
-      list: [for (final font in JapaneseFont.values) font.name],
-      chosen: japaneseFont.index,
+      list: [for (final font in JapaneseFontChoice.values) font.name],
+      chosen: japaneseFont.value.index,
     )(context);
     if (i != null) {
       setState(() {
-        japaneseFont = JapaneseFont.values[i];
+        japaneseFont.value = JapaneseFontChoice.values[i];
       });
     }
   }
@@ -91,14 +91,14 @@ class _SettingsViewState extends State<SettingsView> {
     if (!context.mounted) return;
     final int? i = await _chooseFromList(
       list: ['None', ...libraryLists.map((e) => e.name)],
-      chosen: quickAddLibraryList == null
+      chosen: quickAddLibraryList.value == null
           ? 0
-          : libraryLists.indexWhere((l) => l.name == quickAddLibraryList) + 1,
+          : libraryLists.indexWhere((l) => l.name == quickAddLibraryList.value) + 1,
       title: 'Choose library for quick add',
     )(context);
     if (i != null) {
       setState(() {
-        quickAddLibraryList = i == 0 ? null : libraryLists[i - 1].name;
+        quickAddLibraryList.value = i == 0 ? null : libraryLists[i - 1].name;
       });
     }
   }
@@ -211,15 +211,15 @@ class _SettingsViewState extends State<SettingsView> {
             'Display romaji instead of kana for word readings',
           ),
           leading: const Icon(Mdi.alphabetical),
-          onToggle: (b) => setState(() => romajiEnabled = b),
-          initialValue: romajiEnabled,
+          onToggle: (b) => setState(() => romajiEnabled.value = b),
+          initialValue: romajiEnabled.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
         SettingsTile(
           title: const Text('Japanese font'),
           leading: const Icon(Icons.format_size),
           onPressed: changeFont,
-          trailing: Text(japaneseFont.name),
+          trailing: Text(japaneseFont.value.name),
           // subtitle:
           //     'Which font to use for japanese text. This might be useful if your phone shows kanji with a Chinese font.',
           // subtitleMaxLines: 3,
@@ -228,7 +228,7 @@ class _SettingsViewState extends State<SettingsView> {
           title: const Text('Quick Add Library List'),
           leading: const Icon(Icons.bookmark),
           onPressed: changeQuickAddLibraryList,
-          trailing: Text(quickAddLibraryList ?? 'None'),
+          trailing: Text(quickAddLibraryList.value ?? 'None'),
           description: const Text(
             'Which library to add words on double tapping in search results',
           ),
@@ -243,21 +243,21 @@ class _SettingsViewState extends State<SettingsView> {
           description: const Text('Let theme be determined by system'),
           leading: const Icon(Icons.brightness_auto),
           onToggle: (b) {
-            setState(() => autoThemeEnabled = b);
+            setState(() => autoThemeEnabled.value = b);
             GetIt.instance.get<ThemeController>().updateThemeMode();
           },
-          initialValue: autoThemeEnabled,
+          initialValue: autoThemeEnabled.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
         SettingsTile.switchTile(
           title: const Text('Dark Theme'),
           leading: const Icon(Icons.dark_mode),
           onToggle: (b) {
-            setState(() => darkThemeEnabled = b);
+            setState(() => darkThemeEnabled.value = b);
             GetIt.instance.get<ThemeController>().updateThemeMode();
           },
-          initialValue: darkThemeEnabled,
-          enabled: !autoThemeEnabled,
+          initialValue: darkThemeEnabled.value,
+          enabled: !autoThemeEnabled.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
       ],
@@ -302,8 +302,8 @@ class _SettingsViewState extends State<SettingsView> {
           description: const Text(
             'Useful for reviewing search history without creating clutter',
           ),
-          onToggle: (b) => setState(() => incognitoModeEnabled = b),
-          initialValue: incognitoModeEnabled,
+          onToggle: (b) => setState(() => incognitoModeEnabled.value = b),
+          initialValue: incognitoModeEnabled.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
         SettingsTile.switchTile(
@@ -312,8 +312,8 @@ class _SettingsViewState extends State<SettingsView> {
           description: const Text(
             'Useful if you keep accidentally activating system gestures',
           ),
-          onToggle: (b) => setState(() => reduceKanjiDrawingBoardSize = b),
-          initialValue: reduceKanjiDrawingBoardSize,
+          onToggle: (b) => setState(() => reduceKanjiDrawingBoardSize.value = b),
+          initialValue: reduceKanjiDrawingBoardSize.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
         SettingsTile(

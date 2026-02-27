@@ -334,10 +334,10 @@ class ThemeController {
 
   factory ThemeController.create() {
     AppThemeMode initialMode;
-    if (autoThemeEnabled) {
+    if (autoThemeEnabled.value) {
       initialMode = AppThemeMode.system;
     } else {
-      initialMode = darkThemeEnabled ? AppThemeMode.dark : AppThemeMode.light;
+      initialMode = darkThemeEnabled.value ? AppThemeMode.dark : AppThemeMode.light;
     }
 
     return ThemeController(initialMode);
@@ -346,24 +346,24 @@ class ThemeController {
   void setThemeMode(AppThemeMode mode) {
     if (mode != themeMode.value) {
       if (mode == AppThemeMode.system) {
-        autoThemeEnabled = true;
+        autoThemeEnabled.value = true;
       } else {
-        autoThemeEnabled = false;
-        darkThemeEnabled = mode == AppThemeMode.dark;
+        autoThemeEnabled.value = false;
+        darkThemeEnabled.value = mode == AppThemeMode.dark;
       }
       themeMode.value = mode;
     }
   }
 
   void updateThemeMode() {
-    if (autoThemeEnabled) {
+    if (autoThemeEnabled.value) {
       final platformBrightness =
           WidgetsBinding.instance.platformDispatcher.platformBrightness;
       themeMode.value = platformBrightness == Brightness.dark
           ? AppThemeMode.dark
           : AppThemeMode.light;
     } else {
-      themeMode.value = darkThemeEnabled
+      themeMode.value = darkThemeEnabled.value
           ? AppThemeMode.dark
           : AppThemeMode.light;
     }

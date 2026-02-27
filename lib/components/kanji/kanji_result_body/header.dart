@@ -25,7 +25,7 @@ class Header extends StatelessWidget {
           style: TextStyle(
             fontSize: 70.0,
             color: colors.foregroundColor,
-          ).merge(japaneseFont.textStyle),
+          ).merge(japaneseFont.value.textStyle),
         ),
       ),
     );

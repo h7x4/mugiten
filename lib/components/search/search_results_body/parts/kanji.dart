@@ -29,7 +29,7 @@ class KanjiRow extends StatelessWidget {
                 style: TextStyle(
                   color: colors.foregroundColor,
                   fontSize: fontSize,
-                ).merge(japaneseFont.textStyle),
+                ).merge(japaneseFont.value.textStyle),
               ),
             ),
           ),

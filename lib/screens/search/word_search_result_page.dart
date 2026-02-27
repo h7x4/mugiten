@@ -47,7 +47,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
   void initState() {
     super.initState();
 
-    if (!incognitoModeEnabled && !addedToDatabase) {
+    if (!incognitoModeEnabled.value && !addedToDatabase) {
       GetIt.instance
           .get<Database>()
           .historyEntryInsertWord(widget.searchTerm)
@@ -87,7 +87,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
       appBar: AppBar(
         title: Text('"${widget.searchTerm}"'),
         actions: [
-          if (incognitoModeEnabled)
+          if (incognitoModeEnabled.value)
             IconButton(
               icon: const Icon(Mdi.incognito),
               onPressed: () =>

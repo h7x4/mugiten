@@ -48,7 +48,7 @@ class _GridItem extends StatelessWidget {
           style: TextStyle(
             color: colors.foregroundColor,
             fontSize: 25,
-          ).merge(japaneseFont.textStyle),
+          ).merge(japaneseFont.value.textStyle),
         ),
       ),
     );

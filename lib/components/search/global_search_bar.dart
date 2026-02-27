@@ -25,7 +25,7 @@ class GlobalSearchBar extends StatelessWidget {
             onSubmitted: (text) => _search(context, text),
             controller: textController,
             focusNode: textFocus,
-            style: japaneseFont.textStyle,
+            style: japaneseFont.value.textStyle,
             decoration: InputDecoration(
               labelText: 'Search',
               border: OutlineInputBorder(

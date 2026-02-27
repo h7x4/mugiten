@@ -133,7 +133,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
           style: TextStyle(
             fontSize: fontSize,
             color: panelColor.foregroundColor,
-          ).merge(japaneseFont.textStyle),
+          ).merge(japaneseFont.value.textStyle),
         ),
       ),
     ),
@@ -257,7 +257,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
       ),
     );
 
-    if (reduceKanjiDrawingBoardSize) {
+    if (reduceKanjiDrawingBoardSize.value) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(50, 0, 50, 30),
         child: board,

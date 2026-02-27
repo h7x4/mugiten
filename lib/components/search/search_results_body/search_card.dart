@@ -53,8 +53,8 @@ class _SearchResultCardState extends State<SearchResultCard> {
         (data) => setState(() {
           isFavourited = data['favourites'] ?? false;
           isQuickListed =
-              quickAddLibraryList != null &&
-              (data[quickAddLibraryList!] ?? false);
+              quickAddLibraryList.value != null &&
+              (data[quickAddLibraryList.value!] ?? false);
         }),
       );
 
@@ -139,11 +139,11 @@ class _SearchResultCardState extends State<SearchResultCard> {
       onLongPress: () =>
           copyToClipboard(context, widget.result.japanese.firstOrNull?.base),
       onDoubleTap: () {
-        if (isQuickListed && quickAddLibraryList != null) {
+        if (isQuickListed && quickAddLibraryList.value != null) {
           GetIt.instance
               .get<Database>()
               .libraryListDeleteEntry(
-                quickAddLibraryList!,
+                quickAddLibraryList.value!,
                 jmdictEntryId: widget.result.entryId,
               )
               .then((_) => fetchFavouriteAndQuickListStatus());
@@ -151,7 +151,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
           GetIt.instance
               .get<Database>()
               .libraryListInsertEntry(
-                quickAddLibraryList!,
+                quickAddLibraryList.value!,
                 jmdictEntryId: widget.result.entryId,
               )
               .then((_) => fetchFavouriteAndQuickListStatus());

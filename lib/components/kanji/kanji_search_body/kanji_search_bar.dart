@@ -54,7 +54,7 @@ class KanjiSearchBarState extends State<KanjiSearchBar> {
       controller: textController,
       onChanged: (text) => onChanged(),
       onSubmitted: (_) => {},
-      style: japaneseFont.textStyle,
+      style: japaneseFont.value.textStyle,
       decoration: InputDecoration(
         hintText: 'Search',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),

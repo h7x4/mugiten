@@ -167,7 +167,7 @@ class KanjiBox extends StatelessWidget {
               style: TextStyle(
                 color: calculatedForeground,
                 fontSize: calculatedFontSize,
-              ).merge(japaneseFont.textStyle),
+              ).merge(japaneseFont.value.textStyle),
             ),
           ),
         );

@@ -5,7 +5,128 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final SharedPreferences _prefs = GetIt.instance.get<SharedPreferences>();
 
-enum JapaneseFont {
+abstract interface class StringifySharedPrefItem<T> {
+  String serializeSetting(T value) => value.toString();
+  T deserializeSetting(String s);
+}
+
+abstract class SharedPrefItem<T> extends ValueNotifier<T> {
+  final String key;
+  final T defaultValue;
+
+  SharedPrefItem(this.key, this.defaultValue)
+    : super(_getValue<T>(key, defaultValue));
+
+  static T _getValue<T>(String key, T defaultValue) {
+    Object? result = _prefs.get(key);
+
+    switch (defaultValue) {
+      case StringifySharedPrefItem():
+        if (result is String) {
+          try {
+            result = (defaultValue as StringifySharedPrefItem)
+                .deserializeSetting(result);
+          } catch (e) {
+            // If deserialization fails, reset to default value.
+            _setValue<T>(key, defaultValue);
+            result = defaultValue;
+          }
+        } else {
+          // If the stored value is not a String, reset to default value.
+          _setValue<T>(key, defaultValue);
+          result = defaultValue;
+        }
+      default:
+    }
+
+    return result as T;
+  }
+
+  static void _setValue<T>(String key, T value) {
+    switch (value) {
+      case null:
+        _prefs.remove(key);
+      case bool():
+        _prefs.setBool(key, value);
+      case int():
+        _prefs.setInt(key, value);
+      case double():
+        _prefs.setDouble(key, value);
+      case String():
+        _prefs.setString(key, value);
+      case List<String>():
+        _prefs.setStringList(key, value);
+      case StringifySharedPrefItem():
+        _prefs.setString(
+          key,
+          (value as StringifySharedPrefItem).serializeSetting(value),
+        );
+      default:
+        throw Exception(
+          'Unsupported type for SharedPrefItem: ${value.runtimeType}',
+        );
+    }
+  }
+
+  @override
+  T get value => _getValue<T>(key, defaultValue);
+
+  @override
+  set value(T newValue) {
+    final oldValue = _getValue<T>(key, defaultValue);
+    _setValue<T>(key, newValue);
+
+    if (oldValue != newValue) {
+      notifyListeners();
+    }
+  }
+}
+
+/// Whether to save search history and other data to the database.
+class IncognitoModeEnabled extends SharedPrefItem<bool> {
+  IncognitoModeEnabled() : super('incognitoModeEnabled', false);
+}
+
+final incognitoModeEnabled = IncognitoModeEnabled();
+
+/// Whether to show romaji readings in the word search results and elsewhere.
+class RomajiEnabled extends SharedPrefItem<bool> {
+  RomajiEnabled() : super('romajiEnabled', false);
+}
+
+final romajiEnabled = RomajiEnabled();
+
+/// Whether to use a dark theme.
+class DarkThemeEnabled extends SharedPrefItem<bool> {
+  DarkThemeEnabled() : super('darkThemeEnabled', false);
+}
+
+final darkThemeEnabled = DarkThemeEnabled();
+
+/// Whether to let the system control which theme to use.
+class AutoThemeEnabled extends SharedPrefItem<bool> {
+  AutoThemeEnabled() : super('autoThemeEnabled', true);
+}
+
+final autoThemeEnabled = AutoThemeEnabled();
+
+/// Whether to reduce the size of the kanji drawing board.
+///
+/// This is a workaround for an issue where it's easy to activate the 'go back' gesture when
+/// drawing a little too close to the edge of the screen.
+class ReduceKanjiDrawingBoardSize extends SharedPrefItem<bool> {
+  ReduceKanjiDrawingBoardSize() : super('reduceKanjiDrawingBoardSize', false);
+}
+
+final reduceKanjiDrawingBoardSize = ReduceKanjiDrawingBoardSize();
+
+class QuickAddLibraryList extends SharedPrefItem<String?> {
+  QuickAddLibraryList() : super('quickAddLibraryList', null);
+}
+
+final quickAddLibraryList = QuickAddLibraryList();
+
+enum JapaneseFontChoice implements StringifySharedPrefItem<JapaneseFontChoice> {
   system,
   droidSansJapanese,
   hinaMincho,
@@ -16,87 +137,52 @@ enum JapaneseFont {
   mPlusRounded1c,
   notoSansJapanese,
   notoSerifJapanese,
-  zenKurenaido,
-}
+  zenKurenaido;
 
-extension Methods on JapaneseFont {
-  TextStyle get textStyle {
-    switch (this) {
-      case JapaneseFont.droidSansJapanese:
-        TextStyle(fontFamily: 'Droid Sans Japanese');
-      case JapaneseFont.notoSansJapanese:
-        return GoogleFonts.notoSansJp();
-      case JapaneseFont.notoSerifJapanese:
-        return GoogleFonts.notoSerifJp();
-      case JapaneseFont.hinaMincho:
-        return GoogleFonts.hinaMincho();
-      case JapaneseFont.ibmPlexSansJP:
-        return GoogleFonts.ibmPlexSansJp();
-      case JapaneseFont.kleeOne:
-        return GoogleFonts.kleeOne();
-      case JapaneseFont.kosugi:
-        return GoogleFonts.kosugi();
-      case JapaneseFont.mPlus2:
-        return GoogleFonts.mPlus2();
-      case JapaneseFont.mPlusRounded1c:
-        return GoogleFonts.mPlusRounded1c();
-      case JapaneseFont.zenKurenaido:
-        return GoogleFonts.zenTokyoZoo();
-      case JapaneseFont.system:
-    }
-
-    return const TextStyle();
-  }
-
-  String get name => switch (this) {
-    JapaneseFont.system => 'System Default',
-    JapaneseFont.droidSansJapanese => 'Droid Sans Japanese',
-    JapaneseFont.notoSansJapanese => 'Noto Sans Japanese',
-    JapaneseFont.notoSerifJapanese => 'Noto Serif Japanese',
-    JapaneseFont.hinaMincho => 'Hina Mincho',
-    JapaneseFont.ibmPlexSansJP => 'IBM Plex Sans JP',
-    JapaneseFont.kleeOne => 'Klee One',
-    JapaneseFont.kosugi => 'Kosugi',
-    JapaneseFont.mPlus2 => 'M PLUS 2',
-    JapaneseFont.mPlusRounded1c => 'M PLUS Rounded 1c',
-    JapaneseFont.zenKurenaido => 'Zen Kurenaido',
+  TextStyle get textStyle => switch (this) {
+    JapaneseFontChoice.droidSansJapanese => const TextStyle(
+      fontFamily: 'Droid Sans Japanese',
+    ),
+    JapaneseFontChoice.notoSansJapanese => GoogleFonts.notoSansJp(),
+    JapaneseFontChoice.notoSerifJapanese => GoogleFonts.notoSerifJp(),
+    JapaneseFontChoice.hinaMincho => GoogleFonts.hinaMincho(),
+    JapaneseFontChoice.ibmPlexSansJP => GoogleFonts.ibmPlexSansJp(),
+    JapaneseFontChoice.kleeOne => GoogleFonts.kleeOne(),
+    JapaneseFontChoice.kosugi => GoogleFonts.kosugi(),
+    JapaneseFontChoice.mPlus2 => GoogleFonts.mPlus2(),
+    JapaneseFontChoice.mPlusRounded1c => GoogleFonts.mPlusRounded1c(),
+    JapaneseFontChoice.zenKurenaido => GoogleFonts.zenTokyoZoo(),
+    JapaneseFontChoice.system => const TextStyle(),
   };
+
+  static Map<JapaneseFontChoice, String> get _fontToName => {
+    JapaneseFontChoice.system: 'System Default',
+    JapaneseFontChoice.droidSansJapanese: 'Droid Sans Japanese',
+    JapaneseFontChoice.notoSansJapanese: 'Noto Sans Japanese',
+    JapaneseFontChoice.notoSerifJapanese: 'Noto Serif Japanese',
+    JapaneseFontChoice.hinaMincho: 'Hina Mincho',
+    JapaneseFontChoice.ibmPlexSansJP: 'IBM Plex Sans JP',
+    JapaneseFontChoice.kleeOne: 'Klee One',
+    JapaneseFontChoice.kosugi: 'Kosugi',
+    JapaneseFontChoice.mPlus2: 'M PLUS 2',
+    JapaneseFontChoice.mPlusRounded1c: 'M PLUS Rounded 1c',
+    JapaneseFontChoice.zenKurenaido: 'Zen Kurenaido',
+  };
+
+  static Map<String, JapaneseFontChoice> get _nameToFont =>
+      _fontToName.map((k, v) => MapEntry(v, k));
+
+  String get name => _fontToName[this]!;
+
+  @override
+  String serializeSetting(JapaneseFontChoice value) => _fontToName[value]!;
+
+  @override
+  JapaneseFontChoice deserializeSetting(String s) => _nameToFont[s]!;
 }
 
-const Map<String, dynamic> _defaults = {
-  'incognitoModeEnabled': false,
-  'romajiEnabled': false,
-  'darkThemeEnabled': false,
-  'autoThemeEnabled': true,
-  'japaneseFont': JapaneseFont.droidSansJapanese,
-  'reduceKanjiDrawingBoardSize': false,
-  'quickAddLibraryList': null,
-};
-
-bool _getSettingOrDefault(String settingName) =>
-    _prefs.getBool(settingName) ?? _defaults[settingName];
-
-bool get incognitoModeEnabled => _getSettingOrDefault('incognitoModeEnabled');
-bool get romajiEnabled => _getSettingOrDefault('romajiEnabled');
-bool get darkThemeEnabled => _getSettingOrDefault('darkThemeEnabled');
-bool get autoThemeEnabled => _getSettingOrDefault('autoThemeEnabled');
-bool get reduceKanjiDrawingBoardSize =>
-    _getSettingOrDefault('reduceKanjiDrawingBoardSize');
-JapaneseFont get japaneseFont {
-  final int? i = _prefs.getInt('japaneseFont');
-  return (i != null) ? JapaneseFont.values[i] : _defaults['japaneseFont'];
+class JapaneseFont extends SharedPrefItem<JapaneseFontChoice> {
+  JapaneseFont() : super('japaneseFont', JapaneseFontChoice.droidSansJapanese);
 }
 
-String? get quickAddLibraryList =>
-    _prefs.getString('quickAddLibraryList') ?? _defaults['quickAddLibraryList'];
-
-set incognitoModeEnabled(bool b) => _prefs.setBool('incognitoModeEnabled', b);
-set romajiEnabled(bool b) => _prefs.setBool('romajiEnabled', b);
-set darkThemeEnabled(bool b) => _prefs.setBool('darkThemeEnabled', b);
-set autoThemeEnabled(bool b) => _prefs.setBool('autoThemeEnabled', b);
-set reduceKanjiDrawingBoardSize(bool b) =>
-    _prefs.setBool('reduceKanjiDrawingBoardSize', b);
-set japaneseFont(JapaneseFont jf) => _prefs.setInt('japaneseFont', jf.index);
-set quickAddLibraryList(String? s) => s == null
-    ? _prefs.remove('quickAddLibraryList')
-    : _prefs.setString('quickAddLibraryList', s);
+final japaneseFont = JapaneseFont();

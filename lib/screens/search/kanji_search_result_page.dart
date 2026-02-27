@@ -153,7 +153,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          if (incognitoModeEnabled)
+          if (incognitoModeEnabled.value)
             IconButton(
               icon: const Icon(Mdi.incognito),
               onPressed: () =>
@@ -233,7 +233,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
         .libraryListListContains('favourites', kanji: widget.kanji)
         .then((value) => setState(() => isFavourite = value));
 
-    if (!incognitoModeEnabled && !addedToDatabase) {
+    if (!incognitoModeEnabled.value && !addedToDatabase) {
       GetIt.instance
           .get<Database>()
           .historyEntryInsertKanji(widget.kanji)

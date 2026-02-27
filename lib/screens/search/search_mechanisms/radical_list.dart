@@ -178,7 +178,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
     return Scaffold(
       appBar: AppBar(title: const Text('Choose by radicals')),
       body: DefaultTextStyle.merge(
-        style: japaneseFont.textStyle,
+        style: japaneseFont.value.textStyle,
         child: Column(
           children: [
             Expanded(

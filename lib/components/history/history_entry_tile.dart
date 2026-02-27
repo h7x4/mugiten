@@ -94,7 +94,7 @@ class HistoryEntryTile extends StatelessWidget {
                 child: Text(formatTime(entry.lastTimestamp)),
               ),
               DefaultTextStyle.merge(
-                style: japaneseFont.textStyle,
+                style: japaneseFont.value.textStyle,
                 child: entry.isKanji
                     ? KanjiBox.headline4(context: context, kanji: entry.kanji!)
                     : Expanded(child: Text(entry.word!)),

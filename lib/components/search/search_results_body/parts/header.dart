@@ -22,13 +22,13 @@ class JapaneseHeader extends StatelessWidget {
         children: [
           (furigana != null)
               ? Text(
-                  romajiEnabled
+                  romajiEnabled.value
                       ? transliterateKanaToLatin(furigana!)
                       : furigana!,
-                  style: japaneseFont.textStyle,
+                  style: japaneseFont.value.textStyle,
                 )
               : const Text(''),
-          Text(baseWord, style: japaneseFont.textStyle),
+          Text(baseWord, style: japaneseFont.value.textStyle),
         ],
       ),
     );

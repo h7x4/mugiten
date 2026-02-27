@@ -66,14 +66,14 @@ class YomiChips extends StatelessWidget {
 
   Widget yomiWrapper(BuildContext context) {
     final yomiCards = yomi
-        .map((y) => romajiEnabled ? transliterateKanaToLatin(y) : y)
+        .map((y) => romajiEnabled.value ? transliterateKanaToLatin(y) : y)
         .map(
           (y) => yomiCard(
             context: context,
             yomi: y,
             color: type.getColor(context),
-            extraTextStyle: type != YomiType.meaning && !romajiEnabled
-                ? japaneseFont.textStyle
+            extraTextStyle: type != YomiType.meaning && !romajiEnabled.value
+                ? japaneseFont.value.textStyle
                 : null,
           ),
         )

@@ -24,7 +24,7 @@ class Grade extends StatelessWidget {
         style: TextStyle(
           color: colors.foregroundColor,
           fontSize: 20.0,
-        ).merge(japaneseFont.textStyle),
+        ).merge(japaneseFont.value.textStyle),
       ),
     );
   }

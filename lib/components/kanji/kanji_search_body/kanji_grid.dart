@@ -46,7 +46,7 @@ class _GridItem extends StatelessWidget {
           child: FittedBox(
             child: Text(
               kanji,
-              style: japaneseFont.textStyle.merge(
+              style: japaneseFont.value.textStyle.merge(
                 TextStyle(color: colors.foregroundColor),
               ),
             ),

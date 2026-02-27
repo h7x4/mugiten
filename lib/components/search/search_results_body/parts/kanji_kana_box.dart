@@ -48,7 +48,7 @@ class KanjiKanaBox extends StatelessWidget {
           children: [
             (furigana != null)
                 ? Text(
-                    romajiEnabled
+                    romajiEnabled.value
                         ? transliterateKanaToLatin(furigana!)
                         : furigana!,
                     style:
@@ -56,9 +56,9 @@ class KanjiKanaBox extends StatelessWidget {
                           fontSize: fFontsize,
                           color: colors.foregroundColor,
                         ).merge(
-                          romajiEnabled && autoTransliterateRomaji
+                          romajiEnabled.value && autoTransliterateRomaji
                               ? null
-                              : japaneseFont.textStyle,
+                              : japaneseFont.value.textStyle,
                         ),
                   )
                 : Text(
@@ -72,9 +72,9 @@ class KanjiKanaBox extends StatelessWidget {
               child: Text(baseWord),
               style: TextStyle(
                 fontSize: kanjiFontsize,
-              ).merge(japaneseFont.textStyle),
+              ).merge(japaneseFont.value.textStyle),
             ),
-            if (romajiEnabled && showRomajiBelow)
+            if (romajiEnabled.value && showRomajiBelow)
               Text(transliterateKanaToLatin(furigana ?? baseWord)),
           ],
         ),

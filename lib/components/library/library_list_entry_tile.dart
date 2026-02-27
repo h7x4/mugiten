@@ -40,7 +40,7 @@ class LibraryListEntryTile extends StatelessWidget {
         (index + 1).toString(),
         style: Theme.of(
           context,
-        ).textTheme.titleMedium!.merge(japaneseFont.textStyle),
+        ).textTheme.titleMedium!.merge(japaneseFont.value.textStyle),
       ),
     );
   }

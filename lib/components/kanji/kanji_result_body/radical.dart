@@ -30,7 +30,7 @@ class Radical extends StatelessWidget {
           style: TextStyle(
             color: colors.foregroundColor,
             fontSize: 40.0,
-          ).merge(japaneseFont.textStyle),
+          ).merge(japaneseFont.value.textStyle),
         ),
       ),
     );
