@@ -22,6 +22,7 @@ class SearchResultCard extends StatefulWidget {
   final Widget? leading;
   final Color? backgroundColor;
   final bool allowQuickAddLibraryList;
+  final bool initiallyExpanded;
 
   const SearchResultCard({
     required this.result,
@@ -29,6 +30,7 @@ class SearchResultCard extends StatefulWidget {
     this.leading,
     this.backgroundColor,
     this.allowQuickAddLibraryList = true,
+    this.initiallyExpanded = false,
     super.key,
   });
 
@@ -190,6 +192,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
           leading: widget.leading,
           collapsedBackgroundColor: backgroundColor,
           backgroundColor: backgroundColor,
+          initiallyExpanded: widget.initiallyExpanded,
           // onExpansionChanged: (b) async { },
           title: _header,
           children: [_body()],

@@ -138,6 +138,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
           }
 
           final searchCount = snapshot.data!;
+          final singleItem = searchCount == 1;
 
           return Column(
             children: [
@@ -157,7 +158,10 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
                         builderDelegate: PagedChildBuilderDelegate(
                           invisibleItemsThreshold: invisibleItemsThreshold,
                           itemBuilder: (context, item, index) =>
-                              SearchResultCard(result: item),
+                              SearchResultCard(
+                                result: item,
+                                initiallyExpanded: singleItem,
+                              ),
                         ),
                       ),
                 ),
