@@ -30,12 +30,31 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<MenuGreyDarkThemeExtension>()!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(page.titleBar),
-        centerTitle: true,
-        backgroundColor: mugitenWheatBackground,
-        foregroundColor: mugitenWheatForeground,
-        actions: page.actions,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: ValueListenableBuilder(
+          valueListenable: incognitoModeEnabled,
+          builder: (context, incognitoEnabled, child) => AppBar(
+            title: Text(page.titleBar),
+            centerTitle: true,
+            foregroundColor: incognitoEnabled
+                ? Colors.white
+                : mugitenWheatForeground,
+            backgroundColor: incognitoEnabled
+                ? Colors.deepPurple
+                : mugitenWheatBackground,
+            actions: incognitoEnabled
+                ? [
+                    IconButton(
+                      icon: const Icon(Mdi.incognito),
+                      onPressed: () =>
+                          showSnackbar(context, 'History tracking is disabled'),
+                    ),
+                    ...page.actions,
+                  ]
+                : page.actions,
+          ),
+        ),
       ),
       body: DenshiJishoBackground(child: page.content),
       bottomNavigationBar: BottomNavigationBar(
