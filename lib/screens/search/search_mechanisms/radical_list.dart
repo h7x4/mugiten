@@ -23,11 +23,11 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
   List<String> suggestions = [];
 
   Map<String, bool> radicalToggles = {
-    for (final String r in RADICALS.values.expand((l) => l)) r: false,
+    for (final String r in radicals.values.expand((l) => l)) r: false,
   };
 
   Map<String, bool> allowedToggles = {
-    for (final String r in RADICALS.values.expand((l) => l)) r: true,
+    for (final String r in radicals.values.expand((l) => l)) r: true,
   };
 
   @override
@@ -127,12 +127,12 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
       color: mugitenWheatBackground,
       iconSize: fontSize * 1.3,
     ),
-    ...RADICALS.values
+    ...radicals.values
         .expand((l) => l)
         .where((k) => radicalToggles[k] ?? false)
         .map((k) => radicalGridElement(k.toString())),
 
-    ...RADICALS
+    ...radicals
         .map(
           (key, value) => MapEntry(
             key,

@@ -72,13 +72,13 @@ class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
             ),
           ),
         ),
-        JOUYOU_KANJI_BY_GRADE_AND_STROKE_COUNT,
+        jouyouKanjiByGradeAndStrokeCount,
       );
 
   Future<Widget> get makeGrids async => SingleChildScrollView(
     child: Column(
       children: (await Future.wait(
-        JOUYOU_KANJI_BY_GRADE_AND_STROKE_COUNT.keys.map(
+        jouyouKanjiByGradeAndStrokeCount.keys.map(
           (grade) async => ExpansionTile(
             title: Text(grade == 7 ? 'Junior Highschool' : 'Grade $grade'),
             maintainState: true,

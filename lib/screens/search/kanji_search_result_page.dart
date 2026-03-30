@@ -47,7 +47,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
           widget.kanji,
           page: pageKey - 1,
           pageSize: pageSize,
-          searchMode: SearchMode.Kanji,
+          searchMode: SearchMode.kanji,
         )
         .then((page) {
           if (pageKey == 1 && page != null && page.isNotEmpty) {
