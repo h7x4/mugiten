@@ -9,8 +9,8 @@ class YomiThemeExtension extends ThemeExtension<YomiThemeExtension> {
 
   @override
   ThemeExtension<YomiThemeExtension> copyWith({
-    Color? onyomiColor,
-    Color? kunyomiColor,
+    final Color? onyomiColor,
+    final Color? kunyomiColor,
   }) => YomiThemeExtension(
     onyomiColor: onyomiColor ?? this.onyomiColor,
     kunyomiColor: kunyomiColor ?? this.kunyomiColor,
@@ -18,8 +18,8 @@ class YomiThemeExtension extends ThemeExtension<YomiThemeExtension> {
 
   @override
   ThemeExtension<YomiThemeExtension> lerp(
-    ThemeExtension<YomiThemeExtension>? other,
-    double t,
+    final ThemeExtension<YomiThemeExtension>? other,
+    final double t,
   ) => other is! YomiThemeExtension
       ? this
       : YomiThemeExtension(
@@ -39,10 +39,13 @@ abstract class ForegroundBackgroundThemeExtension<T extends ThemeExtension<T>>
   });
 
   @override
-  ThemeExtension<T> copyWith({Color? foregroundColor, Color? backgroundColor});
+  ThemeExtension<T> copyWith({
+    final Color? foregroundColor,
+    final Color? backgroundColor,
+  });
 
   @override
-  ThemeExtension<T> lerp(ThemeExtension<T>? other, double t) =>
+  ThemeExtension<T> lerp(final ThemeExtension<T>? other, final double t) =>
       other is! ForegroundBackgroundThemeExtension<T>
       ? this as T
       : copyWith(
@@ -69,8 +72,8 @@ class KanjiResultThemeExtension
 
   @override
   ThemeExtension<KanjiResultThemeExtension> copyWith({
-    Color? foregroundColor,
-    Color? backgroundColor,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
   }) => KanjiResultThemeExtension(
     foregroundColor: foregroundColor ?? this.foregroundColor,
     backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -86,8 +89,8 @@ class MenuGreyLightThemeExtension
 
   @override
   ThemeExtension<MenuGreyLightThemeExtension> copyWith({
-    Color? foregroundColor,
-    Color? backgroundColor,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
   }) => MenuGreyLightThemeExtension(
     foregroundColor: foregroundColor ?? this.foregroundColor,
     backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -103,8 +106,8 @@ class MenuGreyNormalThemeExtension
 
   @override
   ThemeExtension<MenuGreyNormalThemeExtension> copyWith({
-    Color? foregroundColor,
-    Color? backgroundColor,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
   }) => MenuGreyNormalThemeExtension(
     foregroundColor: foregroundColor ?? this.foregroundColor,
     backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -120,8 +123,8 @@ class MenuGreyDarkThemeExtension
 
   @override
   ThemeExtension<MenuGreyDarkThemeExtension> copyWith({
-    Color? foregroundColor,
-    Color? backgroundColor,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
   }) => MenuGreyDarkThemeExtension(
     foregroundColor: foregroundColor ?? this.foregroundColor,
     backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -140,7 +143,7 @@ const Color mugitenCommonForeground = Colors.white;
 const Color mugitenCommonBackground = Color(0xFF8ABC83);
 
 /// Source: https://blog.usejournal.com/creating-a-custom-color-swatch-in-flutter-554bcdcb27f3
-MaterialColor createMaterialColor(Color color) {
+MaterialColor createMaterialColor(final Color color) {
   final List<double> strengths = [.05];
   final swatch = <int, Color>{};
   final int r = (color.r * 255.0).round().clamp(0, 255);
@@ -294,7 +297,7 @@ enum AppThemeMode {
     AppThemeMode.system => 'system',
   };
 
-  factory AppThemeMode.fromId(String id) => switch (id) {
+  factory AppThemeMode.fromId(final String id) => switch (id) {
     'light' => AppThemeMode.light,
     'dark' => AppThemeMode.dark,
     'system' => AppThemeMode.system,
@@ -330,20 +333,22 @@ enum AppThemeMode {
 class ThemeController {
   final ValueNotifier<AppThemeMode> themeMode;
 
-  ThemeController(AppThemeMode mode) : themeMode = ValueNotifier(mode);
+  ThemeController(final AppThemeMode mode) : themeMode = ValueNotifier(mode);
 
   factory ThemeController.create() {
     AppThemeMode initialMode;
     if (autoThemeEnabled.value) {
       initialMode = AppThemeMode.system;
     } else {
-      initialMode = darkThemeEnabled.value ? AppThemeMode.dark : AppThemeMode.light;
+      initialMode = darkThemeEnabled.value
+          ? AppThemeMode.dark
+          : AppThemeMode.light;
     }
 
     return ThemeController(initialMode);
   }
 
-  void setThemeMode(AppThemeMode mode) {
+  void setThemeMode(final AppThemeMode mode) {
     if (mode != themeMode.value) {
       if (mode == AppThemeMode.system) {
         autoThemeEnabled.value = true;

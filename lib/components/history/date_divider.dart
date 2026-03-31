@@ -7,7 +7,7 @@ class TextDivider extends StatelessWidget {
   const TextDivider({super.key, required this.text});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<MenuGreyNormalThemeExtension>()!;
 
     return Container(

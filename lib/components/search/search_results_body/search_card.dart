@@ -1,20 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/util/text_filtering.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
+import 'package:mugiten/components/search/search_results_body/parts/common_badge.dart';
+import 'package:mugiten/components/search/search_results_body/parts/header.dart';
+import 'package:mugiten/components/search/search_results_body/parts/jlpt_badge.dart';
+import 'package:mugiten/components/search/search_results_body/parts/kanji.dart';
+import 'package:mugiten/components/search/search_results_body/parts/other_forms.dart';
+import 'package:mugiten/components/search/search_results_body/parts/senses.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/services/clipboard.dart';
 import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-import './parts/common_badge.dart';
-import './parts/header.dart';
-import './parts/jlpt_badge.dart';
-import './parts/other_forms.dart';
-import './parts/senses.dart';
-import 'parts/kanji.dart';
 
 class SearchResultCard extends StatefulWidget {
   final WordSearchResult result;
@@ -50,7 +51,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
       .get<Database>()
       .libraryListAllListsContain(jmdictEntryId: widget.result.entryId)
       .then(
-        (data) => setState(() {
+        (final data) => setState(() {
           isFavourited = data['favourites'] ?? false;
           isQuickListed =
               quickAddLibraryList.value != null &&
@@ -61,16 +62,16 @@ class _SearchResultCardState extends State<SearchResultCard> {
   @override
   void initState() {
     super.initState();
-    fetchFavouriteAndQuickListStatus();
+    unawaited(fetchFavouriteAndQuickListStatus());
   }
 
   List<String> get kanji => kanjiRegex
       .allMatches(
         widget.result.japanese
-            .map((w) => '${w.base}${w.furigana ?? ""}')
+            .map((final w) => '${w.base}${w.furigana ?? ""}')
             .join(),
       )
-      .map((match) => match.group(0)!)
+      .map((final match) => match.group(0)!)
       .toSet()
       .toList();
 
@@ -80,7 +81,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           // TODO: draw sizedbox to take up space instead
-          if (quickAddLibraryList != 'favourites')
+          if (!quickAddLibraryList.contains('favourites'))
             Icon(
               Icons.bookmark,
               color: isQuickListed ? Colors.blue : Colors.transparent,
@@ -110,7 +111,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
 
   static const _margin = SizedBox(height: 20);
 
-  List<Widget> _withMargin(Widget w) => [_margin, w];
+  List<Widget> _withMargin(final Widget w) => [_margin, w];
 
   Widget _body() => Container(
     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
@@ -131,7 +132,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final backgroundColor =
         widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
 
@@ -140,21 +141,25 @@ class _SearchResultCardState extends State<SearchResultCard> {
           copyToClipboard(context, widget.result.japanese.firstOrNull?.base),
       onDoubleTap: () {
         if (isQuickListed && quickAddLibraryList.value != null) {
-          GetIt.instance
-              .get<Database>()
-              .libraryListDeleteEntry(
-                quickAddLibraryList.value!,
-                jmdictEntryId: widget.result.entryId,
-              )
-              .then((_) => fetchFavouriteAndQuickListStatus());
+          unawaited(
+            GetIt.instance
+                .get<Database>()
+                .libraryListDeleteEntry(
+                  quickAddLibraryList.value!,
+                  jmdictEntryId: widget.result.entryId,
+                )
+                .then((_) => fetchFavouriteAndQuickListStatus()),
+          );
         } else {
-          GetIt.instance
-              .get<Database>()
-              .libraryListInsertEntry(
-                quickAddLibraryList.value!,
-                jmdictEntryId: widget.result.entryId,
-              )
-              .then((_) => fetchFavouriteAndQuickListStatus());
+          unawaited(
+            GetIt.instance
+                .get<Database>()
+                .libraryListInsertEntry(
+                  quickAddLibraryList.value!,
+                  jmdictEntryId: widget.result.entryId,
+                )
+                .then((_) => fetchFavouriteAndQuickListStatus()),
+          );
         }
       },
       child: Slidable(
@@ -180,7 +185,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
                 SlidableAction(
                   backgroundColor: Colors.blue,
                   icon: Icons.bookmark,
-                  onPressed: (context) => showAddToLibraryDialog(
+                  onPressed: (final context) => showAddToLibraryDialog(
                     context: context,
                     jmdictEntryId: widget.result.entryId,
                     kanji: null,

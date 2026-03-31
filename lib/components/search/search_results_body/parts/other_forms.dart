@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/models/word_search/word_search_ruby.dart';
+import 'package:mugiten/components/search/search_results_body/parts/kanji_kana_box.dart';
 import 'package:mugiten/theme.dart';
-
-import 'kanji_kana_box.dart';
 
 class OtherForms extends StatelessWidget {
   final List<WordSearchRuby> forms;
@@ -10,7 +9,7 @@ class OtherForms extends StatelessWidget {
   const OtherForms({required this.forms, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<MenuGreyLightThemeExtension>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

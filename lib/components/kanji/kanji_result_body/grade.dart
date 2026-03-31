@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../settings.dart';
 
 class Grade extends StatelessWidget {
   final String? grade;
@@ -10,7 +9,7 @@ class Grade extends StatelessWidget {
   const Grade({required this.grade, this.ifNullChar = '⨉', super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<KanjiResultThemeExtension>()!;
 
     return Container(

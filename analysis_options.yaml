@@ -10,6 +10,11 @@
 include:
   - package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    - 'build/**'
+    - '.direnv/**'
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
@@ -22,20 +27,64 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    always_declare_return_types: true
-    annotate_redeclares: true
-    avoid_print: false
-    avoid_setters_without_getters: true
-    avoid_slow_async_io: true
-    directives_ordering: true
-    eol_at_end_of_file: true
-    prefer_const_declarations: true
-    prefer_contains: true
-    prefer_final_fields: true
-    prefer_final_locals: true
-    prefer_single_quotes: true
-    use_key_in_widget_constructors: true
-    use_null_aware_elements: true
+    - always_declare_return_types
+    - always_use_package_imports
+    - annotate_overrides
+    - annotate_redeclares
+    - avoid_annotating_with_dynamic
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_empty_else
+    - avoid_null_checks_in_equality_operators
+    - avoid_renaming_method_parameters
+    - avoid_returning_null_for_void
+    - avoid_setters_without_getters
+    - avoid_slow_async_io
+    - avoid_unnecessary_containers
+    - await_only_futures
+    - cancel_subscriptions
+    - cascade_invocations
+    - comment_references
+    - directives_ordering
+    - discarded_futures
+    - empty_constructor_bodies
+    - empty_statements
+    - eol_at_end_of_file
+    - exhaustive_cases
+    - invalid_case_patterns
+    - only_throw_errors
+    - prefer_asserts_in_initializer_lists
+    - prefer_asserts_with_message
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_contains
+    - prefer_final_fields
+    - prefer_final_in_for_each
+    - prefer_final_locals
+    - prefer_final_parameters
+    - prefer_single_quotes
+    - require_trailing_commas
+    - simplify_variable_pattern
+    - sized_box_for_whitespace
+    - sized_box_shrink_expand
+    - test_types_in_equals
+    - unnecessary_async
+    - unnecessary_breaks
+    - unnecessary_getters_setters
+    - unnecessary_ignore
+    - unnecessary_lambdas
+    - unnecessary_late
+    - unnecessary_null_checks
+    - unnecessary_parenthesis
+    - unrelated_type_equality_checks
+    - use_enums
+    - use_is_even_rather_than_modulo
+    - use_key_in_widget_constructors
+    - use_named_constants
+    - use_null_aware_elements
+    - valid_regexps
+    - var_with_no_type_annotation
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

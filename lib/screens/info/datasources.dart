@@ -5,7 +5,7 @@ class DataSourcesView extends StatelessWidget {
   const DataSourcesView({super.key});
 
   static final List<Widget> dataSources = [
-    ListTile(
+    const ListTile(
       subtitle: Text(
         'Mugiten is made up of data from various sources, each with their own licenses and copyrights. '
         'Below is a list detailing the data sources used. '
@@ -72,15 +72,15 @@ class DataSourcesView extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Datasources')),
       body: Padding(
         padding: const EdgeInsets.all(2.0),
         child: ListView.separated(
           itemCount: dataSources.length,
-          itemBuilder: (context, index) => dataSources[index],
-          separatorBuilder: (context, index) => const Divider(),
+          itemBuilder: (final context, final index) => dataSources[index],
+          separatorBuilder: (final context, final index) => const Divider(),
         ),
       ),
     );
@@ -106,14 +106,14 @@ class DataSource extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListTile(
       title: Text(title),
       titleTextStyle: Theme.of(context).textTheme.titleLarge,
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           GestureDetector(
             onTap: () async {
               if (await canLaunchUrl(url)) {
@@ -135,9 +135,9 @@ class DataSource extends StatelessWidget {
             ),
           ),
           if (description != null) ...[
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(description!),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
           TextButton(
             onPressed: licenseAssetPath == null
@@ -150,8 +150,10 @@ class DataSource extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Scaffold(
-                          appBar: AppBar(title: Text('License: $licenseIdentifier')),
+                        builder: (final context) => Scaffold(
+                          appBar: AppBar(
+                            title: Text('License: $licenseIdentifier'),
+                          ),
                           body: Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: SingleChildScrollView(
@@ -164,7 +166,7 @@ class DataSource extends StatelessWidget {
                   },
             child: Text('License: $licenseIdentifier'),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             copyright,
             style: TextStyle(

@@ -1,19 +1,20 @@
-DateTime roundToDay(DateTime date) => DateTime(date.year, date.month, date.day);
+DateTime roundToDay(final DateTime date) =>
+    DateTime(date.year, date.month, date.day);
 
-bool dateIsEqual(DateTime date1, DateTime date2) =>
+bool dateIsEqual(final DateTime date1, final DateTime date2) =>
     roundToDay(date1) == roundToDay(date2);
 
 DateTime get today => roundToDay(DateTime.now());
 DateTime get yesterday =>
     roundToDay(DateTime.now().subtract(const Duration(days: 1)));
 
-String formatTime(DateTime timestamp) {
+String formatTime(final DateTime timestamp) {
   final hours = timestamp.hour.toString().padLeft(2, '0');
   final mins = timestamp.minute.toString().padLeft(2, '0');
   return '$hours:$mins';
 }
 
-String formatDate(DateTime date) {
+String formatDate(final DateTime date) {
   if (date == today) return 'Today';
   if (date == yesterday) return 'Yesterday';
 

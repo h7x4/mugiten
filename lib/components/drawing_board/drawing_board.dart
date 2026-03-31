@@ -1,12 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide Ink;
 import 'package:get_it/get_it.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:jadb/search.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
 import 'package:signature/signature.dart';
 import 'package:sqflite/sqflite.dart';
-
-import '../../settings.dart';
 
 class DrawingBoard extends StatefulWidget {
   final Function(String)? onSuggestionChosen;
@@ -64,7 +65,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
         y: controller.points.last.offset.dy,
       ),
     ),
-    onDrawEnd: () => updateSuggestions(),
+    onDrawEnd: updateSuggestions,
   );
 
   Future<void> updateSuggestions() async {
@@ -80,7 +81,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
     );
 
     final ink = Ink()
-      ..strokes = strokes.map((s) => Stroke()..points = s).toList();
+      ..strokes = strokes.map((final s) => Stroke()..points = s).toList();
 
     final newSuggestions = await digitalInkRecognizer.recognize(
       ink,
@@ -88,7 +89,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
     );
 
     setState(() {
-      suggestions = newSuggestions.map((rc) => rc.text).toList();
+      suggestions = newSuggestions.map((final rc) => rc.text).toList();
     });
   }
 
@@ -101,11 +102,11 @@ class _DrawingBoardState extends State<DrawingBoard> {
       deduplicate: true,
     );
     final hiraganaSuggestions = suggestions
-        .where((s) => RegExp(hiraganaR).hasMatch(s))
+        .where((final s) => RegExp(hiraganaR).hasMatch(s))
         .toSet()
         .toList();
     final katakanaSuggestions = suggestions
-        .where((s) => RegExp(katakanaR).hasMatch(s))
+        .where((final s) => RegExp(katakanaR).hasMatch(s))
         .toSet()
         .toList();
 
@@ -114,11 +115,13 @@ class _DrawingBoardState extends State<DrawingBoard> {
           if (widget.allowHiragana) ...hiraganaSuggestions,
           if (widget.allowKatakana) ...katakanaSuggestions,
         }
-        .where((s) => !widget.onlyOneCharacterSuggestions || s.length == 1)
+        .where(
+          (final s) => !widget.onlyOneCharacterSuggestions || s.length == 1,
+        )
         .toList();
   }
 
-  Widget kanjiChip(String kanji) => InkWell(
+  Widget kanjiChip(final String kanji) => InkWell(
     onTap: () => widget.onSuggestionChosen?.call(kanji),
     child: Container(
       height: fontSize + 2 * suggestionCirclePadding,
@@ -144,7 +147,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
 
     return FutureBuilder<List<String>>(
       future: filterSuggestions(),
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting ||
             (!snapshot.hasError && (snapshot.data?.isEmpty ?? false))) {
           return Container(
@@ -186,7 +189,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
           child: Wrap(
             spacing: 20,
             runSpacing: 5,
-            children: filteredSuggestions.map((s) => kanjiChip(s)).toList(),
+            children: filteredSuggestions.map(kanjiChip).toList(),
           ),
         );
       },
@@ -211,7 +214,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
             if (strokes.isNotEmpty) {
               undoQueue.add(strokes.removeLast());
               controller.undo();
-              updateSuggestions();
+              unawaited(updateSuggestions());
             }
           },
           icon: const Icon(Icons.undo),
@@ -221,7 +224,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
             if (undoQueue.isNotEmpty) {
               strokes.add(undoQueue.removeLast());
               controller.redo();
-              updateSuggestions();
+              unawaited(updateSuggestions());
             }
           },
           icon: const Icon(Icons.redo),
@@ -267,7 +270,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(children: [suggestionBar(), drawingPanel()]);
   }
 }

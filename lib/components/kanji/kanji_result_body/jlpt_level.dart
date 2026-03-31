@@ -8,7 +8,7 @@ class JlptLevel extends StatelessWidget {
   const JlptLevel({required this.jlptLevel, this.ifNullChar = '⨉', super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<KanjiResultThemeExtension>()!;
     return Container(
       padding: const EdgeInsets.all(10.0),

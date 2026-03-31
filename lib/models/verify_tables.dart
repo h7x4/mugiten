@@ -2,7 +2,9 @@ import 'package:mugiten/database/history/table_names.dart';
 import 'package:mugiten/database/library_list/table_names.dart';
 import 'package:sqflite/sqflite.dart';
 
-Future<void> verifyMugitenTablesWithDbConnection(DatabaseExecutor db) async {
+Future<void> verifyMugitenTablesWithDbConnection(
+  final DatabaseExecutor db,
+) async {
   final Set<String> tables = await db
       .query(
         'sqlite_master',
@@ -10,8 +12,8 @@ Future<void> verifyMugitenTablesWithDbConnection(DatabaseExecutor db) async {
         where: 'type IN (?, ?)',
         whereArgs: ['table', 'view'],
       )
-      .then((result) {
-        return result.map((row) => row['name'] as String).toSet();
+      .then((final result) {
+        return result.map((final row) => row['name'] as String).toSet();
       });
 
   final Set<String> expectedTables = {
@@ -25,10 +27,10 @@ Future<void> verifyMugitenTablesWithDbConnection(DatabaseExecutor db) async {
     throw Exception(
       [
         'Missing tables:',
-        missingTables.map((table) => '  - $table').join('\n'),
+        missingTables.map((final table) => '  - $table').join('\n'),
         '',
         'Found tables:\n',
-        tables.map((table) => '  - $table').join('\n'),
+        tables.map((final table) => '  - $table').join('\n'),
         '',
         'Please ensure the database is correctly set up.',
       ].join('\n'),

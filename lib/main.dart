@@ -1,13 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/routing/router.dart';
 import 'package:mugiten/screens/initialization.dart';
 import 'package:mugiten/services/initialization/initialization_logic.dart';
 import 'package:mugiten/theme.dart';
 
-import 'routing/router.dart';
-
-void runInitializationScreen(bool deleteDatabase) {
+void runInitializationScreen(final bool deleteDatabase) {
   runApp(
     InitializationView(
       onInitializationComplete: () =>
@@ -42,10 +43,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    unawaited(
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]),
+    );
     GetIt.instance.registerSingleton<ThemeController>(themeController);
   }
 
@@ -62,10 +65,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ValueListenableBuilder<AppThemeMode>(
       valueListenable: themeController.themeMode,
-      builder: (context, themeMode, _) {
+      builder: (final context, final themeMode, _) {
         return MaterialApp(
           title: '麦典',
           theme: themeMode.lightThemeData,

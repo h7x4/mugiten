@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../settings.dart';
+import 'package:mugiten/settings.dart';
 
 class KanjiSearchBar extends StatefulWidget {
   final Function(String)? onChanged;
@@ -39,20 +39,20 @@ class KanjiSearchBarState extends State<KanjiSearchBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final IconButton clearButton = IconButton(
       icon: const Icon(Icons.clear),
-      onPressed: () => clearText(),
+      onPressed: clearText,
     );
 
     final IconButton pasteButton = IconButton(
       icon: const Icon(Icons.content_paste),
-      onPressed: () => pasteText(),
+      onPressed: pasteText,
     );
 
     return TextField(
       controller: textController,
-      onChanged: (text) => onChanged(),
+      onChanged: (final text) => onChanged(),
       onSubmitted: (_) => {},
       style: japaneseFont.value.textStyle,
       decoration: InputDecoration(

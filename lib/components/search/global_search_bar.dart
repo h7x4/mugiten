@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mugiten/components/drawing_board/drawing_board.dart';
+import 'package:mugiten/components/search/language_selector.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../routing/routes.dart';
-import '../../settings.dart';
-import 'language_selector.dart';
 
 class GlobalSearchBar extends StatelessWidget {
   final TextEditingController textController = TextEditingController();
@@ -12,17 +11,17 @@ class GlobalSearchBar extends StatelessWidget {
 
   GlobalSearchBar({super.key});
 
-  void _search(BuildContext context, String text) =>
+  void _search(final BuildContext context, final String text) =>
       Navigator.pushNamed(context, Routes.search, arguments: text);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
         children: [
           TextField(
-            onSubmitted: (text) => _search(context, text),
+            onSubmitted: (final text) => _search(context, text),
             controller: textController,
             focusNode: textFocus,
             style: japaneseFont.value.textStyle,
@@ -57,9 +56,7 @@ class GlobalSearchBar extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.close),
                 color: Colors.red,
-                onPressed: () {
-                  textController.clear();
-                },
+                onPressed: textController.clear,
               ),
               const LanguageSelector(),
               IconButton(
@@ -100,9 +97,11 @@ class GlobalSearchBar extends StatelessWidget {
     );
   }
 
-  Future<String?> Function(BuildContext) _drawKanji(String? precedingText) {
+  Future<String?> Function(BuildContext) _drawKanji(
+    final String? precedingText,
+  ) {
     final MaterialPageRoute<String> route = MaterialPageRoute(
-      builder: (context) => Scaffold(
+      builder: (final context) => Scaffold(
         appBar: AppBar(title: const Text('Draw a kanji')),
         body: SafeArea(
           child: Column(
@@ -111,7 +110,7 @@ class GlobalSearchBar extends StatelessWidget {
               DrawingBoard(
                 precedingText: precedingText,
                 onlyOneCharacterSuggestions: true,
-                onSuggestionChosen: (suggestion) =>
+                onSuggestionChosen: (final suggestion) =>
                     Navigator.pop(context, suggestion),
               ),
             ],
@@ -120,6 +119,6 @@ class GlobalSearchBar extends StatelessWidget {
       ),
     );
 
-    return (context) => Navigator.push<String>(context, route);
+    return (final context) => Navigator.push<String>(context, route);
   }
 }

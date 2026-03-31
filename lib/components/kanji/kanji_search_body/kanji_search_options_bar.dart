@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../routing/routes.dart';
 
 class KanjiSearchOptionsBar extends StatelessWidget {
   const KanjiSearchOptionsBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -42,7 +41,7 @@ class _IconButton extends StatelessWidget {
   const _IconButton({required this.icon, required this.onPressed});
 
   @override
-  Widget build(BuildContext context) => IconButton(
+  Widget build(final BuildContext context) => IconButton(
     onPressed: onPressed,
     icon: icon,
     iconSize: 30,

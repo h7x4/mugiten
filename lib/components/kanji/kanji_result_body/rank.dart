@@ -8,7 +8,7 @@ class Rank extends StatelessWidget {
   const Rank({required this.rank, this.ifNullChar = '⨉', super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<KanjiResultThemeExtension>()!;
 
     return Container(

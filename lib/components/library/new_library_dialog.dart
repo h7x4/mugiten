@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-void Function() showNewLibraryDialog(BuildContext context) => () async {
+void Function() showNewLibraryDialog(final BuildContext context) => () async {
   final String? listName = await showDialog<String>(
     context: context,
     barrierDismissible: true,
@@ -28,7 +28,7 @@ class _NewLibraryDialogState extends State<NewLibraryDialog> {
   final controller = TextEditingController();
   _NameState nameState = _NameState.initial;
 
-  Future<void> onNameUpdate(String proposedListName) async {
+  Future<void> onNameUpdate(final String proposedListName) async {
     setState(() => nameState = _NameState.currentlyChecking);
     if (proposedListName == '') {
       setState(() => nameState = _NameState.invalid);
@@ -54,7 +54,7 @@ class _NewLibraryDialogState extends State<NewLibraryDialog> {
   bool get confirmButtonActive => nameState == _NameState.valid;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AlertDialog(
       title: const Text('Add new library'),
       content: TextField(

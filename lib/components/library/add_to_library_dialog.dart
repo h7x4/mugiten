@@ -1,16 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
+import 'package:mugiten/components/common/loading.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:ruby_text/ruby_text.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../common/loading.dart';
-
 Future<void> showAddToLibraryDialog({
-  required BuildContext context,
-  required int? jmdictEntryId,
-  required String? kanji,
+  required final BuildContext context,
+  required final int? jmdictEntryId,
+  required final String? kanji,
 }) => showDialog(
   context: context,
   barrierDismissible: true,
@@ -43,16 +44,18 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
   void initState() {
     super.initState();
 
-    GetIt.instance
-        .get<Database>()
-        .libraryListAllListsContain(
-          jmdictEntryId: widget.jmdictEntryId,
-          kanji: widget.kanji,
-        )
-        .then((data) => setState(() => librariesContainEntry = data));
+    unawaited(
+      GetIt.instance
+          .get<Database>()
+          .libraryListAllListsContain(
+            jmdictEntryId: widget.jmdictEntryId,
+            kanji: widget.kanji,
+          )
+          .then((final data) => setState(() => librariesContainEntry = data)),
+    );
   }
 
-  Future<void> toggleEntry(String libraryName) async {
+  Future<void> toggleEntry(final String libraryName) async {
     if (toggleLock) return;
 
     setState(() => toggleLock = true);
@@ -71,7 +74,7 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AlertDialog(
       title: const Text('Add to library'),
       contentPadding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
@@ -93,7 +96,7 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
                       future: GetIt.instance.get<Database>().jadbGetWordById(
                         widget.jmdictEntryId!,
                       ),
-                      builder: (context, snapshot) {
+                      builder: (final context, final snapshot) {
                         if (snapshot.hasError) {
                           return ErrorWidget(snapshot.error!);
                         }
@@ -131,7 +134,7 @@ class _AddToLibraryDialogState extends State<AddToLibraryDialog> {
               child: librariesContainEntry == null
                   ? const LoadingScreen()
                   : ListView(
-                      children: librariesContainEntry!.entries.map((e) {
+                      children: librariesContainEntry!.entries.map((final e) {
                         final libraryName = e.key;
                         final checked = e.value;
                         return ListTile(

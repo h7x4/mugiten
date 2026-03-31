@@ -5,9 +5,9 @@ class LicensesView extends StatelessWidget {
   const LicensesView({super.key});
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<PackageInfo>(
+  Widget build(final BuildContext context) => FutureBuilder<PackageInfo>(
     future: PackageInfo.fromPlatform(),
-    builder: (context, snapshot) {
+    builder: (final context, final snapshot) {
       if (snapshot.hasError) {
         return Center(child: Text('Error: ${snapshot.error}'));
       }
@@ -20,10 +20,11 @@ class LicensesView extends StatelessWidget {
     },
   );
 
-  Widget _buildLicensePage(PackageInfo packageInfo) => LicensePage(
+  Widget _buildLicensePage(final PackageInfo packageInfo) => LicensePage(
     applicationName: '麦典 - Mugiten',
     applicationVersion: 'Version: ${packageInfo.version}',
-    applicationLegalese: 'Copyright (c) 2024, h7x4 <mugiten@nani.wtf>\nLicensed under GPL-3.0-only',
+    applicationLegalese:
+        'Copyright (c) 2024, h7x4 <mugiten@nani.wtf>\nLicensed under GPL-3.0-only',
     applicationIcon: Padding(
       padding: const EdgeInsets.symmetric(vertical: 30),
       child: Row(

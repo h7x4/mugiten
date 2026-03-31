@@ -1,11 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jadb/const_data/kanji_grades.dart';
+import 'package:mugiten/components/common/loading.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../../routing/routes.dart';
-import '../../../components/common/loading.dart';
-import '../../../settings.dart';
 
 class KanjiGradeSearch extends StatefulWidget {
   const KanjiGradeSearch({super.key});
@@ -20,7 +19,7 @@ class _GridItem extends StatelessWidget {
   const _GridItem({required this.text, this.isNumber = false});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ForegroundBackgroundThemeExtension colors = isNumber
         ? lightTheme.extension<MenuGreyDarkThemeExtension>()!
         : lightTheme.extension<MenuGreyNormalThemeExtension>()!;
@@ -56,18 +55,18 @@ class _GridItem extends StatelessWidget {
 }
 
 class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
-  Future<Map<int, Map<int, List<Widget>>>> get gradeWidgets async =>
+  Future<Map<int, Map<int, List<Widget>>>> get gradeWidgets =>
       compute<
         Map<int, Map<int, List<String>>>,
         Map<int, Map<int, List<Widget>>>
       >(
-        (gs) => gs.map(
-          (grade, sortedByStrokes) => MapEntry(
+        (final gs) => gs.map(
+          (final grade, final sortedByStrokes) => MapEntry(
             grade,
             sortedByStrokes.map<int, List<Widget>>(
-              (strokeCount, kanji) => MapEntry(strokeCount, [
+              (final strokeCount, final kanji) => MapEntry(strokeCount, [
                 _GridItem(text: strokeCount.toString(), isNumber: true),
-                ...kanji.map((k) => _GridItem(text: k)),
+                ...kanji.map((final k) => _GridItem(text: k)),
               ]),
             ),
           ),
@@ -79,7 +78,7 @@ class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
     child: Column(
       children: (await Future.wait(
         jouyouKanjiByGradeAndStrokeCount.keys.map(
-          (grade) async => ExpansionTile(
+          (final grade) async => ExpansionTile(
             title: Text(grade == 7 ? 'Junior Highschool' : 'Grade $grade'),
             maintainState: true,
             children: [
@@ -91,7 +90,7 @@ class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
                 crossAxisSpacing: 10,
                 padding: const EdgeInsets.all(10),
                 children: (await gradeWidgets)[grade]!.values
-                    .expand((l) => l)
+                    .expand((final l) => l)
                     .toList(),
               ),
             ],
@@ -102,13 +101,13 @@ class _KanjiGradeSearchState extends State<KanjiGradeSearch> {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Choose by grade')),
       body: FutureBuilder<Widget>(
         future: makeGrids,
         initialData: const LoadingScreen(),
-        builder: (context, snapshot) => snapshot.data!,
+        builder: (final context, final snapshot) => snapshot.data!,
       ),
     );
   }

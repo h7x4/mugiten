@@ -6,7 +6,7 @@ class DebugView extends StatelessWidget {
   const DebugView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FutureBuilder(
       future: GetIt.instance.get<Database>().rawQuery("""
         SELECT name, type
@@ -14,7 +14,7 @@ class DebugView extends StatelessWidget {
         WHERE name NOT LIKE 'sqlite_%'
         ORDER BY name
         """),
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -24,7 +24,7 @@ class DebugView extends StatelessWidget {
           appBar: AppBar(title: const Text('Debug View')),
           body: ListView.builder(
             itemCount: (snapshot.data as List<Map<String, dynamic>>).length,
-            itemBuilder: (context, index) {
+            itemBuilder: (final context, final index) {
               final data = (snapshot.data as List<Map<String, dynamic>>)[index];
               final tableName =
                   (data['name'] as String) +

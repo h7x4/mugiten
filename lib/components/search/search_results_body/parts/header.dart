@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
 
-import '../../../../settings.dart';
+import 'package:mugiten/settings.dart';
 
 class JapaneseHeader extends StatelessWidget {
   final String baseWord;
@@ -14,7 +14,7 @@ class JapaneseHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       alignment: Alignment.centerLeft,
       padding: const EdgeInsets.only(left: 10.0),

@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/components/common/loading.dart';
+import 'package:mugiten/components/library/library_list_tile.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-import '../../components/common/loading.dart';
-import '../../components/library/library_list_tile.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key});
@@ -19,16 +20,16 @@ class _LibraryViewState extends State<LibraryView> {
   Future<void> getEntriesFromDatabase() => GetIt.instance
       .get<Database>()
       .libraryListGetLists()
-      .then((libs) => setState(() => libraries = libs));
+      .then((final libs) => setState(() => libraries = libs));
 
   @override
   void initState() {
     super.initState();
-    getEntriesFromDatabase();
+    unawaited(getEntriesFromDatabase());
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (libraries == null) return const LoadingScreen();
     return Column(
       children: [
@@ -44,7 +45,7 @@ class _LibraryViewState extends State<LibraryView> {
                 // Skip favourites
                 .skip(1)
                 .map(
-                  (e) => LibraryListTile(
+                  (final e) => LibraryListTile(
                     key: ValueKey(e.name),
                     library: e,
                     onDelete: getEntriesFromDatabase,

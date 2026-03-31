@@ -1,18 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mdi/mdi.dart';
+import 'package:mugiten/components/common/denshi_jisho_background.dart';
+import 'package:mugiten/components/library/new_library_dialog.dart';
+import 'package:mugiten/screens/debug.dart';
+import 'package:mugiten/screens/history.dart';
+import 'package:mugiten/screens/library/library_view.dart';
 import 'package:mugiten/screens/search/kanji_search_view.dart';
 import 'package:mugiten/screens/search/word_search_view.dart';
+import 'package:mugiten/screens/settings.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../components/common/denshi_jisho_background.dart';
-import '../components/library/new_library_dialog.dart';
-import 'debug.dart';
-import 'history.dart';
-import 'library/library_view.dart';
-import 'settings.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -27,45 +26,49 @@ class _HomeState extends State<Home> {
   _Page get page => pages[pageNum];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<MenuGreyDarkThemeExtension>()!;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: ValueListenableBuilder(
           valueListenable: incognitoModeEnabled,
-          builder: (context, incognitoEnabled, child) => AppBar(
-            title: Text(page.titleBar),
-            centerTitle: true,
-            foregroundColor: incognitoEnabled
-                ? Colors.white
-                : mugitenWheatForeground,
-            backgroundColor: incognitoEnabled
-                ? Colors.deepPurple
-                : mugitenWheatBackground,
-            actions: incognitoEnabled
-                ? [
-                    IconButton(
-                      icon: const Icon(Mdi.incognito),
-                      onPressed: () =>
-                          showSnackbar(context, 'History tracking is disabled'),
-                    ),
-                    ...page.actions,
-                  ]
-                : page.actions,
-          ),
+          builder: (final context, final incognitoEnabled, final child) =>
+              AppBar(
+                title: Text(page.titleBar),
+                centerTitle: true,
+                foregroundColor: incognitoEnabled
+                    ? Colors.white
+                    : mugitenWheatForeground,
+                backgroundColor: incognitoEnabled
+                    ? Colors.deepPurple
+                    : mugitenWheatBackground,
+                actions: incognitoEnabled
+                    ? [
+                        IconButton(
+                          icon: const Icon(Mdi.incognito),
+                          onPressed: () => showSnackbar(
+                            context,
+                            'History tracking is disabled',
+                          ),
+                        ),
+                        ...page.actions,
+                      ]
+                    : page.actions,
+              ),
         ),
       ),
       body: DenshiJishoBackground(child: page.content),
       bottomNavigationBar: BottomNavigationBar(
         fixedColor: mugitenWheatBackground,
         currentIndex: pageNum,
-        onTap: (index) => setState(() {
+        onTap: (final index) => setState(() {
           pageNum = index;
         }),
         items: pages
             .map(
-              (p) => BottomNavigationBarItem(label: p.titleBar, icon: p.icon),
+              (final p) =>
+                  BottomNavigationBarItem(label: p.titleBar, icon: p.icon),
             )
             .toList(),
         showSelectedLabels: false,
@@ -76,7 +79,7 @@ class _HomeState extends State<Home> {
   }
 
   List<_Page> get pages => [
-    _Page(
+    const _Page(
       content: WordSearchView(),
       titleBar: 'Search',
       icon: Icon(Icons.search),
@@ -89,7 +92,7 @@ class _HomeState extends State<Home> {
       //     ),
       // ],
     ),
-    _Page(
+    const _Page(
       content: KanjiSearchView(),
       titleBar: 'Kanji Search',
       icon: Icon(Mdi.ideogramCjk, size: 30),

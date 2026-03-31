@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
+import 'package:mugiten/components/search/search_results_body/parts/sense/english_definitions.dart';
 import 'package:mugiten/components/search/search_results_body/search_card.dart';
 import 'package:mugiten/theme.dart';
 import 'package:sealed_languages/sealed_languages.dart';
-
-import 'english_definitions.dart';
 
 final Map<String, String> languageNameMap = {
   ...{
@@ -20,18 +19,18 @@ class Sense extends StatelessWidget {
 
   const Sense({super.key, required this.index, required this.sense});
 
-  String _capitalize(String str) {
+  String _capitalize(final String str) {
     if (str.isEmpty) return str;
     return str[0].toUpperCase() + str.substring(1);
   }
 
   List<String> _notes() {
     return [
-      ...sense.restrictedToReading.map((e) => 'Restricted to $e'),
-      ...sense.restrictedToKanji.map((e) => 'Restricted to $e'),
-      ...sense.fields.map((e) => 'Field: ${_capitalize(e.description)}'),
-      ...sense.misc.map((e) => e.description),
-      ...sense.languageSource.map((e) {
+      ...sense.restrictedToReading.map((final e) => 'Restricted to $e'),
+      ...sense.restrictedToKanji.map((final e) => 'Restricted to $e'),
+      ...sense.fields.map((final e) => 'Field: ${_capitalize(e.description)}'),
+      ...sense.misc.map((final e) => e.description),
+      ...sense.languageSource.map((final e) {
         final languageName =
             languageNameMap[e.language.toUpperCase()] ?? e.language;
 
@@ -41,12 +40,14 @@ class Sense extends StatelessWidget {
           return 'From $languageName';
         }
       }),
-      ...sense.dialects.map((e) => '${_capitalize(e.description)} dialect'),
+      ...sense.dialects.map(
+        (final e) => '${_capitalize(e.description)} dialect',
+      ),
     ];
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final lightColors = Theme.of(
       context,
     ).extension<MenuGreyLightThemeExtension>()!;
@@ -65,7 +66,7 @@ class Sense extends StatelessWidget {
         children:
             <Widget>[
                   Text(
-                    '${index + 1}. ${sense.partsOfSpeech.map((pos) => _capitalize(pos.shortDescription)).join(', ')}',
+                    '${index + 1}. ${sense.partsOfSpeech.map((final pos) => _capitalize(pos.shortDescription)).join(', ')}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.left,
                   ),
@@ -83,14 +84,14 @@ class Sense extends StatelessWidget {
                     ),
                   if (sense.antonyms.isNotEmpty &&
                       sense.antonyms.first.xrefResult != null)
-                    Text(
+                    const Text(
                       'Antonyms:',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ...sense.antonyms
-                      .where((antonym) => antonym.xrefResult != null)
+                      .where((final antonym) => antonym.xrefResult != null)
                       .map(
-                        (antonym) => SearchResultCard(
+                        (final antonym) => SearchResultCard(
                           result: antonym.xrefResult!,
                           backgroundColor: Colors.black38,
                           leading: antonym.ambiguous
@@ -100,14 +101,14 @@ class Sense extends StatelessWidget {
                       ),
                   if (sense.seeAlso.isNotEmpty &&
                       sense.seeAlso.first.xrefResult != null)
-                    Text(
+                    const Text(
                       'See also:',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ...sense.seeAlso
-                      .where((seeAlso) => seeAlso.xrefResult != null)
+                      .where((final seeAlso) => seeAlso.xrefResult != null)
                       .map(
-                        (seeAlso) => SearchResultCard(
+                        (final seeAlso) => SearchResultCard(
                           result: seeAlso.xrefResult!,
                           backgroundColor: Colors.black38,
                           leading: seeAlso.ambiguous
@@ -117,7 +118,7 @@ class Sense extends StatelessWidget {
                       ),
                 ]
                 .map(
-                  (e) => Container(
+                  (final e) => Container(
                     margin: const EdgeInsets.symmetric(vertical: 5),
                     child: e,
                   ),

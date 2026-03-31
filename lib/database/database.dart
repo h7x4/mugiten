@@ -50,7 +50,7 @@ Future<void> quickInitializeDatabase() async {
   await setupDatabase();
 }
 
-/// Migration logic and heavy initialization
+// Migration logic and heavy initialization
 
 class DatabaseMigration {
   final String path;
@@ -77,7 +77,7 @@ Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
   final List<String> migrations = assetManifest
       .listAssets()
       .where(
-        (assetPath) =>
+        (final assetPath) =>
             RegExp(r'^migrations\/\d{4}.*\.sql$').hasMatch(assetPath),
       )
       .toList();
@@ -92,52 +92,55 @@ Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
   }
 
   return Future.wait(
-    migrations.map((migration) async {
+    migrations.map((final migration) async {
       final content = await rootBundle.loadString(migration, cache: false);
       return DatabaseMigration(path: migration, content: content);
     }),
   );
 }
 
-/// Migrates the database from version [oldVersion] to [newVersion].
-Future<void> migrate(Database db, List<DatabaseMigration> migrations) async {
+/// Migrates the database from version `oldVersion` to `newVersion`.
+Future<void> migrate(
+  final Database db,
+  final List<DatabaseMigration> migrations,
+) async {
   for (final migration in migrations) {
     log('Running migration ${migration.version} from ${migration.path}');
     migration.content
         .split(';')
         .map(
-          (s) => s
+          (final s) => s
               .split('\n')
-              .where((l) => !l.startsWith(RegExp(r'\s*--')))
+              .where((final l) => !l.startsWith(RegExp(r'\s*--')))
               .join('\n')
               .trim(),
         )
-        .where((s) => s != '')
+        .where((final s) => s != '')
         .forEach(db.execute);
   }
 }
 
 Future<Database> openDatabaseWithoutMigrations(
-  String dbPath, {
-  bool readOnly = false,
-  bool verifyTables = true,
+  final String dbPath, {
+  final bool readOnly = false,
+  final bool verifyTables = true,
 }) async {
   log('Opening database at $dbPath');
   final Database database = await openDatabase(
     dbPath,
     version: expectedDatabaseVersion,
     readOnly: readOnly,
-    onConfigure: (db) async {
+    onConfigure: (final db) async {
       // Enable foreign key constraints
       await db.execute('PRAGMA foreign_keys=ON');
     },
-    onOpen: (db) async {
+    onOpen: (final db) async {
       if (verifyTables) {
         log('Verifying jadb tables...');
-        db.jadbVerifyTables();
+        await db.jadbVerifyTables();
 
         log('Verifying mugiten tables...');
-        verifyMugitenTablesWithDbConnection(db);
+        await verifyMugitenTablesWithDbConnection(db);
 
         log('Database tables verified successfully');
       }
@@ -147,19 +150,19 @@ Future<Database> openDatabaseWithoutMigrations(
 }
 
 Future<Database> openAndMigrateDatabase(
-  String dbPath,
-  List<DatabaseMigration> migrations,
+  final String dbPath,
+  final List<DatabaseMigration> migrations,
 ) async {
   log('Opening database at $dbPath');
   final Database database = await openDatabase(
     dbPath,
     version: expectedDatabaseVersion,
     readOnly: false,
-    onUpgrade: (db, oldVersion, newVersion) async {
+    onUpgrade: (final db, final oldVersion, final newVersion) async {
       log('Migrating database from v$oldVersion to v$newVersion...');
       final migrationsToRun = migrations
           .where(
-            (migration) =>
+            (final migration) =>
                 migration.version > oldVersion &&
                 migration.version <= newVersion,
           )
@@ -167,16 +170,16 @@ Future<Database> openAndMigrateDatabase(
 
       await migrate(db, migrationsToRun);
     },
-    onConfigure: (db) async {
+    onConfigure: (final db) async {
       // Enable foreign key constraints
       await db.execute('PRAGMA foreign_keys=ON');
     },
-    onOpen: (db) async {
+    onOpen: (final db) async {
       log('Verifying jadb tables...');
-      db.jadbVerifyTables();
+      await db.jadbVerifyTables();
 
       log('Verifying jadb tables...');
-      verifyMugitenTablesWithDbConnection(db);
+      await verifyMugitenTablesWithDbConnection(db);
 
       log('Database tables verified successfully');
     },
@@ -222,12 +225,10 @@ Future<void> resetDatabase() async {
   await setupDatabase();
 }
 
-/// Extracts the jadb.sqlite file from the assets into a writable directory
+/// Extracts the `jadb.sqlite` file from the assets into a writable directory
 /// and returns its path.
-Future<void> extractJadbFromAssets(String path) async {
-  final File jadbFile = File(path);
-
-  jadbFile.createSync();
+Future<void> extractJadbFromAssets(final String path) async {
+  final File jadbFile = File(path)..createSync();
 
   final ByteData data = await rootBundle.load('assets/jadb.sqlite');
   await jadbFile.writeAsBytes(

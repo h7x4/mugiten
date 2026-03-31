@@ -6,7 +6,7 @@ class DenshiJishoBackground extends StatelessWidget {
   const DenshiJishoBackground({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       children: [
         Positioned(

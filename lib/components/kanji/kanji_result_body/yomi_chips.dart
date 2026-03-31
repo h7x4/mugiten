@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../routing/routes.dart';
-import '../../../settings.dart';
 
 enum YomiType { onyomi, kunyomi, meaning }
 
@@ -19,7 +18,7 @@ extension on YomiType {
   //   }
   // }
 
-  Color getColor(BuildContext context) {
+  Color getColor(final BuildContext context) {
     switch (this) {
       case YomiType.onyomi:
         return Theme.of(context).extension<YomiThemeExtension>()!.onyomiColor!;
@@ -38,11 +37,11 @@ class YomiChips extends StatelessWidget {
   const YomiChips({required this.yomi, required this.type, super.key});
 
   Widget yomiCard({
-    required BuildContext context,
-    required String yomi,
-    required Color? color,
-    bool searchable = true,
-    TextStyle? extraTextStyle,
+    required final BuildContext context,
+    required final String yomi,
+    required final Color? color,
+    final bool searchable = true,
+    final TextStyle? extraTextStyle,
   }) => InkWell(
     onTap: searchable
         ? () => Navigator.pushNamed(context, Routes.search, arguments: yomi)
@@ -64,11 +63,11 @@ class YomiChips extends StatelessWidget {
     ),
   );
 
-  Widget yomiWrapper(BuildContext context) {
+  Widget yomiWrapper(final BuildContext context) {
     final yomiCards = yomi
-        .map((y) => romajiEnabled.value ? transliterateKanaToLatin(y) : y)
+        .map((final y) => romajiEnabled.value ? transliterateKanaToLatin(y) : y)
         .map(
-          (y) => yomiCard(
+          (final y) => yomiCard(
             context: context,
             yomi: y,
             color: type.getColor(context),
@@ -96,7 +95,7 @@ class YomiChips extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       alignment: Alignment.centerLeft,

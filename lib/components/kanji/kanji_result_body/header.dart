@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../settings.dart';
 
 class Header extends StatelessWidget {
   final String kanji;
@@ -9,7 +8,7 @@ class Header extends StatelessWidget {
   const Header({required this.kanji, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<KanjiResultThemeExtension>()!;
 
     return AspectRatio(

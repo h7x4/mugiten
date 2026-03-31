@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../settings.dart';
 
 class LanguageSelector extends StatefulWidget {
   const LanguageSelector({super.key});
@@ -22,24 +21,25 @@ class _LanguageSelectorState extends State<LanguageSelector> {
     isSelected = _getSelectedStatus() ?? [false, false, false];
   }
 
-  Future<void> _updateSelectedStatus() async => prefs.setStringList(
+  void _updateSelectedStatus() => prefs.setStringList(
     'languageSelectorStatus',
-    isSelected.map((b) => b ? '1' : '0').toList(),
+    isSelected.map((final b) => b ? '1' : '0').toList(),
   );
 
   List<bool>? _getSelectedStatus() => prefs
       .getStringList('languageSelectorStatus')
-      ?.map((s) => s == '1')
+      ?.map((final s) => s == '1')
       .toList();
 
-  Widget _languageOption(String language, {TextStyle? style}) => Container(
-    alignment: Alignment.center,
-    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-    child: Text(language, style: style),
-  );
+  Widget _languageOption(final String language, {final TextStyle? style}) =>
+      Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        child: Text(language, style: style),
+      );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ToggleButtons(
       selectedColor: mugitenWheatBackground,
       isSelected: isSelected,
@@ -48,7 +48,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
         _languageOption('日本語', style: japaneseFont.value.textStyle),
         _languageOption('English'),
       ],
-      onPressed: (buttonIndex) {
+      onPressed: (final buttonIndex) {
         setState(() {
           for (final int i in Iterable.generate(isSelected.length)) {
             isSelected[i] = i == buttonIndex;

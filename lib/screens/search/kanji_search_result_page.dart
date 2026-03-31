@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -6,6 +8,13 @@ import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart';
 import 'package:jadb/search/word_search/word_search.dart';
 import 'package:mdi/mdi.dart';
+import 'package:mugiten/components/kanji/kanji_result_body/grade.dart';
+import 'package:mugiten/components/kanji/kanji_result_body/header.dart';
+import 'package:mugiten/components/kanji/kanji_result_body/jlpt_level.dart';
+import 'package:mugiten/components/kanji/kanji_result_body/radical.dart';
+import 'package:mugiten/components/kanji/kanji_result_body/rank.dart';
+import 'package:mugiten/components/kanji/kanji_result_body/stroke_order_gif.dart';
+import 'package:mugiten/components/kanji/kanji_result_body/yomi_chips.dart';
 import 'package:mugiten/components/library/add_to_library_dialog.dart';
 import 'package:mugiten/components/search/search_results_body/search_card.dart';
 import 'package:mugiten/models/history_entry.dart';
@@ -13,14 +22,6 @@ import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqflite.dart';
-
-import '../../components/kanji/kanji_result_body/grade.dart';
-import '../../components/kanji/kanji_result_body/header.dart';
-import '../../components/kanji/kanji_result_body/jlpt_level.dart';
-import '../../components/kanji/kanji_result_body/radical.dart';
-import '../../components/kanji/kanji_result_body/rank.dart';
-import '../../components/kanji/kanji_result_body/stroke_order_gif.dart';
-import '../../components/kanji/kanji_result_body/yomi_chips.dart';
 
 class KanjiSearchResultPage extends StatefulWidget {
   final String kanji;
@@ -39,9 +40,9 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   bool isFavourite = false;
 
   late final _pagingController = PagingController<int, WordSearchResult>(
-    getNextPageKey: (state) =>
+    getNextPageKey: (final state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
-    fetchPage: (pageKey) => GetIt.instance
+    fetchPage: (final pageKey) => GetIt.instance
         .get<Database>()
         .jadbSearchWord(
           widget.kanji,
@@ -49,7 +50,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
           pageSize: pageSize,
           searchMode: SearchMode.kanji,
         )
-        .then((page) {
+        .then((final page) {
           if (pageKey == 1 && page != null && page.isNotEmpty) {
             page.insert(0, WordSearchResult.empty());
           }
@@ -64,7 +65,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   }
 
   // TODO: add compart link
-  Widget _headerRow(KanjiSearchResult result) => Container(
+  Widget _headerRow(final KanjiSearchResult result) => Container(
     margin: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -86,7 +87,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     ),
   );
 
-  Widget _rankingColumn(KanjiSearchResult result) => Column(
+  Widget _rankingColumn(final KanjiSearchResult result) => Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -124,7 +125,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     ],
   );
 
-  Widget _topBody(KanjiSearchResult result) => Column(
+  Widget _topBody(final KanjiSearchResult result) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _headerRow(result),
@@ -149,7 +150,7 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
     ],
   );
 
-  Widget _body(KanjiSearchResult result) {
+  Widget _body(final KanjiSearchResult result) {
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -163,14 +164,16 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
             icon: const Icon(Icons.star),
             color: isFavourite ? Colors.yellow : null,
             onPressed: () {
-              GetIt.instance
-                  .get<Database>()
-                  .libraryListToggleEntry(
-                    'favourites',
-                    jmdictEntryId: null,
-                    kanji: result.kanji,
-                  )
-                  .then((state) => setState(() => isFavourite = state));
+              unawaited(
+                GetIt.instance
+                    .get<Database>()
+                    .libraryListToggleEntry(
+                      'favourites',
+                      jmdictEntryId: null,
+                      kanji: result.kanji,
+                    )
+                    .then((final state) => setState(() => isFavourite = state)),
+              );
             },
           ),
           IconButton(
@@ -185,13 +188,13 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
       ),
       body: PagingListener(
         controller: _pagingController,
-        builder: (context, state, fetchNextPage) {
+        builder: (final context, final state, final fetchNextPage) {
           return PagedListView<int, WordSearchResult>.separated(
             state: state,
             fetchNextPage: fetchNextPage,
             builderDelegate: PagedChildBuilderDelegate<WordSearchResult>(
               invisibleItemsThreshold: invisibleItemsThreshold,
-              itemBuilder: (context, entry, index) {
+              itemBuilder: (final context, final entry, final index) {
                 if (index == 0) {
                   return _topBody(result);
                 } else {
@@ -215,8 +218,8 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
                 ],
               ),
             ),
-            separatorBuilder: (_, index) => index == 0
-                ? SizedBox.shrink()
+            separatorBuilder: (_, final index) => index == 0
+                ? const SizedBox.shrink()
                 : const Divider(height: 0, indent: 10, endIndent: 10),
           );
         },
@@ -228,24 +231,28 @@ class _KanjiSearchResultPageState extends State<KanjiSearchResultPage> {
   void initState() {
     super.initState();
 
-    GetIt.instance
-        .get<Database>()
-        .libraryListListContains('favourites', kanji: widget.kanji)
-        .then((value) => setState(() => isFavourite = value));
-
-    if (!incognitoModeEnabled.value && !addedToDatabase) {
+    unawaited(
       GetIt.instance
           .get<Database>()
-          .historyEntryInsertKanji(widget.kanji)
-          .then((_) => setState(() => addedToDatabase = true));
+          .libraryListListContains('favourites', kanji: widget.kanji)
+          .then((final value) => setState(() => isFavourite = value)),
+    );
+
+    if (!incognitoModeEnabled.value && !addedToDatabase) {
+      unawaited(
+        GetIt.instance
+            .get<Database>()
+            .historyEntryInsertKanji(widget.kanji)
+            .then((_) => setState(() => addedToDatabase = true)),
+      );
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FutureBuilder(
       future: GetIt.instance.get<Database>().jadbSearchKanji(widget.kanji),
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());

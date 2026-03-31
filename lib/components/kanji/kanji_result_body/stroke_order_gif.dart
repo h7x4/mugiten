@@ -8,7 +8,7 @@ class StrokeOrderGif extends StatelessWidget {
   const StrokeOrderGif({required this.kanji, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final kanjiResultColors = Theme.of(
       context,
     ).extension<KanjiResultThemeExtension>()!;

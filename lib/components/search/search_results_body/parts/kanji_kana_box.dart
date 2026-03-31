@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../../settings.dart';
 
 class KanjiKanaBox extends StatelessWidget {
   final String baseWord;
@@ -31,7 +30,7 @@ class KanjiKanaBox extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final fFontsize =
         furiganaFontsize ??
         ((kanjiFontsize != null) ? 0.8 * kanjiFontsize! : null);

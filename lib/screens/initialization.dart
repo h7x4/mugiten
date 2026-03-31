@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mugiten/services/initialization/initialization_cubit.dart';
@@ -10,11 +12,11 @@ class InitializationView extends StatelessWidget {
   InitializationView({
     super.key,
     required this.onInitializationComplete,
-    required bool deleteDatabase,
+    required final bool deleteDatabase,
   }) : cubit = InitializationCubit(deleteDatabase);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       darkTheme: ThemeData.dark(),
       home: Scaffold(
@@ -27,10 +29,10 @@ class InitializationView extends StatelessWidget {
               const SizedBox(height: 20),
               BlocBuilder<InitializationCubit, InitializationStatus>(
                 bloc: cubit,
-                builder: (context, state) {
+                builder: (final context, final state) {
                   switch (state) {
                     case InitializationNotStarted _:
-                      cubit.start();
+                      unawaited(cubit.start());
                       return const CircularProgressIndicator();
 
                     case InitializationPending _:

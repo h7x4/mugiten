@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/components/search/search_results_body/parts/sense/search_chip.dart';
 import 'package:mugiten/theme.dart';
-import 'search_chip.dart';
 
 class EnglishDefinitions extends StatelessWidget {
   final List<String> englishDefinitions;
@@ -13,7 +13,7 @@ class EnglishDefinitions extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Wrap(
+  Widget build(final BuildContext context) => Wrap(
     runSpacing: 10.0,
     spacing: 5,
     crossAxisAlignment: WrapCrossAlignment.center,

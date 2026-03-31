@@ -9,8 +9,8 @@ import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 Future<Database> createDatabaseCopy({
-  required String libsqlitePath,
-  required String jadbPath,
+  required final String libsqlitePath,
+  required final String jadbPath,
 }) async {
   final jadbFile = File(jadbPath);
   if (!jadbFile.existsSync()) {
@@ -41,7 +41,7 @@ Future<Database> createDatabaseCopy({
   );
 }
 
-Future<void> insertTestData(Database db) async {
+Future<void> insertTestData(final Database db) async {
   final libraryList1 = await db.libraryListInsertList('Test Library 1');
   assert(libraryList1 == true);
 

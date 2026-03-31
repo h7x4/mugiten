@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:mugiten/models/library_list.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/screens/home.dart';
 import 'package:mugiten/screens/info/changelog.dart';
 import 'package:mugiten/screens/info/datasources.dart';
+import 'package:mugiten/screens/info/licenses.dart';
 import 'package:mugiten/screens/library/library_content_view.dart';
 import 'package:mugiten/screens/search/kanji_search_result_page.dart';
+import 'package:mugiten/screens/search/search_mechanisms/drawing.dart';
+import 'package:mugiten/screens/search/search_mechanisms/grade_list.dart';
+import 'package:mugiten/screens/search/search_mechanisms/radical_list.dart';
 import 'package:mugiten/screens/search/word_search_result_page.dart';
 
-import '../screens/home.dart';
-import '../screens/info/licenses.dart';
-import '../screens/search/search_mechanisms/drawing.dart';
-import '../screens/search/search_mechanisms/grade_list.dart';
-import '../screens/search/search_mechanisms/radical_list.dart';
-import 'routes.dart';
-
-Route<Widget> generateRoute(RouteSettings settings) {
+Route<Widget> generateRoute(final RouteSettings settings) {
   final args = settings.arguments;
 
   switch (settings.name) {

@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:mugiten/theme.dart';
+import 'dart:async';
 
-import '../../../routing/routes.dart';
-import '../../../settings.dart';
+import 'package:flutter/material.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/settings.dart';
+import 'package:mugiten/theme.dart';
 
 class KanjiGrid extends StatelessWidget {
   final List<String> suggestions;
@@ -10,7 +11,7 @@ class KanjiGrid extends StatelessWidget {
   const KanjiGrid({required this.suggestions, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 40.0),
       child: GridView.count(
@@ -18,7 +19,7 @@ class KanjiGrid extends StatelessWidget {
         crossAxisCount: 3,
         mainAxisSpacing: 10.0,
         crossAxisSpacing: 10.0,
-        children: suggestions.map((kanji) => _GridItem(kanji)).toList(),
+        children: suggestions.map(_GridItem.new).toList(),
       ),
     );
   }
@@ -29,12 +30,14 @@ class _GridItem extends StatelessWidget {
   const _GridItem(this.kanji);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<MenuGreyLightThemeExtension>()!;
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, Routes.kanjiSearch, arguments: kanji);
+        unawaited(
+          Navigator.pushNamed(context, Routes.kanjiSearch, arguments: kanji),
+        );
       },
       child: Container(
         decoration: BoxDecoration(

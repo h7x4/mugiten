@@ -1,9 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../settings.dart';
 
 /// The ratio is defined as 'the amount of space the text should take'
 /// divided by 'the amount of space the padding should take'.
@@ -60,21 +59,21 @@ class KanjiBox extends StatelessWidget {
        );
 
   const factory KanjiBox.withFontSizeAndPadding({
-    required String kanji,
-    required double fontSize,
-    required double padding,
-    Color? foreground,
-    Color? background,
-    double borderRadius,
+    required final String kanji,
+    required final double fontSize,
+    required final double padding,
+    final Color? foreground,
+    final Color? background,
+    final double borderRadius,
   }) = KanjiBox._;
 
   factory KanjiBox.withFontSize({
-    required String kanji,
-    required double fontSize,
-    double ratio = defaultRatio,
-    Color? foreground,
-    Color? background,
-    double borderRadius = defaultBorderRadius,
+    required final String kanji,
+    required final double fontSize,
+    final double ratio = defaultRatio,
+    final Color? foreground,
+    final Color? background,
+    final double borderRadius = defaultBorderRadius,
   }) => KanjiBox._(
     kanji: kanji,
     fontSize: fontSize,
@@ -85,12 +84,12 @@ class KanjiBox extends StatelessWidget {
   );
 
   factory KanjiBox.withPadding({
-    required String kanji,
-    double ratio = defaultRatio,
-    required double padding,
-    Color? foreground,
-    Color? background,
-    double borderRadius = defaultBorderRadius,
+    required final String kanji,
+    final double ratio = defaultRatio,
+    required final double padding,
+    final Color? foreground,
+    final Color? background,
+    final double borderRadius = defaultBorderRadius,
   }) => KanjiBox._(
     kanji: kanji,
     fontSize: ratio * padding,
@@ -101,11 +100,11 @@ class KanjiBox extends StatelessWidget {
   );
 
   factory KanjiBox.expanded({
-    required String kanji,
-    double ratio = defaultRatio,
-    Color? foreground,
-    Color? background,
-    double borderRadius = defaultBorderRadius,
+    required final String kanji,
+    final double ratio = defaultRatio,
+    final Color? foreground,
+    final Color? background,
+    final double borderRadius = defaultBorderRadius,
   }) => KanjiBox._(
     kanji: kanji,
     contentPaddingRatio: ratio,
@@ -116,12 +115,12 @@ class KanjiBox extends StatelessWidget {
 
   /// A shortcut
   factory KanjiBox.headline4({
-    required BuildContext context,
-    required String kanji,
-    double ratio = defaultRatio,
-    Color? foreground,
-    Color? background,
-    double borderRadius = defaultBorderRadius,
+    required final BuildContext context,
+    required final String kanji,
+    final double ratio = defaultRatio,
+    final Color? foreground,
+    final Color? background,
+    final double borderRadius = defaultBorderRadius,
   }) => KanjiBox.withFontSize(
     kanji: kanji,
     fontSize: Theme.of(context).textTheme.displaySmall!.fontSize!,
@@ -132,7 +131,7 @@ class KanjiBox extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final calculatedForeground =
         foreground ??
         Theme.of(
@@ -145,7 +144,7 @@ class KanjiBox extends StatelessWidget {
         ).extension<MenuGreyLightThemeExtension>()!.backgroundColor;
 
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (final context, final constraints) {
         final sizeConstraint = min(constraints.maxHeight, constraints.maxWidth);
         final calculatedFontSize = fontSize ?? sizeConstraint * fontSizeFactor;
         final calculatedPadding =
@@ -163,7 +162,7 @@ class KanjiBox extends StatelessWidget {
           child: FittedBox(
             child: Text(
               kanji,
-              textScaler: TextScaler.linear(1),
+              textScaler: TextScaler.noScaling,
               style: TextStyle(
                 color: calculatedForeground,
                 fontSize: calculatedFontSize,

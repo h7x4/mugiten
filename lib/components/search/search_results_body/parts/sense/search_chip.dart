@@ -14,7 +14,7 @@ class SearchChip extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(final BuildContext context) => Container(
     padding: const EdgeInsets.all(10),
     decoration: BoxDecoration(
       color: colors.backgroundColor,

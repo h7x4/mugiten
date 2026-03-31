@@ -7,7 +7,7 @@ class CircleBadge extends StatelessWidget {
   const CircleBadge({super.key, this.child, required this.color});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(5),
       width: 30,

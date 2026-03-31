@@ -6,7 +6,7 @@ class OpaqueBox extends StatelessWidget {
   const OpaqueBox({required this.child, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,

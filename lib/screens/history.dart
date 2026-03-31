@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:mugiten/components/common/loading.dart';
+import 'package:mugiten/components/common/opaque_box.dart';
+import 'package:mugiten/components/history/date_divider.dart';
+import 'package:mugiten/components/history/history_entry_tile.dart';
+import 'package:mugiten/models/history_entry.dart';
+import 'package:mugiten/services/datetime.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-import '../components/common/loading.dart';
-import '../components/common/opaque_box.dart';
-import '../components/history/date_divider.dart';
-import '../components/history/history_entry_tile.dart';
-import '../models/history_entry.dart';
-import '../services/datetime.dart';
 
 const int pageSize = 50;
 const int invisibleItemsThreshold = 25;
@@ -22,9 +21,9 @@ class HistoryView extends StatefulWidget {
 
 class _HistoryViewState extends State<HistoryView> {
   late final _pagingController = PagingController<int, HistoryEntry?>(
-    getNextPageKey: (state) =>
+    getNextPageKey: (final state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
-    fetchPage: (pageKey) async {
+    fetchPage: (final pageKey) async {
       List<HistoryEntry?> result = await GetIt.instance
           .get<Database>()
           .historyEntryGetAll(page: pageKey - 1, pageSize: pageSize);
@@ -45,10 +44,10 @@ class _HistoryViewState extends State<HistoryView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FutureBuilder<int>(
       future: GetIt.instance.get<Database>().historyEntryAmount(),
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         // TODO: provide proper error handling
         if (snapshot.hasError) return ErrorWidget(snapshot.error!);
         if (!snapshot.hasData) return const LoadingScreen();
@@ -70,16 +69,16 @@ class _HistoryViewState extends State<HistoryView> {
               Expanded(
                 child: PagingListener(
                   controller: _pagingController,
-                  builder: (context, state, fetchNextPage) =>
+                  builder: (final context, final state, final fetchNextPage) =>
                       PagedListView<int, HistoryEntry?>.separated(
                         state: state,
                         fetchNextPage: fetchNextPage,
-                        separatorBuilder: (context, index) {
+                        separatorBuilder: (final context, final index) {
                           if (index == 0) {
                             if (_pagingController.items == null ||
                                 _pagingController.items!.length < 2) {
                               // No history entries, or the items has not been loaded yet.
-                              return SizedBox.shrink();
+                              return const SizedBox.shrink();
                             } else {
                               final firstItemDate =
                                   _pagingController.items![1]!.lastTimestamp;
@@ -107,18 +106,22 @@ class _HistoryViewState extends State<HistoryView> {
                         },
                         builderDelegate: PagedChildBuilderDelegate<HistoryEntry?>(
                           invisibleItemsThreshold: invisibleItemsThreshold,
-                          itemBuilder: (context, entry, index) => index == 0
-                              ? SizedBox.shrink()
-                              : HistoryEntryTile(
-                                  entry: entry!,
-                                  objectKey: entry.id,
-                                  onDelete: () => _pagingController.refresh(),
+                          itemBuilder:
+                              (final context, final entry, final index) =>
+                                  index == 0
+                                  ? const SizedBox.shrink()
+                                  : HistoryEntryTile(
+                                      entry: entry!,
+                                      objectKey: entry.id,
+                                      onDelete: () =>
+                                          _pagingController.refresh(),
+                                    ),
+                          noItemsFoundIndicatorBuilder: (final context) =>
+                              const Center(
+                                child: Text(
+                                  'The history is empty.\nTry searching for something!',
                                 ),
-                          noItemsFoundIndicatorBuilder: (context) => const Center(
-                            child: Text(
-                              'The history is empty.\nTry searching for something!',
-                            ),
-                          ),
+                              ),
                         ),
                       ),
                 ),
@@ -130,7 +133,7 @@ class _HistoryViewState extends State<HistoryView> {
     );
   }
 
-  Widget _dateDivider(DateTime date) =>
+  Widget _dateDivider(final DateTime date) =>
       TextDivider(text: formatDate(roundToDay(date)));
 
   Widget _divider() => const Divider(height: 0, indent: 10, endIndent: 10);

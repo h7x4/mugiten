@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void copyToClipboard(BuildContext context, String? clipboardContent) {
+void copyToClipboard(
+  final BuildContext context,
+  final String? clipboardContent,
+) {
   if (clipboardContent == null) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -12,7 +17,7 @@ void copyToClipboard(BuildContext context, String? clipboardContent) {
     return;
   }
 
-  Clipboard.setData(ClipboardData(text: clipboardContent));
+  unawaited(Clipboard.setData(ClipboardData(text: clipboardContent)));
 
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

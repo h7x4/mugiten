@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,8 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 final SharedPreferences _prefs = GetIt.instance.get<SharedPreferences>();
 
 abstract interface class StringifySharedPrefItem<T> {
-  String serializeSetting(T value) => value.toString();
-  T deserializeSetting(String s);
+  String serializeSetting(final T value) => value.toString();
+  T deserializeSetting(final String s);
 }
 
 abstract class SharedPrefItem<T> extends ValueNotifier<T> {
@@ -17,7 +19,7 @@ abstract class SharedPrefItem<T> extends ValueNotifier<T> {
   SharedPrefItem(this.key, this.defaultValue)
     : super(_getValue<T>(key, defaultValue));
 
-  static T _getValue<T>(String key, T defaultValue) {
+  static T _getValue<T>(final String key, final T defaultValue) {
     Object? result = _prefs.get(key);
 
     switch (defaultValue) {
@@ -28,12 +30,12 @@ abstract class SharedPrefItem<T> extends ValueNotifier<T> {
                 .deserializeSetting(result);
           } catch (e) {
             // If deserialization fails, reset to default value.
-            _setValue<T>(key, defaultValue);
+            unawaited(_setValue<T>(key, defaultValue));
             result = defaultValue;
           }
         } else {
           // If the stored value is not a String, reset to default value.
-          _setValue<T>(key, defaultValue);
+          unawaited(_setValue<T>(key, defaultValue));
           result = defaultValue;
         }
       default:
@@ -42,22 +44,22 @@ abstract class SharedPrefItem<T> extends ValueNotifier<T> {
     return result as T;
   }
 
-  static void _setValue<T>(String key, T value) {
+  static Future<void> _setValue<T>(final String key, final T value) async {
     switch (value) {
       case null:
-        _prefs.remove(key);
+        await _prefs.remove(key);
       case bool():
-        _prefs.setBool(key, value);
+        await _prefs.setBool(key, value);
       case int():
-        _prefs.setInt(key, value);
+        await _prefs.setInt(key, value);
       case double():
-        _prefs.setDouble(key, value);
+        await _prefs.setDouble(key, value);
       case String():
-        _prefs.setString(key, value);
+        await _prefs.setString(key, value);
       case List<String>():
-        _prefs.setStringList(key, value);
+        await _prefs.setStringList(key, value);
       case StringifySharedPrefItem():
-        _prefs.setString(
+        await _prefs.setString(
           key,
           (value as StringifySharedPrefItem).serializeSetting(value),
         );
@@ -72,14 +74,19 @@ abstract class SharedPrefItem<T> extends ValueNotifier<T> {
   T get value => _getValue<T>(key, defaultValue);
 
   @override
-  set value(T newValue) {
+  set value(final T newValue) {
     final oldValue = _getValue<T>(key, defaultValue);
-    _setValue<T>(key, newValue);
-
-    if (oldValue != newValue) {
-      notifyListeners();
-    }
+    unawaited(
+      _setValue<T>(key, newValue).then((_) {
+        if (oldValue != newValue) {
+          notifyListeners();
+        }
+      }),
+    );
   }
+
+  /// Returns whether the value stored in shared preferences is equal to [value].
+  bool contains(final T value) => _getValue<T>(key, defaultValue) == value;
 }
 
 /// Whether to save search history and other data to the database.
@@ -170,15 +177,16 @@ enum JapaneseFontChoice implements StringifySharedPrefItem<JapaneseFontChoice> {
   };
 
   static Map<String, JapaneseFontChoice> get _nameToFont =>
-      _fontToName.map((k, v) => MapEntry(v, k));
+      _fontToName.map((final k, final v) => MapEntry(v, k));
 
   String get name => _fontToName[this]!;
 
   @override
-  String serializeSetting(JapaneseFontChoice value) => _fontToName[value]!;
+  String serializeSetting(final JapaneseFontChoice value) =>
+      _fontToName[value]!;
 
   @override
-  JapaneseFontChoice deserializeSetting(String s) => _nameToFont[s]!;
+  JapaneseFontChoice deserializeSetting(final String s) => _nameToFont[s]!;
 }
 
 class JapaneseFont extends SharedPrefItem<JapaneseFontChoice> {

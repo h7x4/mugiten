@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:mugiten/components/library/library_list_entry_tile.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-import '../../components/library/library_list_entry_tile.dart';
 
 const int pageSize = 50;
 const int invisibleItemsThreshold = 25;
@@ -19,9 +18,9 @@ class LibraryContentView extends StatefulWidget {
 
 class _LibraryContentViewState extends State<LibraryContentView> {
   late final _pagingController = PagingController<int, LibraryListEntry>(
-    getNextPageKey: (state) =>
+    getNextPageKey: (final state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
-    fetchPage: (pageKey) => GetIt.instance
+    fetchPage: (final pageKey) => GetIt.instance
         .get<Database>()
         .libraryListGetListEntries(
           widget.library.name,
@@ -29,7 +28,7 @@ class _LibraryContentViewState extends State<LibraryContentView> {
           pageSize: pageSize,
           includeSearchResult: true,
         )
-        .then((page) => page?.entries ?? []),
+        .then((final page) => page?.entries ?? []),
   );
 
   @override
@@ -38,10 +37,13 @@ class _LibraryContentViewState extends State<LibraryContentView> {
     super.dispose();
   }
 
-  Future<bool> _confirm(BuildContext context, {required Widget content}) async {
+  Future<bool> _confirm(
+    final BuildContext context, {
+    required final Widget content,
+  }) async {
     return await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (final context) => AlertDialog(
             content: content,
             actions: <Widget>[
               TextButton(
@@ -59,7 +61,7 @@ class _LibraryContentViewState extends State<LibraryContentView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.library.name),
@@ -88,24 +90,25 @@ class _LibraryContentViewState extends State<LibraryContentView> {
       ),
       body: PagingListener(
         controller: _pagingController,
-        builder: (context, state, fetchNextPage) =>
+        builder: (final context, final state, final fetchNextPage) =>
             PagedListView<int, LibraryListEntry>.separated(
               state: state,
               fetchNextPage: fetchNextPage,
               builderDelegate: PagedChildBuilderDelegate<LibraryListEntry>(
                 invisibleItemsThreshold: invisibleItemsThreshold,
-                itemBuilder: (context, entry, index) => LibraryListEntryTile(
-                  key: ValueKey(
-                    entry.jmdictEntryId != null
-                        ? 'jmdict-${entry.jmdictEntryId}'
-                        : 'kanji-${entry.kanji}',
-                  ),
-                  index: index,
-                  entry: entry,
-                  library: widget.library,
-                  onDelete: () => _pagingController.refresh(),
-                  onUpdate: () => _pagingController.refresh(),
-                ),
+                itemBuilder: (final context, final entry, final index) =>
+                    LibraryListEntryTile(
+                      key: ValueKey(
+                        entry.jmdictEntryId != null
+                            ? 'jmdict-${entry.jmdictEntryId}'
+                            : 'kanji-${entry.kanji}',
+                      ),
+                      index: index,
+                      entry: entry,
+                      library: widget.library,
+                      onDelete: () => _pagingController.refresh(),
+                      onUpdate: () => _pagingController.refresh(),
+                    ),
                 firstPageErrorIndicatorBuilder: (_) =>
                     ErrorWidget(_pagingController.error!),
                 noItemsFoundIndicatorBuilder: (_) =>

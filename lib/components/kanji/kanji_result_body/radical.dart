@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../routing/routes.dart';
-import '../../../settings.dart';
 
 class Radical extends StatelessWidget {
   final String radical;
@@ -10,7 +9,7 @@ class Radical extends StatelessWidget {
   const Radical({required this.radical, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<KanjiResultThemeExtension>()!;
 
     return InkWell(

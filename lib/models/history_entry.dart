@@ -8,7 +8,7 @@ extension HistoryEntryExt on DatabaseExecutor {
   // Query
 
   Future<HistoryEntry?> historyEntryGetWord(
-    String word,
+    final String word,
     // bool includeSearchResult = false,
   ) async {
     assert(word.isNotEmpty, 'Word must not be empty');
@@ -34,7 +34,7 @@ extension HistoryEntryExt on DatabaseExecutor {
               orderBy: 'timestamp DESC',
             ))
             .map(
-              (e) =>
+              (final e) =>
                   DateTime.fromMillisecondsSinceEpoch(e['timestamp']! as int),
             )
             .toList();
@@ -51,8 +51,8 @@ extension HistoryEntryExt on DatabaseExecutor {
   }
 
   Future<HistoryEntry?> historyEntryGetKanji(
-    String kanji, {
-    bool includeSearchResult = false,
+    final String kanji, {
+    final bool includeSearchResult = false,
   }) async {
     assert(kanji.runes.length == 1, 'Kanji must be a single character');
 
@@ -76,7 +76,7 @@ extension HistoryEntryExt on DatabaseExecutor {
               orderBy: 'timestamp DESC',
             ))
             .map(
-              (e) =>
+              (final e) =>
                   DateTime.fromMillisecondsSinceEpoch(e['timestamp']! as int),
             )
             .toList();
@@ -94,13 +94,19 @@ extension HistoryEntryExt on DatabaseExecutor {
   }
 
   Future<List<HistoryEntry>> historyEntryGetAll({
-    int? page,
-    int? pageSize,
+    final int? page,
+    final int? pageSize,
     // TODO: implement join against jadb
     // bool includeSearchResult = false,
   }) async {
-    assert(page == null || page >= 0);
-    assert(pageSize == null || pageSize > 0);
+    assert(
+      page == null || page >= 0,
+      'Page must be a non-negative integer or null',
+    );
+    assert(
+      pageSize == null || pageSize > 0,
+      'Page size must be a positive integer or null',
+    );
     assert(
       pageSize != null || page == null,
       'pageSize must be provided if page is provided',
@@ -121,10 +127,10 @@ extension HistoryEntryExt on DatabaseExecutor {
       [?pageSize, if (page != null) page * pageSize!],
     );
 
-    final List<HistoryEntry> entries = result.map((e) {
+    final List<HistoryEntry> entries = result.map((final e) {
       final timestamps = (e['timestamps'] as String)
           .split(',')
-          .map((ts) => DateTime.fromMillisecondsSinceEpoch(int.parse(ts)))
+          .map((final ts) => DateTime.fromMillisecondsSinceEpoch(int.parse(ts)))
           .toList();
 
       if (e['kanji'] != null) {
@@ -147,7 +153,7 @@ extension HistoryEntryExt on DatabaseExecutor {
 
   Future<int> historyEntryAmount({
     /// Whether to ignore duplicate searches
-    bool unique = true,
+    final bool unique = true,
   }) async {
     late final int count;
 
@@ -170,7 +176,7 @@ extension HistoryEntryExt on DatabaseExecutor {
 
   // Modification
 
-  Future<void> historyEntryInsertKanji(String kanji) async {
+  Future<void> historyEntryInsertKanji(final String kanji) async {
     final DateTime timestamp = DateTime.now();
 
     final existingEntry = await query(
@@ -202,7 +208,10 @@ extension HistoryEntryExt on DatabaseExecutor {
     );
   }
 
-  Future<void> historyEntryInsertWord(String word, {String? language}) async {
+  Future<void> historyEntryInsertWord(
+    final String word, {
+    final String? language,
+  }) async {
     final DateTime timestamp = DateTime.now();
 
     final existingEntry = await query(
@@ -236,7 +245,7 @@ extension HistoryEntryExt on DatabaseExecutor {
     );
   }
 
-  Future<bool> historyEntryDelete(int entryId) async {
+  Future<bool> historyEntryDelete(final int entryId) async {
     await delete(
       HistoryTableNames.historyEntryTimestamp,
       where: 'entryId = ?',
@@ -265,8 +274,8 @@ extension HistoryEntryExt on DatabaseExecutor {
   }
 
   Future<bool> historyEntryDeleteTimestamp(
-    int entryId,
-    DateTime timestamp,
+    final int entryId,
+    final DateTime timestamp,
   ) async {
     final timestampCount = await query(
       HistoryTableNames.historyEntryTimestamp,
@@ -298,7 +307,7 @@ extension HistoryEntryExt on DatabaseExecutor {
   }
 
   Future<void> historyEntryInsertManyFromJson(
-    List<Map<String, Object?>> json,
+    final List<Map<String, Object?>> json,
   ) async {
     final b = batch();
     for (final jsonObject in json) {
@@ -337,7 +346,7 @@ extension HistoryEntryExt on DatabaseExecutor {
         id = existingEntry.first['entryId']! as int;
       }
       final List<int> timestamps = (jsonObject['timestamps']! as List)
-          .map((ts) => ts as int)
+          .map((final ts) => ts as int)
           .toList();
       for (final timestamp in timestamps) {
         b.insert(
@@ -402,14 +411,16 @@ class HistoryEntry {
   bool get isKanji => word == null;
   int get timestampCount => timestamps.length;
   DateTime get lastTimestamp => timestamps.isNotEmpty
-      ? timestamps.reduce((a, b) => a.isAfter(b) ? a : b)
+      ? timestamps.reduce((final a, final b) => a.isAfter(b) ? a : b)
       : DateTime.fromMillisecondsSinceEpoch(0);
 
   Map<String, Object?> toJson() {
     return {
       'word': word,
       'kanji': kanji,
-      'timestamps': timestamps.map((ts) => ts.millisecondsSinceEpoch).toList(),
+      'timestamps': timestamps
+          .map((final ts) => ts.millisecondsSinceEpoch)
+          .toList(),
     };
   }
 }

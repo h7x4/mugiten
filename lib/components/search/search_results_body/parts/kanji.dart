@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
-
-import '../../../../routing/routes.dart';
-import '../../../../settings.dart';
 
 class KanjiRow extends StatelessWidget {
   final List<String> kanji;
   final double fontSize;
   const KanjiRow({super.key, required this.kanji, this.fontSize = 20});
 
-  Widget _kanjiBox(BuildContext context, String kanji) {
+  Widget _kanjiBox(final BuildContext context, final String kanji) {
     final colors = Theme.of(context).extension<MenuGreyLightThemeExtension>()!;
 
     return UnconstrainedBox(
@@ -39,7 +38,7 @@ class KanjiRow extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

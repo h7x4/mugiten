@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -5,14 +7,13 @@ import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart' show JaDBConnection;
 import 'package:mdi/mdi.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
+import 'package:mugiten/components/search/search_results_body/search_card.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/services/datetime.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
 import 'package:sqflite/sqflite.dart';
-
-import '../../components/search/search_results_body/search_card.dart';
 
 const int pageSize = 50;
 const int invisibleItemsThreshold = 25;
@@ -31,16 +32,16 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
   HistoryEntry? historyEntry;
 
   late final _pagingController = PagingController<int, WordSearchResult>(
-    getNextPageKey: (state) =>
+    getNextPageKey: (final state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
-    fetchPage: (pageKey) => GetIt.instance
+    fetchPage: (final pageKey) => GetIt.instance
         .get<Database>()
         .jadbSearchWord(
           widget.searchTerm,
           page: pageKey - 1,
           pageSize: pageSize,
         )
-        .then((v) => v ?? <WordSearchResult>[]),
+        .then((final v) => v ?? <WordSearchResult>[]),
   );
 
   @override
@@ -48,29 +49,33 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
     super.initState();
 
     if (!incognitoModeEnabled.value && !addedToDatabase) {
-      GetIt.instance
-          .get<Database>()
-          .historyEntryInsertWord(widget.searchTerm)
-          .then(
-            (_) => GetIt.instance.get<Database>().historyEntryGetWord(
-              widget.searchTerm,
+      unawaited(
+        GetIt.instance
+            .get<Database>()
+            .historyEntryInsertWord(widget.searchTerm)
+            .then(
+              (_) => GetIt.instance.get<Database>().historyEntryGetWord(
+                widget.searchTerm,
+              ),
+            )
+            .then(
+              (final entry) => setState(() {
+                addedToDatabase = true;
+                historyEntry = entry;
+              }),
             ),
-          )
-          .then(
-            (entry) => setState(() {
-              addedToDatabase = true;
-              historyEntry = entry;
-            }),
-          );
+      );
     } else {
-      GetIt.instance
-          .get<Database>()
-          .historyEntryGetWord(widget.searchTerm)
-          .then(
-            (entry) => setState(() {
-              historyEntry = entry;
-            }),
-          );
+      unawaited(
+        GetIt.instance
+            .get<Database>()
+            .historyEntryGetWord(widget.searchTerm)
+            .then(
+              (final entry) => setState(() {
+                historyEntry = entry;
+              }),
+            ),
+      );
     }
   }
 
@@ -81,7 +86,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final colors = Theme.of(context).extension<MenuGreyNormalThemeExtension>()!;
     return Scaffold(
       appBar: AppBar(
@@ -98,21 +103,23 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                        appBar: AppBar(title: const Text('Last searched')),
-                        body: ListView(
-                          children: historyEntry!.timestamps
-                              .map(
-                                (ts) => ListTile(
-                                  title: Text(
-                                    '${formatDate(ts)}    ${formatTime(ts)}',
+                  unawaited(
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (final context) => Scaffold(
+                          appBar: AppBar(title: const Text('Last searched')),
+                          body: ListView(
+                            children: historyEntry!.timestamps
+                                .map(
+                                  (final ts) => ListTile(
+                                    title: Text(
+                                      '${formatDate(ts)}    ${formatTime(ts)}',
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
+                                )
+                                .toList(),
+                          ),
                         ),
                       ),
                     ),
@@ -130,8 +137,8 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
         future: GetIt.instance
             .get<Database>()
             .jadbSearchWordCount(widget.searchTerm)
-            .then((v) => v ?? 0),
-        builder: (context, snapshot) {
+            .then((final v) => v ?? 0),
+        builder: (final context, final snapshot) {
           if (snapshot.hasError) return ErrorWidget(snapshot.error!);
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -151,17 +158,18 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
               Expanded(
                 child: PagingListener(
                   controller: _pagingController,
-                  builder: (context, state, fetchNextPage) =>
+                  builder: (final context, final state, final fetchNextPage) =>
                       PagedListView<int, WordSearchResult>(
                         state: state,
                         fetchNextPage: fetchNextPage,
                         builderDelegate: PagedChildBuilderDelegate(
                           invisibleItemsThreshold: invisibleItemsThreshold,
-                          itemBuilder: (context, item, index) =>
-                              SearchResultCard(
-                                result: item,
-                                initiallyExpanded: singleItem,
-                              ),
+                          itemBuilder:
+                              (final context, final item, final index) =>
+                                  SearchResultCard(
+                                    result: item,
+                                    initiallyExpanded: singleItem,
+                                  ),
                         ),
                       ),
                 ),

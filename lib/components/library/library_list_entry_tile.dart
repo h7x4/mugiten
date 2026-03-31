@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/components/common/kanji_box.dart';
 import 'package:mugiten/components/search/search_results_body/search_card.dart';
 import 'package:mugiten/models/library_list.dart';
+import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/services/clipboard.dart';
+import 'package:mugiten/settings.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-import '../../routing/routes.dart';
-import '../../services/clipboard.dart';
-import '../../settings.dart';
-import '../common/kanji_box.dart';
 
 class LibraryListEntryTile extends StatelessWidget {
   final int? index;
@@ -27,13 +26,13 @@ class LibraryListEntryTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return entry.kanji != null
         ? _kanjiTile(context, index, entry.kanji!)
         : _jmdictEntryTile(context, index, entry);
   }
 
-  Widget _index(BuildContext context, int index) {
+  Widget _index(final BuildContext context, final int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Text(
@@ -60,7 +59,11 @@ class LibraryListEntryTile extends StatelessWidget {
     );
   }
 
-  Widget _kanjiTile(BuildContext context, int? index, String kanji) {
+  Widget _kanjiTile(
+    final BuildContext context,
+    final int? index,
+    final String kanji,
+  ) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
@@ -79,7 +82,7 @@ class LibraryListEntryTile extends StatelessWidget {
         onLongPress: () => copyToClipboard(context, kanji),
         title: Row(
           children: [
-            SizedBox(width: 15),
+            const SizedBox(width: 15),
             KanjiBox.headline4(context: context, kanji: kanji),
           ],
         ),
@@ -88,9 +91,9 @@ class LibraryListEntryTile extends StatelessWidget {
   }
 
   Widget _jmdictEntryTile(
-    BuildContext context,
-    int? index,
-    LibraryListEntry entry,
+    final BuildContext context,
+    final int? index,
+    final LibraryListEntry entry,
   ) {
     return SearchResultCard(
       result: entry.wordSearchResult!,

@@ -3,9 +3,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mugiten/components/common/async_text_form_field.dart';
 import 'package:mugiten/models/library_list.dart';
+import 'package:mugiten/routing/routes.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-import '../../routing/routes.dart';
 
 class LibraryListTile extends StatelessWidget {
   final Widget? leading;
@@ -24,7 +23,7 @@ class LibraryListTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
@@ -101,12 +100,12 @@ class _RenameLibraryDialogState extends State<_RenameLibraryDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AlertDialog(
       title: const Text('Rename library'),
       content: AsyncTextFormField(
         controller: controller,
-        asyncValidator: (value) async {
+        asyncValidator: (final value) async {
           if (value == null || value.isEmpty) {
             return 'Please enter a name';
           }

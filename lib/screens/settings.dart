@@ -30,10 +30,13 @@ class _SettingsViewState extends State<SettingsView> {
   bool dataExportIsLoading = false;
   bool dataImportIsLoading = false;
 
-  Future<bool> confirm(BuildContext context, {required Widget content}) async {
+  Future<bool> confirm(
+    final BuildContext context, {
+    required final Widget content,
+  }) async {
     return await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (final context) => AlertDialog(
             content: content,
             actions: <Widget>[
               TextButton(
@@ -50,7 +53,7 @@ class _SettingsViewState extends State<SettingsView> {
         false;
   }
 
-  Future<void> clearHistory(BuildContext context) async {
+  Future<void> clearHistory(final BuildContext context) async {
     final historyCount = await GetIt.instance
         .get<Database>()
         .historyEntryAmount();
@@ -72,7 +75,7 @@ class _SettingsViewState extends State<SettingsView> {
     showSnackbar(context, 'Cleared history');
   }
 
-  Future<void> changeFont(BuildContext context) async {
+  Future<void> changeFont(final BuildContext context) async {
     final int? i = await _chooseFromList(
       list: [for (final font in JapaneseFontChoice.values) font.name],
       chosen: japaneseFont.value.index,
@@ -84,16 +87,19 @@ class _SettingsViewState extends State<SettingsView> {
     }
   }
 
-  Future<void> changeQuickAddLibraryList(BuildContext context) async {
+  Future<void> changeQuickAddLibraryList(final BuildContext context) async {
     final libraryLists = await GetIt.instance
         .get<Database>()
         .libraryListGetLists();
     if (!context.mounted) return;
     final int? i = await _chooseFromList(
-      list: ['None', ...libraryLists.map((e) => e.name)],
+      list: ['None', ...libraryLists.map((final e) => e.name)],
       chosen: quickAddLibraryList.value == null
           ? 0
-          : libraryLists.indexWhere((l) => l.name == quickAddLibraryList.value) + 1,
+          : libraryLists.indexWhere(
+                  (final l) => l.name == quickAddLibraryList.value,
+                ) +
+                1,
       title: 'Choose library for quick add',
     )(context);
     if (i != null) {
@@ -103,7 +109,7 @@ class _SettingsViewState extends State<SettingsView> {
     }
   }
 
-  Future<void> exportHandler(BuildContext context) async {
+  Future<void> exportHandler(final BuildContext context) async {
     late final File zipfile;
     try {
       setState(() => dataExportIsLoading = true);
@@ -133,7 +139,7 @@ class _SettingsViewState extends State<SettingsView> {
     }
   }
 
-  Future<void> importHandler(BuildContext context) async {
+  Future<void> importHandler(final BuildContext context) async {
     final saveFile = await FilePicker.platform.pickFiles(
       dialogTitle: 'Import data',
       type: FileType.custom,
@@ -143,7 +149,7 @@ class _SettingsViewState extends State<SettingsView> {
       return;
     }
 
-    assert(saveFile.files.length == 1);
+    assert(saveFile.files.length == 1, 'Multiple files selected for import');
 
     final filepath = saveFile.files.first.path;
 
@@ -163,18 +169,18 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future<int?> Function(BuildContext) _chooseFromList({
-    required List<String> list,
-    int? chosen,
-    String? title,
+    required final List<String> list,
+    final int? chosen,
+    final String? title,
   }) =>
-      (context) => Navigator.push<int>(
+      (final context) => Navigator.push<int>(
         context,
         MaterialPageRoute(
-          builder: (context) => Scaffold(
+          builder: (final context) => Scaffold(
             appBar: AppBar(title: title == null ? null : Text(title)),
             body: DenshiJishoBackground(
               child: ListView.builder(
-                itemBuilder: (context, i) => ListTile(
+                itemBuilder: (final context, final i) => ListTile(
                   title: Text(list[i]),
                   trailing: (chosen != null && chosen == i)
                       ? const Icon(Icons.check)
@@ -189,7 +195,7 @@ class _SettingsViewState extends State<SettingsView> {
       );
 
   @override
-  Widget build(BuildContext context) => SettingsList(
+  Widget build(final BuildContext context) => SettingsList(
     lightTheme: SettingsThemeData(
       settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
     ),
@@ -201,7 +207,7 @@ class _SettingsViewState extends State<SettingsView> {
     sections: _sections(context),
   );
 
-  List<SettingsSection> _sections(BuildContext context) => [
+  List<SettingsSection> _sections(final BuildContext context) => [
     SettingsSection(
       title: const Text('Dictionary'),
       tiles: <SettingsTile>[
@@ -211,7 +217,7 @@ class _SettingsViewState extends State<SettingsView> {
             'Display romaji instead of kana for word readings',
           ),
           leading: const Icon(Mdi.alphabetical),
-          onToggle: (b) => setState(() => romajiEnabled.value = b),
+          onToggle: (final b) => setState(() => romajiEnabled.value = b),
           initialValue: romajiEnabled.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
@@ -242,7 +248,7 @@ class _SettingsViewState extends State<SettingsView> {
           title: const Text('Automatic theme'),
           description: const Text('Let theme be determined by system'),
           leading: const Icon(Icons.brightness_auto),
-          onToggle: (b) {
+          onToggle: (final b) {
             setState(() => autoThemeEnabled.value = b);
             GetIt.instance.get<ThemeController>().updateThemeMode();
           },
@@ -252,7 +258,7 @@ class _SettingsViewState extends State<SettingsView> {
         SettingsTile.switchTile(
           title: const Text('Dark Theme'),
           leading: const Icon(Icons.dark_mode),
-          onToggle: (b) {
+          onToggle: (final b) {
             setState(() => darkThemeEnabled.value = b);
             GetIt.instance.get<ThemeController>().updateThemeMode();
           },
@@ -302,7 +308,7 @@ class _SettingsViewState extends State<SettingsView> {
           description: const Text(
             'Useful for reviewing search history without creating clutter',
           ),
-          onToggle: (b) => setState(() => incognitoModeEnabled.value = b),
+          onToggle: (final b) => setState(() => incognitoModeEnabled.value = b),
           initialValue: incognitoModeEnabled.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
@@ -312,7 +318,8 @@ class _SettingsViewState extends State<SettingsView> {
           description: const Text(
             'Useful if you keep accidentally activating system gestures',
           ),
-          onToggle: (b) => setState(() => reduceKanjiDrawingBoardSize.value = b),
+          onToggle: (final b) =>
+              setState(() => reduceKanjiDrawingBoardSize.value = b),
           initialValue: reduceKanjiDrawingBoardSize.value,
           activeSwitchColor: mugitenWheatBackground,
         ),
@@ -350,13 +357,14 @@ class _SettingsViewState extends State<SettingsView> {
           leading: const Icon(Icons.copyright),
           title: const Text('About'),
           description: const Text('Info about Mugiten and its dependencies'),
-          onPressed: (c) => Navigator.pushNamed(context, Routes.aboutLicenses),
+          onPressed: (final c) =>
+              Navigator.pushNamed(context, Routes.aboutLicenses),
         ),
         SettingsTile(
           leading: const Icon(Mdi.database),
           title: const Text('Datasources'),
           description: const Text('List of datasources used in Mugiten'),
-          onPressed: (c) =>
+          onPressed: (final c) =>
               Navigator.pushNamed(context, Routes.aboutDatasources),
         ),
         SettingsTile(
@@ -365,13 +373,14 @@ class _SettingsViewState extends State<SettingsView> {
           description: const Text(
             'See what changed between different versions of the application',
           ),
-          onPressed: (c) => Navigator.pushNamed(context, Routes.aboutChangelog),
+          onPressed: (final c) =>
+              Navigator.pushNamed(context, Routes.aboutChangelog),
         ),
         SettingsTile(
           leading: const Icon(Mdi.git),
           title: const Text('Repository'),
           description: const Text('https://git.pvv.ntnu.no/mugiten'),
-          onPressed: (c) =>
+          onPressed: (final c) =>
               launchUrl(Uri.parse('https://git.pvv.ntnu.no/mugiten')),
         ),
       ],

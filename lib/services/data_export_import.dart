@@ -21,20 +21,19 @@ extension ArchiveFormat on Directory {
   Directory get libraryDir => Directory(uri.resolve('library').toFilePath());
 }
 
-Future<Directory> tmpdir() async =>
-    Directory.systemTemp.createTemp('mugiten_data_');
+Future<Directory> tmpdir() => Directory.systemTemp.createTemp('mugiten_data_');
 
-Future<Directory> unpackZipToTempDir(String zipFilePath) async {
+Future<Directory> unpackZipToTempDir(final String zipFilePath) async {
   final outputDir = await tmpdir();
   await extractFileToDisk(zipFilePath, outputDir.path);
   return outputDir;
 }
 
-Future<File> packZip(Directory dir, {File? outputFile}) async {
+Future<File> packZip(final Directory dir, {File? outputFile}) async {
   if (outputFile == null || !outputFile.existsSync()) {
     final outputDir = await tmpdir();
-    outputFile = File(outputDir.uri.resolve('mugiten_data.zip').toFilePath());
-    outputFile.createSync();
+    outputFile = File(outputDir.uri.resolve('mugiten_data.zip').toFilePath())
+      ..createSync();
   }
 
   final archive = createArchiveFromDirectory(dir, includeDirName: false);
@@ -55,11 +54,11 @@ String getExportFileNameNoSuffix() {
   return 'mugiten_data_$formattedDate';
 }
 
-Future<File> exportData(DatabaseExecutor db) async {
+Future<File> exportData(final DatabaseExecutor db) async {
   final dir = await tmpdir();
 
-  final libraryDir = Directory(dir.uri.resolve('library').toFilePath());
-  libraryDir.createSync();
+  final libraryDir = Directory(dir.uri.resolve('library').toFilePath())
+    ..createSync();
 
   await Future.wait([
     exportDataFormatVersionTo(dir),
@@ -72,7 +71,7 @@ Future<File> exportData(DatabaseExecutor db) async {
   return zipFile;
 }
 
-Future<void> importData(Database db, File zipFile) async {
+Future<void> importData(final Database db, final File zipFile) async {
   final dir = await unpackZipToTempDir(zipFile.path);
 
   await Future.wait([
@@ -89,13 +88,13 @@ Future<void> importData(Database db, File zipFile) async {
 
 const int expectedDataFormatVersion = 1;
 
-Future<void> exportDataFormatVersionTo(Directory dir) async {
-  final file = dir.versionFile;
-  file.createSync();
-  file.writeAsStringSync(expectedDataFormatVersion.toString());
+Future<void> exportDataFormatVersionTo(final Directory dir) async {
+  dir.versionFile
+    ..createSync()
+    ..writeAsStringSync(expectedDataFormatVersion.toString());
 }
 
-Future<int> importDataFormatVersionFrom(File file) async {
+Future<int> importDataFormatVersionFrom(final File file) async {
   final String content = file.readAsStringSync();
   return int.parse(content);
 }
@@ -104,34 +103,42 @@ Future<int> importDataFormatVersionFrom(File file) async {
 // HISTORY //
 /////////////
 
-Future<void> exportHistoryTo(DatabaseExecutor db, Directory dir) async {
-  final file = dir.historyFile;
-  file.createSync();
+Future<void> exportHistoryTo(
+  final DatabaseExecutor db,
+  final Directory dir,
+) async {
+  final file = dir.historyFile..createSync();
 
   final List<Map<String, Object?>> jsonEntries = (await db.historyEntryGetAll())
-      .map((e) => e.toJson())
+      .map((final e) => e.toJson())
       .toList();
 
   file.writeAsStringSync(jsonEncode(jsonEntries));
 }
 
-Future<void> importHistoryFrom(Database db, File file) async {
+Future<void> importHistoryFrom(final Database db, final File file) async {
   final String content = file.readAsStringSync();
   final List<Map<String, Object?>> json = (jsonDecode(content) as List)
-      .map((h) => h as Map<String, Object?>)
+      .map((final h) => h as Map<String, Object?>)
       .toList();
   // log('Importing ${json.length} entries from ${file.path}');
-  await db.transaction((txn) => txn.historyEntryInsertManyFromJson(json));
+  await db.transaction((final txn) => txn.historyEntryInsertManyFromJson(json));
 }
 
 ///////////////////
 // LIBRARY LISTS //
 ///////////////////
 
-Future<void> exportLibraryListsTo(DatabaseExecutor db, Directory dir) async {
+Future<void> exportLibraryListsTo(
+  final DatabaseExecutor db,
+  final Directory dir,
+) async {
   final libraryNames = await db
       .query(LibraryListTableNames.libraryList, columns: ['name'])
-      .then((result) => result.map((row) => row['name'] as String).toList());
+      .then(
+        (final result) =>
+            result.map((final row) => row['name'] as String).toList(),
+      );
 
   await Future.wait([
     for (final libraryName in libraryNames)
@@ -140,9 +147,9 @@ Future<void> exportLibraryListsTo(DatabaseExecutor db, Directory dir) async {
 }
 
 Future<void> exportLibraryListTo(
-  DatabaseExecutor db,
-  String libraryName,
-  Directory dir,
+  final DatabaseExecutor db,
+  final String libraryName,
+  final Directory dir,
 ) async {
   final file = File(dir.uri.resolve('$libraryName.json').toFilePath());
   await file.create();
@@ -150,20 +157,23 @@ Future<void> exportLibraryListTo(
   // TODO: properly null check
   final entries = (await db.libraryListGetListEntries(
     libraryName,
-  ))!.entries.map((e) => e.toJson()).toList();
+  ))!.entries.map((final e) => e.toJson()).toList();
 
   await file.writeAsString(jsonEncode(entries));
 }
 
 // TODO: how do we handle lists that already exist? There seems to be no good way to merge them?
 Future<void> importLibraryListsFrom(
-  DatabaseExecutor db,
-  Directory libraryListsDir,
+  final DatabaseExecutor db,
+  final Directory libraryListsDir,
 ) async {
   for (final file in libraryListsDir.listSync()) {
     if (file is! File) continue;
 
-    assert(file.path.endsWith('.json'));
+    assert(
+      file.path.endsWith('.json'),
+      'Expected all files in library directory to be json files, but found ${file.path}',
+    );
 
     final libraryName = file.uri.pathSegments.last.replaceFirst(
       RegExp(r'\.json$'),
@@ -188,7 +198,7 @@ Future<void> importLibraryListsFrom(
 
     final content = await file.readAsString();
     final List<Map<String, Object?>> jsonEntries = (jsonDecode(content) as List)
-        .map((e) => e as Map<String, Object?>)
+        .map((final e) => e as Map<String, Object?>)
         .toList();
 
     await db.libraryListInsertJsonEntriesForSingleList(

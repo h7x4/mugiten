@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
 
-import 'sense/sense.dart';
+import 'package:mugiten/components/search/search_results_body/parts/sense/sense.dart';
 
 class Senses extends StatelessWidget {
   final List<WordSearchSense> senses;
@@ -13,7 +13,7 @@ class Senses extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(final BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: _senseWidgets,
   );

@@ -1,12 +1,13 @@
+import 'dart:async';
+
 import 'package:animated_size_and_fade/animated_size_and_fade.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
+import 'package:mugiten/components/kanji/kanji_search_body/kanji_grid.dart';
+import 'package:mugiten/components/kanji/kanji_search_body/kanji_search_bar.dart';
+import 'package:mugiten/components/kanji/kanji_search_body/kanji_search_options_bar.dart';
 import 'package:sqflite/sqflite.dart';
-
-import 'kanji_search_body/kanji_grid.dart';
-import 'kanji_search_body/kanji_search_bar.dart';
-import 'kanji_search_body/kanji_search_options_bar.dart';
 
 class KanjiSearchBody extends StatefulWidget {
   const KanjiSearchBody({super.key});
@@ -47,10 +48,10 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return PopScope(
       canPop: !_isFocused,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvokedWithResult: (final didPop, final result) {
         if (!didPop) {
           focus.unfocus();
           _kanjiSearchBarState.currentState!.clearText();
@@ -64,7 +65,7 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: AnimatedBuilder(
             animation: _searchbarMovementAnimation,
-            builder: (context, _) {
+            builder: (final context, _) {
               return Container(
                 alignment: _searchbarMovementAnimation.value,
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -73,18 +74,26 @@ class _KanjiSearchBodyState extends State<KanjiSearchBody>
                   children: [
                     Focus(
                       focusNode: focus,
-                      onFocusChange: (hasFocus) {
+                      onFocusChange: (final hasFocus) {
                         if (hasFocus) {
-                          _controller.forward();
-                          setState(() => _isFocused = true);
+                          unawaited(
+                            _controller.forward().then(
+                              (_) => setState(() => _isFocused = true),
+                            ),
+                          );
                         } else {
-                          _controller.reverse();
-                          setState(() => _isFocused = false);
+                          unawaited(
+                            _controller.reverse().then(
+                              (_) => setState(() {
+                                _isFocused = false;
+                              }),
+                            ),
+                          );
                         }
                       },
                       child: KanjiSearchBar(
                         key: _kanjiSearchBarState,
-                        onChanged: (text) => setState(() async {
+                        onChanged: (final text) => setState(() async {
                           suggestions = await GetIt.instance
                               .get<Database>()
                               .filterKanji(text.characters.toList());

@@ -9,8 +9,8 @@ extension LibraryListExt on DatabaseExecutor {
   // Query
 
   Future<List<LibraryList>> libraryListGetLists({
-    int? page,
-    int? pageSize,
+    final int? page,
+    final int? pageSize,
   }) async {
     final result = await rawQuery(
       '''
@@ -33,7 +33,7 @@ extension LibraryListExt on DatabaseExecutor {
 
     return result
         .map(
-          (row) => LibraryList(
+          (final row) => LibraryList(
             name: row['name'] as String,
             totalCount: row['count'] as int? ?? 0,
           ),
@@ -41,7 +41,7 @@ extension LibraryListExt on DatabaseExecutor {
         .toList();
   }
 
-  Future<LibraryList?> libraryListGetList(String listName) async {
+  Future<LibraryList?> libraryListGetList(final String listName) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
 
     final result = await rawQuery(
@@ -70,10 +70,10 @@ extension LibraryListExt on DatabaseExecutor {
   }
 
   Future<LibraryListPage?> libraryListGetListEntries(
-    String listName, {
-    int? page,
-    int? pageSize,
-    bool includeSearchResult = false,
+    final String listName, {
+    final int? page,
+    final int? pageSize,
+    final bool includeSearchResult = false,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     assert(
@@ -141,21 +141,21 @@ extension LibraryListExt on DatabaseExecutor {
     Map<String, KanjiSearchResult>? kanjiResults;
     if (includeSearchResult) {
       final wordResultJmdictIds = entries
-          .where((e) => e['jmdictEntryId'] != null)
-          .map((e) => e['jmdictEntryId'] as int)
+          .where((final e) => e['jmdictEntryId'] != null)
+          .map((final e) => e['jmdictEntryId'] as int)
           .toSet();
 
       wordResults = await jadbGetManyWordsByIds(wordResultJmdictIds);
 
       final kanjiResultKanjis = entries
-          .where((e) => e['kanji'] != null)
-          .map((e) => e['kanji'] as String)
+          .where((final e) => e['kanji'] != null)
+          .map((final e) => e['kanji'] as String)
           .toSet();
 
       kanjiResults = await jadbGetManyKanji(kanjiResultKanjis);
     }
 
-    final result = entries.map((entry) {
+    final result = entries.map((final entry) {
       if (entry['jmdictEntryId'] != null) {
         return LibraryListEntry.fromJmdictId(
           jmdictEntryId: entry['jmdictEntryId'] as int,
@@ -187,8 +187,8 @@ extension LibraryListExt on DatabaseExecutor {
   }
 
   Future<Map<String, bool>> libraryListAllListsContain({
-    int? jmdictEntryId,
-    String? kanji,
+    final int? jmdictEntryId,
+    final String? kanji,
   }) async {
     final result = await rawQuery(
       '''
@@ -211,9 +211,9 @@ extension LibraryListExt on DatabaseExecutor {
   }
 
   Future<bool> libraryListListContains(
-    String listName, {
-    int? jmdictEntryId,
-    String? kanji,
+    final String listName, {
+    final int? jmdictEntryId,
+    final String? kanji,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     final result = await rawQuery(
@@ -230,7 +230,10 @@ extension LibraryListExt on DatabaseExecutor {
     return (result.firstOrNull?['exists'] as int? ?? 0) == 1;
   }
 
-  Future<void> libraryListRenameList(String oldName, String newName) async {
+  Future<void> libraryListRenameList(
+    final String oldName,
+    final String newName,
+  ) async {
     if (oldName.isEmpty) {
       throw ArgumentError('Old library list name must not be empty.');
     }
@@ -251,21 +254,19 @@ extension LibraryListExt on DatabaseExecutor {
       throw ArgumentError('Library list "$newName" already exists.');
     }
 
-    final b = batch();
-
-    b.update(
-      LibraryListTableNames.libraryList,
-      {'name': newName},
-      where: '"name" = ?',
-      whereArgs: [oldName],
-    );
-
-    b.update(
-      LibraryListTableNames.libraryListEntry,
-      {'listName': newName},
-      where: '"listName" = ?',
-      whereArgs: [oldName],
-    );
+    final b = batch()
+      ..update(
+        LibraryListTableNames.libraryList,
+        {'name': newName},
+        where: '"name" = ?',
+        whereArgs: [oldName],
+      )
+      ..update(
+        LibraryListTableNames.libraryListEntry,
+        {'listName': newName},
+        where: '"listName" = ?',
+        whereArgs: [oldName],
+      );
 
     await b.commit();
   }
@@ -279,7 +280,7 @@ extension LibraryListExt on DatabaseExecutor {
     return result.firstOrNull?['count'] as int? ?? 0;
   }
 
-  Future<bool> libraryListExists(String listName) async {
+  Future<bool> libraryListExists(final String listName) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     final result = await rawQuery(
       '''
@@ -298,8 +299,8 @@ extension LibraryListExt on DatabaseExecutor {
 
   /// Inserts a new library list into the database.
   Future<bool> libraryListInsertList(
-    String listName, {
-    bool existsOk = true,
+    final String listName, {
+    final bool existsOk = true,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
 
@@ -319,9 +320,9 @@ extension LibraryListExt on DatabaseExecutor {
 
   /// Deletes a library list by its name.
   Future<bool> libraryListDeleteList(
-    String listName, {
-    bool notEmptyOk = true,
-    bool doesNotExistOk = false,
+    final String listName, {
+    final bool notEmptyOk = true,
+    final bool doesNotExistOk = false,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     assert(listName != 'favourites', 'Cannot delete the "favourites" list.');
@@ -346,8 +347,8 @@ extension LibraryListExt on DatabaseExecutor {
 
   /// Deletes all entries in a library list.
   Future<bool> libraryListDeleteAllEntries(
-    String listName, {
-    bool doesNotExistOk = false,
+    final String listName, {
+    final bool doesNotExistOk = false,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
 
@@ -369,10 +370,10 @@ extension LibraryListExt on DatabaseExecutor {
   /// This function returns false if the position is out of bounds,
   /// if the list does not exist, or if the entry is already a part of the list.
   Future<bool> libraryListInsertEntry(
-    String listName, {
-    int? jmdictEntryId,
-    String? kanji,
-    int? position,
+    final String listName, {
+    final int? jmdictEntryId,
+    final String? kanji,
+    final int? position,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     assert(
@@ -407,20 +408,20 @@ extension LibraryListExt on DatabaseExecutor {
         final prevEntry = entries_[position - 1];
         final nextEntry = entries_[position];
 
-        b.insert(LibraryListTableNames.libraryListEntry, {
-          'listName': listName,
-          'jmdictEntryId': jmdictEntryId,
-          'kanji': kanji,
-          'prevEntryJmdictEntryId': prevEntry.jmdictEntryId,
-          'prevEntryKanji': prevEntry.kanji,
-        });
-
-        b.update(
-          LibraryListTableNames.libraryListEntry,
-          {'prevEntryJmdictEntryId': jmdictEntryId, 'prevEntryKanji': kanji},
-          where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
-          whereArgs: [listName, nextEntry.jmdictEntryId, nextEntry.kanji],
-        );
+        b
+          ..insert(LibraryListTableNames.libraryListEntry, {
+            'listName': listName,
+            'jmdictEntryId': jmdictEntryId,
+            'kanji': kanji,
+            'prevEntryJmdictEntryId': prevEntry.jmdictEntryId,
+            'prevEntryKanji': prevEntry.kanji,
+          })
+          ..update(
+            LibraryListTableNames.libraryListEntry,
+            {'prevEntryJmdictEntryId': jmdictEntryId, 'prevEntryKanji': kanji},
+            where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
+            whereArgs: [listName, nextEntry.jmdictEntryId, nextEntry.kanji],
+          );
 
         await b.commit();
 
@@ -448,9 +449,9 @@ extension LibraryListExt on DatabaseExecutor {
   /// This function returns false if the list does not exist,
   /// or if the entry is not already a part of the list.
   Future<bool> libraryListDeleteEntry(
-    String listName, {
-    int? jmdictEntryId,
-    String? kanji,
+    final String listName, {
+    final int? jmdictEntryId,
+    final String? kanji,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     assert(
@@ -490,7 +491,7 @@ extension LibraryListExt on DatabaseExecutor {
     final prevEntryKanji = entryQuery.first['prevEntryKanji'] as String?;
 
     final LibraryListEntry? nextEntry = nextEntryQuery
-        .map((e) => LibraryListEntry.fromDBMap(e))
+        .map(LibraryListEntry.fromDBMap)
         .firstOrNull;
 
     // TODO: use a transaction instead of a batch
@@ -508,13 +509,13 @@ extension LibraryListExt on DatabaseExecutor {
       );
     }
 
-    b.delete(
-      LibraryListTableNames.libraryListEntry,
-      where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
-      whereArgs: [listName, jmdictEntryId, kanji],
-    );
-
-    b.commit();
+    b
+      ..delete(
+        LibraryListTableNames.libraryListEntry,
+        where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
+        whereArgs: [listName, jmdictEntryId, kanji],
+      )
+      ..commit();
 
     return true;
   }
@@ -528,8 +529,8 @@ extension LibraryListExt on DatabaseExecutor {
   /// in contrast to `libraryListDeleteEntry` which has a time complexity of whatever
   /// SQLite uses for its indices.
   Future<bool> libraryListDeleteEntryByPosition(
-    String listName,
-    int position,
+    final String listName,
+    final int position,
   ) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
 
@@ -564,10 +565,10 @@ extension LibraryListExt on DatabaseExecutor {
   /// This function returns false if the position is out of bounds,
   /// if the list does not exist, or if the entry is not already a part of the list.
   Future<bool> libraryListMoveEntry(
-    String listName,
-    int newPosition, {
-    int? jmdictEntryId,
-    String? kanji,
+    final String listName,
+    final int newPosition, {
+    final int? jmdictEntryId,
+    final String? kanji,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     throw UnimplementedError();
@@ -576,10 +577,10 @@ extension LibraryListExt on DatabaseExecutor {
   /// Appends an entry to the library list if it's not there already,
   /// or removes it if it is. Returns whether the entry is now in the list.
   Future<bool> libraryListToggleEntry(
-    String listName, {
-    int? jmdictEntryId,
-    String? kanji,
-    bool? overrideToggleOn,
+    final String listName, {
+    final int? jmdictEntryId,
+    final String? kanji,
+    final bool? overrideToggleOn,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
 
@@ -622,7 +623,7 @@ extension LibraryListExt on DatabaseExecutor {
   }
 
   /// Verifies the linked list structure of a single library list.
-  Future<bool> libraryListVerifyList(String listName) async {
+  Future<bool> libraryListVerifyList(final String listName) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     throw UnimplementedError();
   }
@@ -634,11 +635,11 @@ extension LibraryListExt on DatabaseExecutor {
   // }
 
   Future<void> libraryListInsertJsonEntriesForSingleList(
-    String listName,
-    List<Map<String, Object?>> jsonEntries,
+    final String listName,
+    final List<Map<String, Object?>> jsonEntries,
   ) async {
     final List<LibraryListEntry> entries = jsonEntries
-        .map((e) => LibraryListEntry.fromJson(e))
+        .map(LibraryListEntry.fromJson)
         .toList();
 
     // TODO: batch
@@ -681,7 +682,7 @@ class LibraryListEntry {
   final KanjiSearchResult? kanjiSearchResult;
 
   LibraryListEntry({
-    DateTime? lastModified,
+    final DateTime? lastModified,
     this.wordSearchResult,
     this.jmdictEntryId,
     this.kanji,
@@ -707,7 +708,7 @@ class LibraryListEntry {
   LibraryListEntry.fromJmdictId({
     required int this.jmdictEntryId,
     this.wordSearchResult,
-    DateTime? lastModified,
+    final DateTime? lastModified,
   }) : lastModified = lastModified ?? DateTime.now(),
        kanji = null,
        kanjiSearchResult = null;
@@ -715,7 +716,7 @@ class LibraryListEntry {
   LibraryListEntry.fromKanji({
     required String this.kanji,
     this.kanjiSearchResult,
-    DateTime? lastModified,
+    final DateTime? lastModified,
   }) : lastModified = lastModified ?? DateTime.now(),
        jmdictEntryId = null,
        wordSearchResult = null;
@@ -726,7 +727,7 @@ class LibraryListEntry {
     'lastModified': lastModified.millisecondsSinceEpoch,
   };
 
-  factory LibraryListEntry.fromJson(Map<String, Object?> json) {
+  factory LibraryListEntry.fromJson(final Map<String, Object?> json) {
     assert(
       (json.containsKey('kanji') && json['kanji'] != null) ||
           (json.containsKey('jmdictEntryId') && json['jmdictEntryId'] != null),
@@ -755,6 +756,6 @@ class LibraryListEntry {
   }
 
   // NOTE: this just happens to be the same as the logic in `fromJson`
-  factory LibraryListEntry.fromDBMap(Map<String, Object?> dbObject) =>
+  factory LibraryListEntry.fromDBMap(final Map<String, Object?> dbObject) =>
       LibraryListEntry.fromJson(dbObject);
 }
