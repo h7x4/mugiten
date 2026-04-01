@@ -34,9 +34,11 @@
       in pkgs.mkShell {
         packages = [
           flutter'
-          pkgs.sqlite-interactive
           androidPkgs.androidsdk
           jdk'
+
+          pkgs.sqlite-interactive
+          pkgs.sqldiff
         ];
         env = {
           ANDROID_SDK_ROOT = "${androidPkgs.androidsdk}/libexec/android-sdk";
