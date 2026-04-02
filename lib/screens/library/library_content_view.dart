@@ -66,26 +66,27 @@ class _LibraryContentViewState extends State<LibraryContentView> {
       appBar: AppBar(
         title: Text(widget.library.name),
         actions: [
-          IconButton(
-            onPressed: () async {
-              final entryCount = widget.library.totalCount;
-              if (!context.mounted) return;
-              final bool userIsSure = await _confirm(
-                context,
-                content: Text(
-                  'Are you sure that you want to clear all $entryCount entries?',
-                ),
-              );
-              if (!userIsSure) return;
+          if (widget.library.name != 'favourites')
+            IconButton(
+              onPressed: () async {
+                final entryCount = widget.library.totalCount;
+                if (!context.mounted) return;
+                final bool userIsSure = await _confirm(
+                  context,
+                  content: Text(
+                    'Are you sure that you want to clear all $entryCount entries?',
+                  ),
+                );
+                if (!userIsSure) return;
 
-              await GetIt.instance.get<Database>().libraryListDeleteAllEntries(
-                widget.library.name,
-              );
+                await GetIt.instance
+                    .get<Database>()
+                    .libraryListDeleteAllEntries(widget.library.name);
 
-              _pagingController.refresh();
-            },
-            icon: const Icon(Icons.delete),
-          ),
+                _pagingController.refresh();
+              },
+              icon: const Icon(Icons.delete),
+            ),
         ],
       ),
       body: PagingListener(
