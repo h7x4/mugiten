@@ -90,7 +90,10 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
     final colors = Theme.of(context).extension<MenuGreyNormalThemeExtension>()!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('"${widget.searchTerm}"'),
+        title: Text(
+          '"${widget.searchTerm}"',
+          style: japaneseFont.value.textStyle,
+        ),
         actions: [
           if (incognitoModeEnabled.value)
             IconButton(
@@ -151,7 +154,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
             children: [
               Center(
                 child: Text(
-                  'Found $searchCount results for "${widget.searchTerm}"',
+                  'Found $searchCount result${searchCount != 1 ? 's' : ''}',
                   style: const TextStyle(fontSize: 10, color: Colors.grey),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jadb/models/word_search/word_search_sense.dart';
 import 'package:mugiten/components/search/search_results_body/parts/sense/english_definitions.dart';
 import 'package:mugiten/components/search/search_results_body/search_card.dart';
+import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
 import 'package:sealed_languages/sealed_languages.dart';
 
@@ -24,25 +25,58 @@ class Sense extends StatelessWidget {
     return str[0].toUpperCase() + str.substring(1);
   }
 
-  List<String> _notes() {
+  final _notesTextStyle = const TextStyle(fontSize: 12);
+  List<Text> _notes() {
     return [
-      ...sense.restrictedToReading.map((final e) => 'Restricted to $e'),
-      ...sense.restrictedToKanji.map((final e) => 'Restricted to $e'),
-      ...sense.fields.map((final e) => 'Field: ${_capitalize(e.description)}'),
-      ...sense.misc.map((final e) => e.description),
-      ...sense.languageSource.map((final e) {
-        final languageName =
-            languageNameMap[e.language.toUpperCase()] ?? e.language;
-
-        if (e.phrase != null) {
-          return 'From $languageName, "${e.phrase}"';
-        } else {
-          return 'From $languageName';
-        }
-      }),
-      ...sense.dialects.map(
-        (final e) => '${_capitalize(e.description)} dialect',
+      ...sense.restrictedToReading.map(
+        (final e) => Text.rich(
+          TextSpan(
+            text: 'Restricted to ',
+            style: _notesTextStyle,
+            children: [
+              TextSpan(
+                text: '"$e"',
+                style: _notesTextStyle.merge(japaneseFont.value.textStyle),
+              ),
+            ],
+          ),
+        ),
       ),
+
+      ...sense.restrictedToKanji.map(
+        (final e) => Text.rich(
+          TextSpan(
+            text: 'Restricted to ',
+            style: _notesTextStyle,
+            children: [
+              TextSpan(
+                text: '"$e"',
+                style: _notesTextStyle.merge(japaneseFont.value.textStyle),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      ...[
+        ...sense.fields.map(
+          (final e) => 'Field: ${_capitalize(e.description)}',
+        ),
+        ...sense.misc.map((final e) => e.description),
+        ...sense.languageSource.map((final e) {
+          final languageName =
+              languageNameMap[e.language.toUpperCase()] ?? e.language;
+
+          if (e.phrase != null) {
+            return 'From $languageName, "${e.phrase}"';
+          } else {
+            return 'From $languageName';
+          }
+        }),
+        ...sense.dialects.map(
+          (final e) => '${_capitalize(e.description)} dialect',
+        ),
+      ].map((final e) => Text(e, style: _notesTextStyle)),
     ];
   }
 
@@ -77,9 +111,9 @@ class Sense extends StatelessWidget {
                   if (_notes().isNotEmpty)
                     Container(
                       margin: const EdgeInsets.only(top: 5),
-                      child: Text(
-                        _notes().join('\n'),
-                        style: const TextStyle(fontSize: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: _notes(),
                       ),
                     ),
                   if (sense.antonyms.isNotEmpty &&
