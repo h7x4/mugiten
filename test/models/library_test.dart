@@ -42,26 +42,27 @@ Future<Database> createDatabaseCopy({
 }
 
 Future<void> insertTestData(final Database db) async {
-  final libraryList1 = await db.libraryListInsertList('Test Library 1');
-  assert(libraryList1 == true);
+  const listNames = ['Test Library 1', 'Test Library 2', 'Test Library 3'];
 
-  await db.libraryListInsertEntry(
-    'Test Library 1',
-    jmdictEntryId: null,
-    kanji: '漢',
-  );
+  for (final listName in listNames) {
+    await db.libraryListInsertList(listName);
+    final exists = await db.libraryListExists(listName);
+    assert(exists, 'Library list "$listName" does not exist after insertion');
+  }
 
-  await db.libraryListInsertEntry(
-    'Test Library 1',
-    jmdictEntryId: null,
-    kanji: '字',
-  );
+  for (final kanji in ['漢', '字', '学', '習']) {
+    await db.libraryListInsertEntry(
+      'Test Library 1',
+      jmdictEntryId: null,
+      kanji: kanji,
+    );
+  }
 }
 
 void main() {
   late final String libsqlitePath;
   late final String jadbPath;
-  late final Database database;
+  late Database database;
 
   setUpAll(() {
     if (!Platform.environment.containsKey('LIBSQLITE_PATH')) {
@@ -88,8 +89,6 @@ void main() {
     );
 
     GetIt.instance.registerSingleton<Database>(database);
-
-    await insertTestData(database);
   });
 
   tearDown(() async {
@@ -104,7 +103,132 @@ void main() {
     }
   });
 
-  test('Database is open', () async {
+  test('Database is open', () {
     expect(database.isOpen, isTrue);
+  });
+
+  test('Can insert and query library list', () async {
+    await insertTestData(database);
+
+    final libraryExists = await database.libraryListExists('Test Library 1');
+    expect(libraryExists, isTrue);
+
+    final libraryLists = await database.libraryListGetLists();
+    expect(libraryLists.length, 4);
+    expect(libraryLists[0].name, 'favourites');
+    expect(libraryLists[1].name, 'Test Library 1');
+    expect(libraryLists[2].name, 'Test Library 2');
+    expect(libraryLists[3].name, 'Test Library 3');
+
+    final listPage = (await database.libraryListGetListEntries(
+      'Test Library 1',
+    ))!;
+    expect(listPage.entries.length, 4);
+    expect(listPage.entries[0].kanji, '漢');
+    expect(listPage.entries[1].kanji, '字');
+    expect(listPage.entries[2].kanji, '学');
+    expect(listPage.entries[3].kanji, '習');
+  });
+
+  group('Library list CRUD', () {
+    test('Can create another list', () async {
+      await insertTestData(database);
+
+      await database.libraryListInsertList('Test Library 4');
+
+      final libraryExists = await database.libraryListExists('Test Library 4');
+      expect(libraryExists, isTrue);
+
+      final libraryLists = await database.libraryListGetLists();
+      expect(libraryLists.length, 5);
+    });
+
+    test('Can delete middle list', () async {
+      await insertTestData(database);
+
+      await database.libraryListDeleteList('Test Library 2');
+
+      final libraryExists = await database.libraryListExists('Test Library 2');
+      expect(libraryExists, isFalse);
+
+      final libraryLists = await database.libraryListGetLists();
+      expect(libraryLists.length, 3);
+    });
+    test('Can delete last list', () async {
+      await insertTestData(database);
+
+      await database.libraryListDeleteList('Test Library 3');
+
+      final libraryExists = await database.libraryListExists('Test Library 3');
+      expect(libraryExists, isFalse);
+
+      final libraryLists = await database.libraryListGetLists();
+      expect(libraryLists.length, 3);
+    });
+
+    test('Can rename middle list', () async {
+      await insertTestData(database);
+
+      await database.libraryListRenameList(
+        'Test Library 2',
+        'Renamed Test Library 2',
+      );
+
+      final libraryExists = await database.libraryListExists(
+        'Renamed Test Library 2',
+      );
+      expect(libraryExists, isTrue);
+
+      final libraryLists = await database.libraryListGetLists();
+      expect(libraryLists.length, 4);
+      expect(libraryLists[2].name, 'Renamed Test Library 2');
+    });
+    test('Can rename last list', () async {
+      await insertTestData(database);
+
+      await database.libraryListRenameList(
+        'Test Library 3',
+        'Renamed Test Library 3',
+      );
+
+      final libraryExists = await database.libraryListExists(
+        'Renamed Test Library 3',
+      );
+      expect(libraryExists, isTrue);
+
+      final libraryLists = await database.libraryListGetLists();
+      expect(libraryLists.length, 4);
+      expect(libraryLists[3].name, 'Renamed Test Library 3');
+    });
+
+    test('Can not delete favourites list', () async {
+      await insertTestData(database);
+
+      try {
+        await database.libraryListDeleteList('favourites');
+        fail('Expected an exception when trying to delete the favourites list');
+      } catch (e) {
+        expect(e.toString(), contains('Cannot delete the "favourites" list'));
+      }
+
+      final libraryExists = await database.libraryListExists('favourites');
+      expect(libraryExists, isTrue);
+    });
+    test('Can not rename favourites list', () async {
+      await insertTestData(database);
+
+      try {
+        await database.libraryListRenameList(
+          'favourites',
+          'Renamed Favourites',
+        );
+        fail('Expected an exception when trying to rename the favourites list');
+      } catch (e) {
+        expect(e.toString(), contains('Cannot rename the "favourites" list'));
+      }
+
+      final libraryExists = await database.libraryListExists('favourites');
+      expect(libraryExists, isTrue);
+    });
   });
 }
