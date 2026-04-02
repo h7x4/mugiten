@@ -11,6 +11,7 @@ import 'package:sqflite/sqlite_api.dart';
 
 const int pageSize = 50;
 const int invisibleItemsThreshold = 25;
+const int minutesBetweenTimeDividers = 30;
 
 class HistoryView extends StatefulWidget {
   const HistoryView({super.key});
@@ -80,6 +81,7 @@ class _HistoryViewState extends State<HistoryView> {
                               // No history entries, or the items has not been loaded yet.
                               return const SizedBox.shrink();
                             } else {
+                              // The first item is a dummy null entry, so we need to get the date from the second item.
                               final firstItemDate =
                                   _pagingController.items![1]!.lastTimestamp;
                               return _dateDivider(firstItemDate);
@@ -94,6 +96,7 @@ class _HistoryViewState extends State<HistoryView> {
                           final HistoryEntry? previousSearch =
                               data.length > index + 1 ? data[index + 1] : null;
 
+                          // Date divider
                           if (previousSearch != null &&
                               !dateIsEqual(
                                 search.lastTimestamp,
@@ -102,6 +105,16 @@ class _HistoryViewState extends State<HistoryView> {
                             return _dateDivider(previousSearch.lastTimestamp);
                           }
 
+                          // Large divider
+                          if (previousSearch != null &&
+                              search.lastTimestamp
+                                      .difference(previousSearch.lastTimestamp)
+                                      .inMinutes >
+                                  minutesBetweenTimeDividers) {
+                            return _timeDivider(previousSearch.lastTimestamp);
+                          }
+
+                          // Regular divider
                           return _divider();
                         },
                         builderDelegate: PagedChildBuilderDelegate<HistoryEntry?>(
@@ -135,6 +148,22 @@ class _HistoryViewState extends State<HistoryView> {
 
   Widget _dateDivider(final DateTime date) =>
       TextDivider(text: formatDate(roundToDay(date)));
+
+  Widget _timeDivider(final DateTime date) => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const Expanded(
+        child: Divider(height: 20, thickness: 5, indent: 10, endIndent: 10),
+      ),
+      Text(
+        formatTime(date),
+        style: const TextStyle(fontSize: 12, color: Colors.grey),
+      ),
+      const Expanded(
+        child: Divider(height: 20, thickness: 5, indent: 10, endIndent: 10),
+      ),
+    ],
+  );
 
   Widget _divider() => const Divider(height: 0, indent: 10, endIndent: 10);
 }
