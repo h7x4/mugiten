@@ -6,11 +6,13 @@ import 'package:mugiten/settings.dart';
 class JapaneseHeader extends StatelessWidget {
   final String baseWord;
   final String? furigana;
+  final bool dimBase;
 
   const JapaneseHeader({
+    super.key,
     required this.baseWord,
     required this.furigana,
-    super.key,
+    this.dimBase = false,
   });
 
   @override
@@ -28,7 +30,17 @@ class JapaneseHeader extends StatelessWidget {
                   style: japaneseFont.value.textStyle,
                 )
               : const Text(''),
-          Text(baseWord, style: japaneseFont.value.textStyle),
+          Text(
+            baseWord,
+            style: japaneseFont.value.textStyle.merge(
+              TextStyle(
+                color:
+                    (japaneseFont.value.textStyle.color ??
+                            Theme.of(context).textTheme.bodyMedium?.color)
+                        ?.withAlpha(dimBase ? 0xA0 : 0xFF),
+              ),
+            ),
+          ),
         ],
       ),
     );

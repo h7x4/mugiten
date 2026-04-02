@@ -98,6 +98,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
         child: JapaneseHeader(
           baseWord: widget.result.japanese[0].base,
           furigana: widget.result.japanese[0].furigana,
+          dimBase: widget.result.hasUnusualKanji,
         ),
       ),
       Row(
