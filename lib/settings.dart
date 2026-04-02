@@ -39,6 +39,11 @@ abstract class SharedPrefItem<T> extends ValueNotifier<T> {
           result = defaultValue;
         }
       default:
+        // Try to cast the result to the expected type. If it fails, reset to default value.
+        if (result is! T) {
+          unawaited(_setValue<T>(key, defaultValue));
+          result = defaultValue;
+        }
     }
 
     return result as T;
