@@ -262,6 +262,12 @@ extension LibraryListExt on DatabaseExecutor {
         whereArgs: [oldName],
       )
       ..update(
+        LibraryListTableNames.libraryList,
+        {'prevList': newName},
+        where: '"prevList" = ?',
+        whereArgs: [oldName],
+      )
+      ..update(
         LibraryListTableNames.libraryListEntry,
         {'listName': newName},
         where: '"listName" = ?',
@@ -327,8 +333,8 @@ extension LibraryListExt on DatabaseExecutor {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     assert(listName != 'favourites', 'Cannot delete the "favourites" list.');
 
-    if (!doesNotExistOk && !(await libraryListExists(listName))) {
-      return false;
+    if (!(await libraryListExists(listName))) {
+      return doesNotExistOk;
     }
 
     if (!notEmptyOk &&
@@ -336,13 +342,44 @@ extension LibraryListExt on DatabaseExecutor {
       return false;
     }
 
-    final result = await delete(
+    final listQuery = (await query(
       LibraryListTableNames.libraryList,
+      columns: ['prevList'],
       where: '"name" = ?',
       whereArgs: [listName],
+    )).map((final row) => row['prevList'] as String?).first;
+
+    assert(
+      listQuery != null,
+      'Library list "$listName" has no prevList, this should only happen for "favourites".',
     );
 
-    return doesNotExistOk || result > 0;
+    final nextListQuery = (await query(
+      LibraryListTableNames.libraryList,
+      columns: ['name'],
+      where: '"prevList" = ?',
+      whereArgs: [listName],
+    )).map((final row) => row['name'] as String).firstOrNull;
+
+    final b = batch()
+      ..delete(
+        LibraryListTableNames.libraryList,
+        where: '"name" = ?',
+        whereArgs: [listName],
+      );
+
+    if (nextListQuery != null) {
+      b.update(
+        LibraryListTableNames.libraryList,
+        {'prevList': listQuery},
+        where: '"name" = ?',
+        whereArgs: [nextListQuery],
+      );
+    }
+
+    await b.commit();
+
+    return true;
   }
 
   /// Deletes all entries in a library list.
