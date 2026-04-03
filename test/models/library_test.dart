@@ -231,4 +231,110 @@ void main() {
       expect(libraryExists, isTrue);
     });
   });
+
+  group('Library list insert entries', () {
+    test('Can insert entry into list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListInsertEntry(
+        'Test Library 1',
+        jmdictEntryId: null,
+        kanji: '新',
+      );
+      expect(result, isTrue);
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+      ))!;
+      expect(listPage.entries.length, 5);
+      expect(listPage.entries[4].kanji, '新');
+    });
+
+    test('Can insert entry into list at specific position', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListInsertEntry(
+        'Test Library 1',
+        jmdictEntryId: null,
+        kanji: '新',
+        position: 2,
+      );
+      expect(result, isTrue);
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+      ))!;
+      expect(listPage.entries.length, 5);
+      expect(listPage.entries[2].kanji, '新');
+    });
+
+    test('Cannot insert entry into non-existent list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListInsertEntry(
+        'Non-existent List',
+        jmdictEntryId: null,
+        kanji: '新',
+      );
+
+      expect(result, isFalse);
+    });
+
+    test('Cannot insert duplicate entry into list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListInsertEntry(
+        'Test Library 1',
+        jmdictEntryId: null,
+        kanji: '漢',
+      );
+      expect(result, isFalse);
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+      ))!;
+      expect(listPage.entries.length, 4);
+    });
+
+    // test('Can bulk insert entries into list', () async {
+    //   await insertTestData(database);
+
+    //   final entriesToInsert = [
+    //     LibraryListEntry(jmdictEntryId: null, kanji: '古'),
+    //     LibraryListEntry(jmdictEntryId: null, kanji: '高'),
+    //   ];
+
+    //   await database.libraryListInsertEntries(
+    //     'Test Library 1',
+    //     entriesToInsert,
+    //   );
+
+    //   final listPage = (await database.libraryListGetListEntries(
+    //     'Test Library 1',
+    //   ))!;
+    //   expect(listPage.entries.length, 6);
+    //   expect(listPage.entries[4].kanji, '古');
+    //   expect(listPage.entries[5].kanji, '高');
+    // });
+
+    // test('Bulk insert does not insert duplicates', () async {
+    //   await insertTestData(database);
+
+    //   final entriesToInsert = [
+    //     LibraryListEntry(jmdictEntryId: null, kanji: '漢'),
+    //     LibraryListEntry(jmdictEntryId: null, kanji: '新'),
+    //   ];
+
+    //   await database.libraryListInsertEntries(
+    //     'Test Library 1',
+    //     entriesToInsert,
+    //   );
+
+    //   final listPage = (await database.libraryListGetListEntries(
+    //     'Test Library 1',
+    //   ))!;
+    //   expect(listPage.entries.length, 5);
+    //   expect(listPage.entries[4].kanji, '新');
+    // });
+  });
 }
