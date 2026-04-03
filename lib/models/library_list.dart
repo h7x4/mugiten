@@ -196,6 +196,71 @@ extension LibraryListExt on DatabaseExecutor {
     );
   }
 
+  /// Get the position of an entry in a library list, or null if the entry is not in the list.
+  Future<int?> libraryListEntryPosition(
+    final String listName, {
+    final int? jmdictEntryId,
+    final String? kanji,
+  }) async {
+    assert(listName.isNotEmpty, 'Library list name must not be empty.');
+    assert(
+      (jmdictEntryId == null) != (kanji == null),
+      'Either jmdictEntryId or kanji must be provided, but not both.',
+    );
+
+    if (!await libraryListExists(listName)) {
+      return null;
+    }
+
+    if (!await libraryListListContains(
+      listName,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+    )) {
+      return null;
+    }
+
+    final result = await rawQuery(
+      '''
+        WITH RECURSIVE
+          "RecursionTable"(
+            "jmdictEntryId",
+            "kanji",
+            "position"
+          ) AS (
+            SELECT
+              "jmdictEntryId",
+              "kanji",
+              0 AS "position"
+            FROM "${LibraryListTableNames.libraryListEntry}"
+            WHERE
+              "listName" = ?
+              AND "prevEntryJmdictEntryId" IS NULL
+              AND "prevEntryKanji" IS NULL
+
+            UNION ALL
+
+            SELECT
+              "R"."jmdictEntryId",
+              "R"."kanji",
+              "RecursionTable"."position" + 1 AS "position"
+            FROM "${LibraryListTableNames.libraryListEntry}" AS "R", "RecursionTable"
+            WHERE
+              "R"."listName" = ?
+              AND ("R"."prevEntryJmdictEntryId" = "RecursionTable"."jmdictEntryId"
+                OR "R"."prevEntryKanji" = "RecursionTable"."kanji")
+          )
+        SELECT
+          "position"
+        FROM "RecursionTable"
+        WHERE ("jmdictEntryId" = ? OR "kanji" = ?)
+      ''',
+      [listName, listName, jmdictEntryId, kanji],
+    );
+
+    return result.firstOrNull?['position'] as int?;
+  }
+
   /// Get whether each library list contains the specified entry.
   ///
   /// Returns a map from library list name to whether the list contains the entry.
@@ -420,6 +485,8 @@ extension LibraryListExt on DatabaseExecutor {
   }
 
   /// Appends an entry into the library list, optionally at a specific position.
+  ///
+  /// The position is zero-indexed, and if not provided, the entry will be appended at the end of the list.
   ///
   /// This function returns false if the position is out of bounds,
   /// if the list does not exist, or if the entry is already a part of the list.
@@ -669,6 +736,8 @@ extension LibraryListExt on DatabaseExecutor {
 
   /// Reorder an entry within the library list.
   ///
+  /// The position is zero-indexed.
+  ///
   /// This function returns false if the position is out of bounds,
   /// if the list does not exist, or if the entry is not already a part of the list.
   Future<bool> libraryListMoveEntry(
@@ -678,7 +747,56 @@ extension LibraryListExt on DatabaseExecutor {
     final String? kanji,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
-    throw UnimplementedError();
+
+    assert(
+      (jmdictEntryId == null) != (kanji == null),
+      'Either jmdictEntryId or kanji must be provided, but not both.',
+    );
+
+    if (!await libraryListExists(listName)) {
+      return false;
+    }
+
+    if (!await libraryListListContains(
+      listName,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+    )) {
+      return false;
+    }
+
+    if (newPosition < 0) {
+      return false;
+    }
+
+    if ((await libraryListGetList(listName))!.totalCount <= newPosition) {
+      return false;
+    }
+
+    final currentPosition = await libraryListEntryPosition(
+      listName,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+    );
+
+    if (currentPosition == newPosition) {
+      return true;
+    }
+
+    await libraryListDeleteEntry(
+      listName,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+    );
+
+    await libraryListInsertEntry(
+      listName,
+      jmdictEntryId: jmdictEntryId,
+      kanji: kanji,
+      position: newPosition > currentPosition! ? newPosition - 1 : newPosition,
+    );
+
+    return true;
   }
 
   /// Append an entry to the library list if it's not there already,
