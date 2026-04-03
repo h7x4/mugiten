@@ -42,6 +42,8 @@ CREATE TABLE "Mugiten_LibraryListEntry" (
   "lastModified" INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
   "prevEntryJmdictEntryId" INTEGER,
   "prevEntryKanji" CHAR(1),
+
+  -- The entry cannot show up more than once in the same list
   PRIMARY KEY ("listName", "jmdictEntryId", "kanji"),
 
   -- This is true for all other entries than the first one in the list.

@@ -8,6 +8,7 @@ import 'package:sqflite/sqlite_api.dart';
 extension LibraryListExt on DatabaseExecutor {
   // Query
 
+  /// Get a page of library lists, ordered by insertion time (oldest first).
   Future<List<LibraryList>> libraryListGetLists({
     final int? page,
     final int? pageSize,
@@ -41,6 +42,9 @@ extension LibraryListExt on DatabaseExecutor {
         .toList();
   }
 
+  /// Get the details of a library list.
+  ///
+  /// Note that this does not include its entries, use [libraryListGetListEntries] for that.
   Future<LibraryList?> libraryListGetList(final String listName) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
 
@@ -69,6 +73,12 @@ extension LibraryListExt on DatabaseExecutor {
     );
   }
 
+  /// Get a page of entries in a library list, ordered by insertion time (oldest first).
+  ///
+  /// If [includeSearchResult] is true, also includes the corresponding search results for each entry.
+  ///
+  /// Unless [pageSize] (and optionally [page]) is provided, all entries are returned. This can be very
+  /// expensive, so it's recommended to use pagination for lists with many entries.
   Future<LibraryListPage?> libraryListGetListEntries(
     final String listName, {
     final int? page,
@@ -186,6 +196,9 @@ extension LibraryListExt on DatabaseExecutor {
     );
   }
 
+  /// Get whether each library list contains the specified entry.
+  ///
+  /// Returns a map from library list name to whether the list contains the entry.
   Future<Map<String, bool>> libraryListAllListsContain({
     final int? jmdictEntryId,
     final String? kanji,
@@ -210,6 +223,7 @@ extension LibraryListExt on DatabaseExecutor {
     };
   }
 
+  /// Get whether a specific library list contains an entry.
   Future<bool> libraryListListContains(
     final String listName, {
     final int? jmdictEntryId,
@@ -230,6 +244,7 @@ extension LibraryListExt on DatabaseExecutor {
     return (result.firstOrNull?['exists'] as int? ?? 0) == 1;
   }
 
+  /// Rename a library list.
   Future<void> libraryListRenameList(
     final String oldName,
     final String newName,
@@ -277,6 +292,7 @@ extension LibraryListExt on DatabaseExecutor {
     await b.commit();
   }
 
+  /// Get the total number of library lists.
   Future<int> libraryListAmount() async {
     final result = await query(
       LibraryListTableNames.libraryList,
@@ -286,6 +302,7 @@ extension LibraryListExt on DatabaseExecutor {
     return result.firstOrNull?['count'] as int? ?? 0;
   }
 
+  /// Get whether a library list with the specified name exists.
   Future<bool> libraryListExists(final String listName) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     final result = await rawQuery(
@@ -303,7 +320,7 @@ extension LibraryListExt on DatabaseExecutor {
 
   // Modification
 
-  /// Inserts a new library list into the database.
+  /// Insert a new library list into the database.
   Future<bool> libraryListInsertList(
     final String listName, {
     final bool existsOk = true,
@@ -324,7 +341,7 @@ extension LibraryListExt on DatabaseExecutor {
     return true;
   }
 
-  /// Deletes a library list by its name.
+  /// Delete a library list by its name.
   Future<bool> libraryListDeleteList(
     final String listName, {
     final bool notEmptyOk = true,
@@ -382,7 +399,7 @@ extension LibraryListExt on DatabaseExecutor {
     return true;
   }
 
-  /// Deletes all entries in a library list.
+  /// Delete all entries in a library list.
   Future<bool> libraryListDeleteAllEntries(
     final String listName, {
     final bool doesNotExistOk = false,
@@ -481,7 +498,60 @@ extension LibraryListExt on DatabaseExecutor {
     return true;
   }
 
-  /// Deletes an entry at a specific position in the library list.
+  /// Append multiple entries into the library list at once.
+  ///
+  /// If you already know the last entry in the list, you can provide it as [prevEntry] to avoid an extra query.
+  /// However be careful when doing this, as providing the wrong entry will put the list into an inconsistent state.
+  Future<bool> libraryListInsertEntries(
+    final String listName,
+    final List<LibraryListEntry> entries, {
+    final LibraryListEntry? prevEntry,
+    final bool throwErrorOnDuplicate = false,
+  }) async {
+    assert(listName.isNotEmpty, 'Library list name must not be empty.');
+
+    if (!await libraryListExists(listName)) {
+      return false;
+    }
+
+    final lastEntry =
+        prevEntry ??
+        (await libraryListGetListEntries(listName))!.entries.lastOrNull;
+
+    // TODO: set up lastModified insertion
+
+    final List<Map<String, Object?>> entriesToInsert = entries.indexed.map((
+      final e,
+    ) {
+      final i = e.$1;
+      final entry = e.$2;
+      final prevEntry = i == 0 ? lastEntry : entries[i - 1];
+
+      return {
+        'listName': listName,
+        'jmdictEntryId': entry.jmdictEntryId,
+        'kanji': entry.kanji,
+        'prevEntryJmdictEntryId': prevEntry?.jmdictEntryId,
+        'prevEntryKanji': prevEntry?.kanji,
+      };
+    }).toList();
+
+    final b = batch();
+    for (final entry in entriesToInsert) {
+      b.insert(
+        LibraryListTableNames.libraryListEntry,
+        entry,
+        conflictAlgorithm: throwErrorOnDuplicate
+            ? ConflictAlgorithm.abort
+            : ConflictAlgorithm.ignore,
+      );
+    }
+    await b.commit();
+
+    return true;
+  }
+
+  /// Delete an entry at a specific position in the library list.
   ///
   /// This function returns false if the list does not exist,
   /// or if the entry is not already a part of the list.
@@ -557,7 +627,7 @@ extension LibraryListExt on DatabaseExecutor {
     return true;
   }
 
-  /// Deletes an entry at a specific position in the library list.
+  /// Delete an entry at a specific position in the library list.
   ///
   /// This function returns false if the position is out of bounds,
   /// or if the list does not exist.
@@ -597,7 +667,7 @@ extension LibraryListExt on DatabaseExecutor {
     return result;
   }
 
-  /// Reorders an entry within the library list.
+  /// Reorder an entry within the library list.
   ///
   /// This function returns false if the position is out of bounds,
   /// if the list does not exist, or if the entry is not already a part of the list.
@@ -611,7 +681,7 @@ extension LibraryListExt on DatabaseExecutor {
     throw UnimplementedError();
   }
 
-  /// Appends an entry to the library list if it's not there already,
+  /// Append an entry to the library list if it's not there already,
   /// or removes it if it is. Returns whether the entry is now in the list.
   Future<bool> libraryListToggleEntry(
     final String listName, {
@@ -654,39 +724,34 @@ extension LibraryListExt on DatabaseExecutor {
     return shouldToggleOn;
   }
 
-  /// Verifies the linked list structure of the list of library lists.
+  /// Verify the linked list structure of the list of library lists.
   Future<bool> libraryListVerifyLists() async {
     throw UnimplementedError();
   }
 
-  /// Verifies the linked list structure of a single library list.
+  /// Verify the linked list structure of a single library list.
   Future<bool> libraryListVerifyList(final String listName) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     throw UnimplementedError();
   }
 
-  // Future<void> libraryListInsertJsonEntries(
-  //   List<Map<String, Object?>> jsonEntries,
-  // ) async {
-  //   throw UnimplementedError();
-  // }
-
+  /// Append multiple entries into the library list at once, using a list of JSON objects.
   Future<void> libraryListInsertJsonEntriesForSingleList(
     final String listName,
-    final List<Map<String, Object?>> jsonEntries,
-  ) async {
+    final List<Map<String, Object?>> jsonEntries, {
+    final LibraryListEntry? prevEntry,
+    final bool throwErrorOnDuplicate = false,
+  }) async {
     final List<LibraryListEntry> entries = jsonEntries
         .map(LibraryListEntry.fromJson)
         .toList();
 
-    // TODO: batch
-    for (final entry in entries) {
-      await libraryListInsertEntry(
-        listName,
-        kanji: entry.kanji,
-        jmdictEntryId: entry.jmdictEntryId,
-      );
-    }
+    await libraryListInsertEntries(
+      listName,
+      entries,
+      prevEntry: prevEntry,
+      throwErrorOnDuplicate: throwErrorOnDuplicate,
+    );
   }
 }
 
