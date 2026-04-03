@@ -337,4 +337,161 @@ void main() {
     //   expect(listPage.entries[4].kanji, '新');
     // });
   });
+
+  group('Library list delete entries', () {
+    test('Can delete entry from list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteEntry(
+        'Test Library 1',
+        kanji: '学',
+      );
+      expect(result, isTrue);
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+      ))!;
+      expect(listPage.entries.length, 3);
+      expect(listPage.entries.any((final e) => e.kanji == '学'), isFalse);
+    });
+
+    test('Cannot delete non-existent entry from list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteEntry(
+        'Test Library 1',
+        kanji: '非',
+      );
+      expect(result, isFalse);
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+      ))!;
+      expect(listPage.entries.length, 4);
+    });
+
+    test('Cannot delete entry from non-existent list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteEntry(
+        'Non-existent List',
+        kanji: '学',
+      );
+      expect(result, isFalse);
+    });
+
+    test('Delete by position', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteEntryByPosition(
+        'Test Library 1',
+        1,
+      );
+      expect(result, isTrue);
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+      ))!;
+      expect(listPage.entries.length, 3);
+      expect(listPage.entries[0].kanji, '漢');
+      expect(listPage.entries[1].kanji, '学');
+      expect(listPage.entries[2].kanji, '習');
+    });
+
+    test('Cannot delete entry by position from non-existent list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteEntryByPosition(
+        'Non-existent List',
+        0,
+      );
+      expect(result, isFalse);
+    });
+
+    test('Cannot delete entry by invalid position', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteEntryByPosition(
+        'Test Library 1',
+        10,
+      );
+      expect(result, isFalse);
+    });
+
+    test('Cannot delete entry by negative position', () async {
+      await insertTestData(database);
+
+      try {
+        await database.libraryListDeleteEntryByPosition('Test Library 1', -1);
+      } catch (e) {
+        expect(
+          e.toString(),
+          contains('Position must be a non-negative integer'),
+        );
+      }
+    });
+
+    test('Delete all entries from list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteAllEntries(
+        'Test Library 1',
+      );
+      expect(result, isTrue);
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+      ))!;
+      expect(listPage.entries.length, 0);
+    });
+
+    test('Cannot delete all entries from non-existent list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteAllEntries(
+        'Non-existent List',
+      );
+      expect(result, isFalse);
+    });
+
+    test('Delete list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteList('Test Library 1');
+      expect(result, isTrue);
+
+      final libraryExists = await database.libraryListExists('Test Library 1');
+      expect(libraryExists, isFalse);
+    });
+
+    test('Cannot delete non-existent list', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteList('Non-existent List');
+      expect(result, isFalse);
+    });
+
+    test('Cannot delete favourites list', () async {
+      await insertTestData(database);
+
+      try {
+        await database.libraryListDeleteList('favourites');
+      } catch (e) {
+        expect(e.toString(), contains('Cannot delete the "favourites" list'));
+      }
+    });
+
+    test('Cannot delete list with items', () async {
+      await insertTestData(database);
+
+      final result = await database.libraryListDeleteList(
+        'Test Library 1',
+        notEmptyOk: false,
+      );
+      expect(result, isFalse);
+
+      final libraryExists = await database.libraryListExists('Test Library 1');
+      expect(libraryExists, isTrue);
+    });
+  });
 }
