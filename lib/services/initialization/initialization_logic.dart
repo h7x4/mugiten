@@ -29,11 +29,7 @@ Future<void> quickInitialization() async {
   await Future.wait([
     quickInitializeDatabase(),
     setupSharedPreferences(),
-    (() async {
-      final modelManager = DigitalInkRecognizerModelManager();
-      final isDownloaded = await modelManager.isModelDownloaded('ja');
-      assert(isDownloaded, 'Japanese model should be downloaded at this point');
-    })(),
+    ensureDigitalInkModelDownloaded(),
   ]);
 
   registerExtraLicenses();
@@ -43,6 +39,12 @@ Future<void> quickInitialization() async {
 Future<void> setupSharedPreferences() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   GetIt.instance.registerSingleton<SharedPreferences>(prefs);
+}
+
+Future<void> ensureDigitalInkModelDownloaded() async {
+  final modelManager = DigitalInkRecognizerModelManager();
+  final isDownloaded = await modelManager.isModelDownloaded('ja');
+  assert(isDownloaded, 'Japanese model should be downloaded at this point');
 }
 
 void registerExtraLicenses() => LicenseRegistry.addLicense(() async* {
