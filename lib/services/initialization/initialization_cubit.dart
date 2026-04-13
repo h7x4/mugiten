@@ -11,7 +11,8 @@ import 'package:mugiten/database/database.dart'
         openAndMigrateDatabase,
         openDatabaseWithoutMigrations,
         readMigrationsFromAssets;
-import 'package:mugiten/services/archive/v1/format.dart';
+import 'package:mugiten/services/archive/v1/format.dart'
+    show exportData, importData;
 import 'package:mugiten/services/initialization/initialization_status.dart';
 import 'package:path_provider/path_provider.dart';
 

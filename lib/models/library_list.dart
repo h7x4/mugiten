@@ -899,11 +899,11 @@ class LibraryListEntry {
          "Library entry can't have both kanji and jmdictEntryId",
        ),
        assert(
-         kanjiSearchResult?.kanji == kanji,
+         kanjiSearchResult == null || kanjiSearchResult.kanji == kanji,
          "KanjiSearchResult's kanji must match the kanji in LibraryListEntry",
        ),
        assert(
-         wordSearchResult?.entryId == jmdictEntryId,
+         wordSearchResult == null || wordSearchResult.entryId == jmdictEntryId,
          "WordSearchResult's jmdictEntryId must match the jmdictEntryId in LibraryListEntry",
        );
 

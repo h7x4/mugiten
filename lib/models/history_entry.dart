@@ -245,42 +245,68 @@ extension HistoryEntryExt on DatabaseExecutor {
     );
   }
 
-  Future<void> historyEntryInsertEntry(final HistoryEntry entry) =>
-      historyEntryInsertEntries([entry]);
+  Future<void> historyEntryInsertEntry(
+    final HistoryEntry entry, {
+    final bool assignNewId = false,
+  }) => historyEntryInsertEntries([entry], assignNewIds: assignNewId);
 
   Future<void> historyEntryInsertEntries(
-    final Iterable<HistoryEntry> entries,
-  ) async {
+    final Iterable<HistoryEntry> entries, {
+    final bool assignNewIds = false,
+  }) async {
+    late final List<int> newIds;
+    if (assignNewIds) {
+      final b = batch();
+      for (final _ in entries) {
+        b.insert(HistoryTableNames.historyEntry, {}, nullColumnHack: 'id');
+      }
+      newIds = (await b.commit()).map((final result) => result as int).toList();
+    }
+
+    assert(
+      !assignNewIds || newIds.length == entries.length,
+      'Number of new IDs must match number of entries when assignNewIds is true',
+    );
+
     final b = batch();
-    for (final entry in entries) {
-      b.insert(
-        HistoryTableNames.historyEntry,
-        {'id': entry.id},
-        nullColumnHack: 'id',
-      );
+    for (final (i, entry) in entries.indexed) {
+      final int id = assignNewIds ? newIds[i] : entry.id;
+
+      if (!assignNewIds) {
+        b.insert(
+          HistoryTableNames.historyEntry,
+          {'id': id},
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
 
       if (entry.isKanji) {
-        b.insert(HistoryTableNames.historyEntryKanji, {
-          'entryId': entry.id,
-          'kanji': entry.kanji,
-        });
+        b.insert(
+          HistoryTableNames.historyEntryKanji,
+          {'entryId': id, 'kanji': entry.kanji},
+          conflictAlgorithm: assignNewIds ? null : ConflictAlgorithm.ignore,
+        );
       } else {
-        b.insert(HistoryTableNames.historyEntryWord, {
-          'entryId': entry.id,
-          'word': entry.word,
-          'language': {
-            null: null,
-            'japanese': 'j',
-            'english': 'e',
-          }[entry.language],
-        });
+        b.insert(
+          HistoryTableNames.historyEntryWord,
+          {
+            'entryId': id,
+            'word': entry.word,
+            'language': {
+              null: null,
+              'japanese': 'j',
+              'english': 'e',
+            }[entry.language],
+          },
+          conflictAlgorithm: assignNewIds ? null : ConflictAlgorithm.ignore,
+        );
       }
 
       for (final timestamp in entry.timestamps) {
         b.insert(
           HistoryTableNames.historyEntryTimestamp,
-          {'entryId': entry.id, 'timestamp': timestamp.millisecondsSinceEpoch},
-          conflictAlgorithm: ConflictAlgorithm.ignore,
+          {'entryId': id, 'timestamp': timestamp.millisecondsSinceEpoch},
+          conflictAlgorithm: assignNewIds ? null : ConflictAlgorithm.ignore,
         );
       }
     }

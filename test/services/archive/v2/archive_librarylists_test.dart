@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mugiten/models/library_list.dart';
-import 'package:mugiten/services/archive/v1/format.dart';
+import 'package:mugiten/services/archive/v2/format.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import '../../../testutils.dart';
@@ -41,6 +41,7 @@ void main() {
     GetIt.instance.registerSingleton<Database>(database);
 
     tmpdir = await test_tmpdir();
+    tmpdir.libraryDir.createSync();
   });
 
   tearDown(() async {
@@ -92,8 +93,7 @@ void main() {
       'Library list amount should be 4 after insertion, but got $listCount1',
     );
 
-    tmpdir.libraryDir.createSync();
-    await exportLibraryListsTo(database, tmpdir);
+    await exportLibraryLists(database, tmpdir).drain();
 
     await database.libraryListDeleteList('Test List 1');
     await database.libraryListDeleteList('Test List 2');
@@ -105,7 +105,7 @@ void main() {
       'Library list amount should be 1 after deletion, but got $listCount2',
     );
 
-    await importLibraryListsFrom(database, tmpdir);
+    await importLibraryLists(database, tmpdir).drain();
 
     final listCount3 = await database.libraryListAmount();
     assert(
@@ -128,8 +128,7 @@ void main() {
       'Favourites entry count should be ${libraryEntries.length} after insertion, but got ${favourites.totalCount}',
     );
 
-    tmpdir.libraryDir.createSync();
-    await exportLibraryListsTo(database, tmpdir);
+    await exportLibraryLists(database, tmpdir).drain();
 
     await database.libraryListDeleteAllEntries('favourites');
     final emptyFavourites = (await database.libraryListGetLists()).first;
@@ -138,7 +137,7 @@ void main() {
       'Favourites entry count should be 0 after deletion, but got ${emptyFavourites.totalCount}',
     );
 
-    await importLibraryListsFrom(database, tmpdir);
+    await importLibraryLists(database, tmpdir).drain();
 
     final importedFavourites = (await database.libraryListGetLists()).first;
     assert(
