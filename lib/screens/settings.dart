@@ -122,7 +122,7 @@ class _SettingsViewState extends State<SettingsView> {
       setState(() => dataExportIsLoading = false);
     }
 
-    final saveFile = await FilePicker.platform.saveFile(
+    final saveFile = await FilePicker.saveFile(
       dialogTitle: 'Export data',
       fileName: getExportFileNameNoSuffix(),
       type: FileType.custom,
@@ -140,7 +140,7 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future<void> importHandler(final BuildContext context) async {
-    final saveFile = await FilePicker.platform.pickFiles(
+    final saveFile = await FilePicker.pickFiles(
       dialogTitle: 'Import data',
       type: FileType.custom,
       allowedExtensions: ['zip'],
