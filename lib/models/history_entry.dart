@@ -305,60 +305,6 @@ extension HistoryEntryExt on DatabaseExecutor {
 
     return true;
   }
-
-  Future<void> historyEntryInsertManyFromJson(
-    final List<Map<String, Object?>> json,
-  ) async {
-    final b = batch();
-    for (final jsonObject in json) {
-      final bool isKanji = jsonObject['word'] == null;
-      final existingEntry = isKanji
-          ? await query(
-              HistoryTableNames.historyEntryKanji,
-              where: 'kanji = ?',
-              whereArgs: [jsonObject['kanji']! as String],
-            )
-          : await query(
-              HistoryTableNames.historyEntryWord,
-              where: 'word = ?',
-              whereArgs: [jsonObject['word']! as String],
-            );
-
-      late final int id;
-      if (existingEntry.isEmpty) {
-        id = await insert(
-          HistoryTableNames.historyEntry,
-          {},
-          nullColumnHack: 'id',
-        );
-        if (isKanji) {
-          b.insert(HistoryTableNames.historyEntryKanji, {
-            'entryId': id,
-            'kanji': jsonObject['kanji']! as String,
-          });
-        } else {
-          b.insert(HistoryTableNames.historyEntryWord, {
-            'entryId': id,
-            'word': jsonObject['word']! as String,
-          });
-        }
-      } else {
-        id = existingEntry.first['entryId']! as int;
-      }
-      final List<int> timestamps = (jsonObject['timestamps']! as List)
-          .map((final ts) => ts as int)
-          .toList();
-      for (final timestamp in timestamps) {
-        b.insert(
-          HistoryTableNames.historyEntryTimestamp,
-          {'entryId': id, 'timestamp': timestamp},
-          conflictAlgorithm: ConflictAlgorithm.ignore,
-        );
-      }
-    }
-
-    await b.commit();
-  }
 }
 
 class HistoryEntry {

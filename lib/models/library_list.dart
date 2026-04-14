@@ -852,25 +852,6 @@ extension LibraryListExt on DatabaseExecutor {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     throw UnimplementedError();
   }
-
-  /// Append multiple entries into the library list at once, using a list of JSON objects.
-  Future<void> libraryListInsertJsonEntriesForSingleList(
-    final String listName,
-    final List<Map<String, Object?>> jsonEntries, {
-    final LibraryListEntry? prevEntry,
-    final bool throwErrorOnDuplicate = false,
-  }) async {
-    final List<LibraryListEntry> entries = jsonEntries
-        .map(LibraryListEntry.fromJson)
-        .toList();
-
-    await libraryListInsertEntries(
-      listName,
-      entries,
-      prevEntry: prevEntry,
-      throwErrorOnDuplicate: throwErrorOnDuplicate,
-    );
-  }
 }
 
 class LibraryList {
