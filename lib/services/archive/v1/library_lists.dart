@@ -92,7 +92,7 @@ Future<void> importLibraryListsFrom(
 Future<void> libraryListInsertJsonEntriesForSingleList(
   final DatabaseExecutor db,
   final String listName,
-  final List<Map<String, Object?>> jsonEntries, {
+  final Iterable<Map<String, Object?>> jsonEntries, {
   final LibraryListEntry? prevEntry,
   final bool throwErrorOnDuplicate = false,
 }) async {

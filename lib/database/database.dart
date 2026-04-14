@@ -102,7 +102,7 @@ Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
 /// Migrates the database from version `oldVersion` to `newVersion`.
 Future<void> migrate(
   final Database db,
-  final List<DatabaseMigration> migrations,
+  final Iterable<DatabaseMigration> migrations,
 ) async {
   for (final migration in migrations) {
     log('Running migration ${migration.version} from ${migration.path}');
@@ -151,7 +151,7 @@ Future<Database> openDatabaseWithoutMigrations(
 
 Future<Database> openAndMigrateDatabase(
   final String dbPath,
-  final List<DatabaseMigration> migrations,
+  final Iterable<DatabaseMigration> migrations,
 ) async {
   log('Opening database at $dbPath');
   final Database database = await openDatabase(

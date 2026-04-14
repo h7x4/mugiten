@@ -44,7 +44,7 @@ Future<void> importHistoryFrom(final Database db, final File file) async {
 
 Future<void> historyEntryInsertManyFromJson(
   final DatabaseExecutor db,
-  final List<Map<String, Object?>> json,
+  final Iterable<Map<String, Object?>> json,
 ) async {
   final b = db.batch();
   for (final jsonObject in json) {

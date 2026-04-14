@@ -32,18 +32,14 @@ extension ArchiveFormatV1 on Directory {
   File get historyFile => File(uri.resolve('history.json').toFilePath());
   Directory get libraryDir => Directory(uri.resolve('library').toFilePath());
 
-  List<File> get libraryListFiles => libraryDir
+  Iterable<File> get libraryListFiles => libraryDir
       .listSync()
       .whereType<File>()
-      .where((final f) => f.path.endsWith('.json'))
-      .toList();
+      .where((final f) => f.path.endsWith('.json'));
 
-  List<String> get libraryListNames => libraryListFiles
-      .map(
-        (final f) =>
-            f.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), ''),
-      )
-      .toList();
+  Iterable<String> get libraryListNames => libraryListFiles.map(
+    (final f) => f.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), ''),
+  );
 }
 
 /// Creates a temporary directory for storing exported data files before zipping them.

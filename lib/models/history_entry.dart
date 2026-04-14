@@ -249,7 +249,7 @@ extension HistoryEntryExt on DatabaseExecutor {
       historyEntryInsertEntries([entry]);
 
   Future<void> historyEntryInsertEntries(
-    final List<HistoryEntry> entries,
+    final Iterable<HistoryEntry> entries,
   ) async {
     final b = batch();
     for (final entry in entries) {

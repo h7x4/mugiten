@@ -571,6 +571,7 @@ extension LibraryListExt on DatabaseExecutor {
   /// However be careful when doing this, as providing the wrong entry will put the list into an inconsistent state.
   Future<bool> libraryListInsertEntries(
     final String listName,
+    // TODO: convert this to Iterable<LibraryListEntry>
     final List<LibraryListEntry> entries, {
     final LibraryListEntry? prevEntry,
     final bool throwErrorOnDuplicate = false,
