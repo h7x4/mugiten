@@ -17,7 +17,7 @@ class ArchiveV1LibraryListEntry {
 
 Future<void> exportLibraryListsTo(
   final DatabaseExecutor db,
-  final Directory dir,
+  final Directory archiveRoot,
 ) async {
   final libraryNames = await db
       .query(LibraryListTableNames.libraryList, columns: ['name'])
@@ -28,7 +28,7 @@ Future<void> exportLibraryListsTo(
 
   await Future.wait([
     for (final libraryName in libraryNames)
-      exportLibraryListTo(db, libraryName, dir),
+      exportLibraryListTo(db, libraryName, archiveRoot.libraryDir),
   ]);
 }
 
@@ -51,9 +51,9 @@ Future<void> exportLibraryListTo(
 // TODO: how do we handle lists that already exist? There seems to be no good way to merge them?
 Future<void> importLibraryListsFrom(
   final DatabaseExecutor db,
-  final Directory libraryListsDir,
+  final Directory archiveRoot,
 ) async {
-  for (final file in libraryListsDir.libraryListFiles) {
+  for (final file in archiveRoot.libraryListFiles) {
     final libraryName = file.uri.pathSegments.last.replaceFirst(
       RegExp(r'\.json$'),
       '',

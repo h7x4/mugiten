@@ -82,31 +82,29 @@ String getExportFileNameNoSuffix() {
 }
 
 Future<File> exportData(final DatabaseExecutor db) async {
-  final dir = await tmpdir();
-
-  final libraryDir = Directory(dir.uri.resolve('library').toFilePath())
-    ..createSync();
+  final archiveRoot = await tmpdir();
+  archiveRoot.libraryDir.createSync();
 
   await Future.wait([
-    exportDataFormatVersionTo(dir),
-    exportHistoryTo(db, dir),
-    exportLibraryListsTo(db, libraryDir),
+    exportDataFormatVersionTo(archiveRoot),
+    exportHistoryTo(db, archiveRoot),
+    exportLibraryListsTo(db, archiveRoot),
   ]);
 
-  final zipFile = await packZip(dir);
+  final zipFile = await packZip(archiveRoot);
 
   return zipFile;
 }
 
 Future<void> importData(final Database db, final File zipFile) async {
-  final dir = await unpackZipToTempDir(zipFile.path);
+  final archiveRoot = await unpackZipToTempDir(zipFile.path);
 
   await Future.wait([
-    importHistoryFrom(db, dir.historyFile),
-    importLibraryListsFrom(db, dir.libraryDir),
+    importHistoryFrom(db, archiveRoot.historyFile),
+    importLibraryListsFrom(db, archiveRoot),
   ]);
 
-  dir.deleteSync(recursive: true);
+  archiveRoot.deleteSync(recursive: true);
 }
 
 Future<void> exportDataFormatVersionTo(final Directory dir) async {

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mugiten/database/history/table_names.dart';
+import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/services/archive/v1/format.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -59,19 +61,29 @@ void main() {
     }
   });
 
-  test('Full reimport', () async {
+  test('Archive V1 export to and import from zip archive', () async {
+    // Insert data
+    final historyEntries = await createRandomHistoryEntries(
+      db: database,
+      count: 300,
+    );
+    await database.historyEntryInsertEntries(historyEntries);
+
+    final libraryEntriesF = await createRandomLibraryListEntries(
+      db: database,
+      kanjiCount: 400,
+      jmdictEntryCount: 440,
+    );
     final libraryEntries1 = await createRandomLibraryListEntries(
       db: database,
       kanjiCount: 150,
       jmdictEntryCount: 150,
     );
-
     final libraryEntries2 = await createRandomLibraryListEntries(
       db: database,
       kanjiCount: 150,
       jmdictEntryCount: 300,
     );
-
     final libraryEntries3 = await createRandomLibraryListEntries(
       db: database,
       kanjiCount: 150,
@@ -82,68 +94,43 @@ void main() {
     await database.libraryListInsertList('Test List 2');
     await database.libraryListInsertList('Test List 3');
 
+    await database.libraryListInsertEntries('favourites', libraryEntriesF);
     await database.libraryListInsertEntries('Test List 1', libraryEntries1);
     await database.libraryListInsertEntries('Test List 2', libraryEntries2);
     await database.libraryListInsertEntries('Test List 3', libraryEntries3);
 
-    final listCount1 = await database.libraryListAmount();
-    assert(
-      listCount1 == 4,
-      'Library list amount should be 3 after insertion, but got $listCount1',
-    );
+    // Export to zip
+    final zipFile = await exportData(database);
 
-    tmpdir.libraryDir.createSync();
-    await exportLibraryListsTo(database, tmpdir);
-
+    // Delete all data
+    await database.delete(HistoryTableNames.historyEntry);
+    await database.libraryListDeleteAllEntries('favourites');
     await database.libraryListDeleteList('Test List 1');
     await database.libraryListDeleteList('Test List 2');
     await database.libraryListDeleteList('Test List 3');
 
-    final listCount2 = await database.libraryListAmount();
+    // Import from zip
+    await importData(database, zipFile);
+
+    // Verify data
+    final int historyEntryAmount = await database.historyEntryAmount();
     assert(
-      listCount2 == 1,
-      'Library list amount should be 0 after deletion, but got $listCount2',
+      historyEntryAmount == historyEntries.length,
+      'History entry amount should be ${historyEntries.length} after import, but got $historyEntryAmount',
     );
 
-    await importLibraryListsFrom(database, tmpdir);
-
-    final listCount3 = await database.libraryListAmount();
-    assert(
-      listCount3 == 4,
-      'Library list amount should be 3 after import, but got $listCount3',
+    final favourites = (await database.libraryListGetLists()).firstWhere(
+      (final list) => list.name == 'favourites',
     );
-  });
-
-  test('Full reimport favourites', () async {
-    final libraryEntries = await createRandomLibraryListEntries(
-      db: database,
-      kanjiCount: 150,
-      jmdictEntryCount: 150,
+    assert(
+      favourites.totalCount == libraryEntriesF.length,
+      'Favourites entry count should be ${libraryEntriesF.length} after import, but got ${favourites.totalCount}',
     );
 
-    await database.libraryListInsertEntries('favourites', libraryEntries);
-    final favourites = (await database.libraryListGetLists()).first;
+    final listCount = await database.libraryListAmount();
     assert(
-      favourites.totalCount == libraryEntries.length,
-      'Favourites entry count should be ${libraryEntries.length} after insertion, but got ${favourites.totalCount}',
-    );
-
-    tmpdir.libraryDir.createSync();
-    await exportLibraryListsTo(database, tmpdir);
-
-    await database.libraryListDeleteAllEntries('favourites');
-    final emptyFavourites = (await database.libraryListGetLists()).first;
-    assert(
-      emptyFavourites.totalCount == 0,
-      'Favourites entry count should be 0 after deletion, but got ${emptyFavourites.totalCount}',
-    );
-
-    await importLibraryListsFrom(database, tmpdir);
-
-    final importedFavourites = (await database.libraryListGetLists()).first;
-    assert(
-      importedFavourites.totalCount == libraryEntries.length,
-      'Favourites entry count should be ${libraryEntries.length} after import, but got ${importedFavourites.totalCount}',
+      listCount == 4,
+      'Library list amount should be 4 after import, but got $listCount',
     );
   });
 }
