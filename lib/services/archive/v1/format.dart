@@ -93,6 +93,8 @@ Future<File> exportData(final DatabaseExecutor db) async {
 
   final zipFile = await packZip(archiveRoot);
 
+  archiveRoot.deleteSync(recursive: true);
+
   return zipFile;
 }
 
