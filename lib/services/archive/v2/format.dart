@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
@@ -111,6 +112,32 @@ extension ArchiveFormatV2 on Directory {
 
 String slugifyLibraryListFileName(final String name) =>
     name.toLowerCase().replaceAll(RegExp(r'\s+'), '_');
+
+Future<int> totalAmountOfChunksFromDatabase(final DatabaseExecutor db) async {
+  final historyCount = await db.historyEntryAmount();
+  final libraryListCounts = (await db.libraryListGetLists())
+      .map((final list) => (list.totalCount / libraryListChunkSize).ceil())
+      .sum;
+
+  return (historyCount / historyChunkSize).ceil() + libraryListCounts;
+}
+
+// TODO: skip counting chunks where the library list already exists
+//       and has a non-zero entry count.
+int totalAmountOfChunksFromArchive(final File archiveFile) {
+  final Archive archive = ZipDecoder().decodeStream(
+    InputFileStream(archiveFile.path),
+  );
+  int result = 0;
+  for (final file in archive) {
+    if (file.isFile &&
+        file.name != 'metadata.json' &&
+        file.name.endsWith('.json')) {
+      result++;
+    }
+  }
+  return result;
+}
 
 class ArchiveV2StreamEvent {
   final String type;

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mdi/mdi.dart';
@@ -11,6 +12,7 @@ import 'package:mugiten/main.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/services/archive/archive_controller.dart';
 import 'package:mugiten/services/archive/v1/format.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
@@ -26,10 +28,6 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
-  final Database db = GetIt.instance.get<Database>();
-  bool dataExportIsLoading = false;
-  bool dataImportIsLoading = false;
-
   Future<bool> confirm(
     final BuildContext context, {
     required final Widget content,
@@ -110,24 +108,22 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future<void> exportHandler(final BuildContext context) async {
-    late final File zipfile;
-    try {
-      setState(() => dataExportIsLoading = true);
-      final db = GetIt.instance.get<Database>();
-      zipfile = await exportData(db);
-    } catch (e) {
-      if (!context.mounted) return;
-      showSnackbar(context, 'Error exporting data: $e');
-    } finally {
-      setState(() => dataExportIsLoading = false);
-    }
+    final tmpfile = File(
+      Directory.systemTemp
+          .createTempSync('mugiten_data_')
+          .uri
+          .resolve('mugiten_data.zip')
+          .toFilePath(),
+    );
+
+    await BlocProvider.of<ArchiveController>(context).startExport(tmpfile);
 
     final saveFile = await FilePicker.saveFile(
       dialogTitle: 'Export data',
       fileName: getExportFileNameNoSuffix(),
       type: FileType.custom,
       allowedExtensions: ['zip'],
-      bytes: zipfile.readAsBytesSync(),
+      bytes: tmpfile.readAsBytesSync(),
     );
 
     if (!context.mounted) return;
@@ -153,19 +149,11 @@ class _SettingsViewState extends State<SettingsView> {
 
     final filepath = saveFile.files.first.path;
 
-    final db = GetIt.instance.get<Database>();
+    if (!context.mounted) return;
 
-    try {
-      setState(() => dataImportIsLoading = true);
-      await importData(db, File(filepath!));
-      if (!context.mounted) return;
-      showSnackbar(context, 'Data imported successfully');
-    } catch (e) {
-      if (!context.mounted) return;
-      showSnackbar(context, 'Error importing data: $e');
-    } finally {
-      setState(() => dataImportIsLoading = false);
-    }
+    await BlocProvider.of<ArchiveController>(
+      context,
+    ).startImport(File(filepath!));
   }
 
   Future<int?> Function(BuildContext) _chooseFromList({
@@ -195,19 +183,25 @@ class _SettingsViewState extends State<SettingsView> {
       );
 
   @override
-  Widget build(final BuildContext context) => SettingsList(
-    lightTheme: SettingsThemeData(
-      settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
-    ),
-    darkTheme: SettingsThemeData(
-      settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
-      titleTextColor: mugitenWheatBackground,
-    ),
-    contentPadding: const EdgeInsets.symmetric(vertical: 10),
-    sections: _sections(context),
-  );
+  Widget build(final BuildContext context) =>
+      BlocBuilder<ArchiveController, ArchiveState>(
+        builder: (final context, final archiveState) => SettingsList(
+          lightTheme: SettingsThemeData(
+            settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
+          ),
+          darkTheme: SettingsThemeData(
+            settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
+            titleTextColor: mugitenWheatBackground,
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          sections: _sections(context, archiveState),
+        ),
+      );
 
-  List<SettingsSection> _sections(final BuildContext context) => [
+  List<SettingsSection> _sections(
+    final BuildContext context,
+    final ArchiveState archiveState,
+  ) => [
     SettingsSection(
       title: const Text('Dictionary'),
       tiles: <SettingsTile>[
@@ -272,23 +266,41 @@ class _SettingsViewState extends State<SettingsView> {
       title: const Text('Data'),
       tiles: <SettingsTile>[
         SettingsTile(
-          enabled: true,
+          enabled: archiveState is IdleState,
           leading: const Icon(Icons.file_upload),
           title: const Text('Import Data'),
           description: const Text('Import user data from a file'),
           onPressed: importHandler,
-          value: dataImportIsLoading ? const LinearProgressIndicator() : null,
+          trailing: archiveState is ImportingState
+              ? CircularProgressIndicator(
+                  value: archiveState.total > 0
+                      ? archiveState.progress / archiveState.total
+                      : null,
+                )
+              : null,
+          value: archiveState is ImportingState
+              ? Text(archiveState.status)
+              : null,
         ),
         SettingsTile(
-          enabled: true,
+          enabled: archiveState is IdleState,
           leading: const Icon(Icons.file_download),
           title: const Text('Export Data'),
           description: const Text('Export user data to a file'),
           onPressed: exportHandler,
-          value: dataExportIsLoading ? const LinearProgressIndicator() : null,
+          trailing: archiveState is ExportingState
+              ? CircularProgressIndicator(
+                  value: archiveState.total > 0
+                      ? archiveState.progress / archiveState.total
+                      : null,
+                )
+              : null,
+          value: archiveState is ExportingState
+              ? Text(archiveState.status)
+              : null,
         ),
         SettingsTile(
-          enabled: true,
+          enabled: archiveState is IdleState,
           leading: const Icon(Icons.delete),
           title: const Text(
             'Clear History',
@@ -324,7 +336,7 @@ class _SettingsViewState extends State<SettingsView> {
           activeSwitchColor: mugitenWheatBackground,
         ),
         SettingsTile(
-          enabled: true,
+          enabled: archiveState is IdleState,
           leading: const Icon(Icons.cached),
           title: const Text(
             'Reinitialize application',

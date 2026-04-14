@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mugiten/routing/router.dart';
 import 'package:mugiten/screens/initialization.dart';
+import 'package:mugiten/services/archive/archive_controller.dart';
 import 'package:mugiten/services/initialization/initialization_logic.dart';
 import 'package:mugiten/theme.dart';
 
@@ -38,6 +40,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final themeController = ThemeController.create();
+  final archiveController = ArchiveController();
 
   @override
   void initState() {
@@ -68,16 +71,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(final BuildContext context) {
     return ValueListenableBuilder<AppThemeMode>(
       valueListenable: themeController.themeMode,
-      builder: (final context, final themeMode, _) {
-        return MaterialApp(
-          title: '麦典',
-          theme: themeMode.lightThemeData,
-          darkTheme: themeMode.darkThemeData,
-          themeMode: themeMode.themeMode,
-          initialRoute: '/',
-          onGenerateRoute: generateRoute,
-        );
-      },
+      builder: (final context, final themeMode, _) =>
+          BlocProvider<ArchiveController>.value(
+            value: archiveController,
+            child: MaterialApp(
+              title: '麦典',
+              theme: themeMode.lightThemeData,
+              darkTheme: themeMode.darkThemeData,
+              themeMode: themeMode.themeMode,
+              initialRoute: '/',
+              onGenerateRoute: generateRoute,
+            ),
+          ),
     );
   }
 }
