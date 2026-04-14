@@ -245,6 +245,49 @@ extension HistoryEntryExt on DatabaseExecutor {
     );
   }
 
+  Future<void> historyEntryInsertEntry(final HistoryEntry entry) =>
+      historyEntryInsertEntries([entry]);
+
+  Future<void> historyEntryInsertEntries(
+    final List<HistoryEntry> entries,
+  ) async {
+    final b = batch();
+    for (final entry in entries) {
+      b.insert(
+        HistoryTableNames.historyEntry,
+        {'id': entry.id},
+        nullColumnHack: 'id',
+      );
+
+      if (entry.isKanji) {
+        b.insert(HistoryTableNames.historyEntryKanji, {
+          'entryId': entry.id,
+          'kanji': entry.kanji,
+        });
+      } else {
+        b.insert(HistoryTableNames.historyEntryWord, {
+          'entryId': entry.id,
+          'word': entry.word,
+          'language': {
+            null: null,
+            'japanese': 'j',
+            'english': 'e',
+          }[entry.language],
+        });
+      }
+
+      for (final timestamp in entry.timestamps) {
+        b.insert(
+          HistoryTableNames.historyEntryTimestamp,
+          {'entryId': entry.id, 'timestamp': timestamp.millisecondsSinceEpoch},
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
+    }
+
+    await b.commit(noResult: true);
+  }
+
   Future<bool> historyEntryDelete(final int entryId) async {
     await delete(
       HistoryTableNames.historyEntryTimestamp,
