@@ -24,7 +24,7 @@ dependencies:
   collection: ^1.19.0
   cupertino_icons: ^1.0.8
   division: ^0.9.0
-  file_picker: ^11.0.2
+  file_picker: ^12.0.0-beta.3
   flutter_bloc: ^9.1.0
   flutter_markdown_plus: ^1.0.3
   flutter_settings_ui: ^3.0.1
@@ -37,12 +37,12 @@ dependencies:
   infinite_scroll_pagination: ^5.1.0
   markdown: ^7.3.0
   mdi: ^5.0.0-nullsafety.0
-  package_info_plus: ^9.0.0
+  package_info_plus: ^10.1.0
   path: ^1.9.0
   path_provider: ^2.1.5
   ruby_text: ^3.0.3
   sealed_languages: ^3.0.0
-  share_plus: ^12.0.1
+  share_plus: ^13.1.0
   shared_preferences: ^2.5.3
   signature: ^6.3.0
   sqflite: ^2.4.1
