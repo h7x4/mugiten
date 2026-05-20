@@ -132,7 +132,6 @@ Future<void> libraryListInsertEntriesForSingleList(
   await db.libraryListInsertEntries(
     listName,
     entries_,
-    prevEntry: prevEntry,
     throwErrorOnDuplicate: throwErrorOnDuplicate,
   );
 }

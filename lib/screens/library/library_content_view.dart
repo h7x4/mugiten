@@ -5,7 +5,6 @@ import 'package:mugiten/components/library/library_list_entry_tile.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-const int pageSize = 50;
 const int invisibleItemsThreshold = 25;
 
 class LibraryContentView extends StatefulWidget {
@@ -25,7 +24,6 @@ class _LibraryContentViewState extends State<LibraryContentView> {
         .libraryListGetListEntries(
           widget.library.name,
           page: pageKey - 1,
-          pageSize: pageSize,
           includeSearchResult: true,
         )
         .then((final page) => page?.entries ?? []),

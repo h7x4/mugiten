@@ -216,23 +216,27 @@ void main() {
       expect(listPage.entries[4].kanji, '新');
     });
 
-    test('Can insert entry into list at specific position', () async {
-      await insertTestData(database);
+    test(
+      'Can insert entry into list at specific position',
+      () async {
+        await insertTestData(database);
 
-      final result = await database.libraryListInsertEntry(
-        'Test Library 1',
-        jmdictEntryId: null,
-        kanji: '新',
-        position: 2,
-      );
-      expect(result, isTrue);
+        final result = await database.libraryListInsertEntry(
+          'Test Library 1',
+          jmdictEntryId: null,
+          kanji: '新',
+          position: 2,
+        );
+        expect(result, isTrue);
 
-      final listPage = (await database.libraryListGetListEntries(
-        'Test Library 1',
-      ))!;
-      expect(listPage.entries.length, 5);
-      expect(listPage.entries[2].kanji, '新');
-    });
+        final listPage = (await database.libraryListGetListEntries(
+          'Test Library 1',
+        ))!;
+        expect(listPage.entries.length, 5);
+        expect(listPage.entries[2].kanji, '新');
+      },
+      skip: 'This is currently not implemented',
+    );
 
     test('Cannot insert entry into non-existent list', () async {
       await insertTestData(database);

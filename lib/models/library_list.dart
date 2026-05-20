@@ -5,14 +5,21 @@ import 'package:jadb/search.dart';
 import 'package:mugiten/database/library_list/table_names.dart';
 import 'package:sqflite/sqlite_api.dart';
 
+const int basicListOrderNumInterval = 100;
+const int defaultLibraryListPageSize = 100;
+
 extension LibraryListExt on DatabaseExecutor {
   // Query
 
   /// Get a page of library lists, ordered by insertion time (oldest first).
-  Future<List<LibraryList>> libraryListGetLists({
-    final int? page,
-    final int? pageSize,
-  }) async {
+  ///
+  /// Pages are 0-indexed.
+  Future<List<LibraryList>> libraryListGetLists({final int? page}) async {
+    assert(
+      page == null || page >= 0,
+      'Page must be null or a non-negative integer.',
+    );
+
     final result = await rawQuery(
       '''
         SELECT
@@ -20,17 +27,18 @@ extension LibraryListExt on DatabaseExecutor {
           (
             SELECT COUNT(*)
             FROM "${LibraryListTableNames.libraryListEntry}"
-            WHERE "listName" = "name"
+            WHERE "${LibraryListTableNames.libraryListEntry}"."listName" = "${LibraryListTableNames.libraryList}"."name"
           ) AS "count"
-        FROM "${LibraryListTableNames.libraryListOrdered}"
-        ${pageSize != null ? 'LIMIT ?' : ''}
-        ${page != null ? 'OFFSET ?' : ''}
+        FROM "${LibraryListTableNames.libraryList}"
+        ${page != null ? 'WHERE orderNum >= ? AND orderNum < ?' : ''}
+        ORDER BY "orderNum" ASC
       ''',
-      [?pageSize, if (page != null) page * pageSize!],
+      [
+        if (page != null) (basicListOrderNumInterval * page),
+        if (page != null)
+          (basicListOrderNumInterval * (page + defaultLibraryListPageSize)),
+      ],
     );
-
-    //   COUNT(*) AS "count"
-    // LEFT JOIN "${LibraryListTableNames.libraryListEntry}"
 
     return result
         .map(
@@ -57,7 +65,7 @@ extension LibraryListExt on DatabaseExecutor {
             FROM "${LibraryListTableNames.libraryListEntry}"
             WHERE "listName" = "name"
           ) AS "count"
-        FROM "${LibraryListTableNames.libraryListOrdered}"
+        FROM "${LibraryListTableNames.libraryList}"
         WHERE "name" = ?
       ''',
       [listName],
@@ -73,16 +81,17 @@ extension LibraryListExt on DatabaseExecutor {
     );
   }
 
-  /// Get a page of entries in a library list, ordered by insertion time (oldest first).
+  /// Get a page of entries in a library list
   ///
   /// If [includeSearchResult] is true, also includes the corresponding search results for each entry.
   ///
-  /// Unless [pageSize] (and optionally [page]) is provided, all entries are returned. This can be very
+  /// Unless  [page] is provided, all entries are returned. This can be very
   /// expensive, so it's recommended to use pagination for lists with many entries.
+  ///
+  /// Pages are 0-indexed.
   Future<LibraryListPage?> libraryListGetListEntries(
     final String listName, {
     final int? page,
-    final int? pageSize,
     final bool includeSearchResult = false,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
@@ -90,61 +99,31 @@ extension LibraryListExt on DatabaseExecutor {
       page == null || page >= 0,
       'Page must be null or a non-negative integer.',
     );
-    assert(
-      pageSize == null || pageSize > 0,
-      'Page size must be null or a positive integer.',
-    );
-    assert(
-      page == null || pageSize != null,
-      'If page is provided, pageSize must also be provided.',
-    );
 
+    // NOTE: This is used instead of libraryListExists because we'll also return the page count later
     final list = await libraryListGetList(listName);
-
     if (list == null) {
       return null;
     }
 
+    final offset = page != null ? basicListOrderNumInterval * (basicListOrderNumInterval * page) : null;
+    final limit = offset != null
+        ? offset + (basicListOrderNumInterval * defaultLibraryListPageSize)
+        : null;
+
     final entries = await rawQuery(
       '''
-        WITH RECURSIVE
-          "RecursionTable"(
-            "jmdictEntryId",
-            "kanji",
-            "lastModified"
-          ) AS (
-            SELECT
-              "jmdictEntryId",
-              "kanji",
-              "lastModified"
-            FROM "${LibraryListTableNames.libraryListEntry}"
-            WHERE
-              "listName" = ?
-              AND "prevEntryJmdictEntryId" IS NULL
-              AND "prevEntryKanji" IS NULL
-
-            UNION ALL
-
-            SELECT
-              "R"."jmdictEntryId",
-              "R"."kanji",
-              "R"."lastModified"
-            FROM "${LibraryListTableNames.libraryListEntry}" AS "R", "RecursionTable"
-            WHERE
-              "R"."listName" = ?
-              AND ("R"."prevEntryJmdictEntryId" = "RecursionTable"."jmdictEntryId"
-                OR "R"."prevEntryKanji" = "RecursionTable"."kanji")
-          )
         SELECT
           "jmdictEntryId",
           "kanji",
           "lastModified"
-        FROM "RecursionTable"
-        ${pageSize != null ? 'LIMIT ?' : ''}
-        ${page != null ? 'OFFSET ?' : ''}
-
+        FROM "${LibraryListTableNames.libraryListEntry}"
+        WHERE
+          "listName" = ?
+          ${page != null ? 'AND orderNum >= ? AND orderNum < ?' : ''}
+        ORDER BY "orderNum" ASC
       ''',
-      [listName, listName, ?pageSize, if (page != null) page * pageSize!],
+      [listName, if (page != null) offset, if (page != null) limit],
     );
 
     Map<int, WordSearchResult>? wordResults;
@@ -183,6 +162,7 @@ extension LibraryListExt on DatabaseExecutor {
           ),
         );
       } else {
+        // TODO: this is not an argument error, fix the error type...
         throw ArgumentError(
           'Library list entry must have either jmdictEntryId or kanji.',
         );
@@ -212,51 +192,33 @@ extension LibraryListExt on DatabaseExecutor {
       return null;
     }
 
-    if (!await libraryListListContains(
-      listName,
-      jmdictEntryId: jmdictEntryId,
-      kanji: kanji,
-    )) {
-      return null;
-    }
-
+    // TODO: select the item matching listname, jmdict id, kanji, and then use the orderNum
+    // to find the count of items with a lesser orderNum to know its position.
+    //
+    // If said entry does not exist, it should return -1
     final result = await rawQuery(
       '''
-        WITH RECURSIVE
-          "RecursionTable"(
-            "jmdictEntryId",
-            "kanji",
-            "position"
-          ) AS (
+        WITH
+          "item" AS (
             SELECT
-              "jmdictEntryId",
-              "kanji",
-              0 AS "position"
+              "orderNum"
             FROM "${LibraryListTableNames.libraryListEntry}"
-            WHERE
-              "listName" = ?
-              AND "prevEntryJmdictEntryId" IS NULL
-              AND "prevEntryKanji" IS NULL
-
-            UNION ALL
-
-            SELECT
-              "R"."jmdictEntryId",
-              "R"."kanji",
-              "RecursionTable"."position" + 1 AS "position"
-            FROM "${LibraryListTableNames.libraryListEntry}" AS "R", "RecursionTable"
-            WHERE
-              "R"."listName" = ?
-              AND ("R"."prevEntryJmdictEntryId" = "RecursionTable"."jmdictEntryId"
-                OR "R"."prevEntryKanji" = "RecursionTable"."kanji")
+            WHERE "listName" = ?
+              AND ("jmdictEntryId" = ? OR "kanji" = ?)
           )
         SELECT
-          "position"
-        FROM "RecursionTable"
-        WHERE ("jmdictEntryId" = ? OR "kanji" = ?)
+          EXISTS(SELECT * FROM "item") AS "exists",
+          COUNT(*) + 1 AS "position"
+        FROM "${LibraryListTableNames.libraryListEntry}"
+        WHERE "listName" = ?
+          AND "orderNum" < (SELECT "orderNum" FROM "item")
       ''',
       [listName, listName, jmdictEntryId, kanji],
     );
+
+    if ((result.firstOrNull?['exists'] as int? ?? 0) == 0) {
+      return null;
+    }
 
     return result.firstOrNull?['position'] as int?;
   }
@@ -268,6 +230,11 @@ extension LibraryListExt on DatabaseExecutor {
     final int? jmdictEntryId,
     final String? kanji,
   }) async {
+    assert(
+      (jmdictEntryId == null) != (kanji == null),
+      'Either jmdictEntryId or kanji must be provided, but not both.',
+    );
+
     final result = await rawQuery(
       '''
         SELECT
@@ -277,7 +244,7 @@ extension LibraryListExt on DatabaseExecutor {
             WHERE "listName" = "name"
               AND ("jmdictEntryId" = ? OR "kanji" = ?)
           ) AS "exists"
-        FROM "${LibraryListTableNames.libraryListOrdered}"
+        FROM "${LibraryListTableNames.libraryList}"
       ''',
       [jmdictEntryId, kanji],
     );
@@ -295,6 +262,11 @@ extension LibraryListExt on DatabaseExecutor {
     final String? kanji,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
+    assert(
+      (jmdictEntryId == null) != (kanji == null),
+      'Either jmdictEntryId or kanji must be provided, but not both.',
+    );
+
     final result = await rawQuery(
       '''
         SELECT EXISTS(
@@ -334,27 +306,12 @@ extension LibraryListExt on DatabaseExecutor {
       throw ArgumentError('Library list "$newName" already exists.');
     }
 
-    final b = batch()
-      ..update(
-        LibraryListTableNames.libraryList,
-        {'name': newName},
-        where: '"name" = ?',
-        whereArgs: [oldName],
-      )
-      ..update(
-        LibraryListTableNames.libraryList,
-        {'prevList': newName},
-        where: '"prevList" = ?',
-        whereArgs: [oldName],
-      )
-      ..update(
-        LibraryListTableNames.libraryListEntry,
-        {'listName': newName},
-        where: '"listName" = ?',
-        whereArgs: [oldName],
-      );
-
-    await b.commit();
+    await update(
+      LibraryListTableNames.libraryList,
+      {'name': newName},
+      where: '"name" = ?',
+      whereArgs: [oldName],
+    );
   }
 
   /// Get the total number of library lists.
@@ -396,12 +353,26 @@ extension LibraryListExt on DatabaseExecutor {
       return false;
     }
 
-    // // This is ok, because "favourites" should always exist.
-    final prevList = (await libraryListGetLists()).last;
-    await insert(LibraryListTableNames.libraryList, {
-      'name': listName,
-      'prevList': prevList.name,
-    });
+    await rawInsert(
+      '''
+        INSERT INTO
+          "${LibraryListTableNames.libraryList}" ("name", "orderNum")
+        VALUES
+          (
+            ?,
+            (SELECT
+              IIF(
+                MAX("orderNum") IS NULL,
+                0,
+                MAX("orderNum") + ?
+              )
+            FROM
+              "${LibraryListTableNames.libraryList}"
+            )
+          )
+      ''',
+      [listName, basicListOrderNumInterval],
+    );
 
     return true;
   }
@@ -424,42 +395,19 @@ extension LibraryListExt on DatabaseExecutor {
       return false;
     }
 
-    final listQuery = (await query(
-      LibraryListTableNames.libraryList,
-      columns: ['prevList'],
-      where: '"name" = ?',
-      whereArgs: [listName],
-    )).map((final row) => row['prevList'] as String?).first;
-
-    assert(
-      listQuery != null,
-      'Library list "$listName" has no prevList, this should only happen for "favourites".',
-    );
-
-    final nextListQuery = (await query(
-      LibraryListTableNames.libraryList,
-      columns: ['name'],
-      where: '"prevList" = ?',
-      whereArgs: [listName],
-    )).map((final row) => row['name'] as String).firstOrNull;
-
     final b = batch()
       ..delete(
         LibraryListTableNames.libraryList,
         where: '"name" = ?',
         whereArgs: [listName],
+      )
+      ..delete(
+        LibraryListTableNames.libraryListEntry,
+        where: '"listName" = ?',
+        whereArgs: [listName],
       );
 
-    if (nextListQuery != null) {
-      b.update(
-        LibraryListTableNames.libraryList,
-        {'prevList': listQuery},
-        where: '"name" = ?',
-        whereArgs: [nextListQuery],
-      );
-    }
-
-    await b.commit();
+    await b.commit(noResult: true);
 
     return true;
   }
@@ -498,6 +446,10 @@ extension LibraryListExt on DatabaseExecutor {
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     assert(
+      position == null || position >= 0,
+      'Position must be a non-negative integer.',
+    );
+    assert(
       (jmdictEntryId == null) != (kanji == null),
       'Either jmdictEntryId or kanji must be provided, but not both.',
     );
@@ -515,65 +467,46 @@ extension LibraryListExt on DatabaseExecutor {
       return false;
     }
 
-    if (position != null) {
-      final len = (await libraryListGetList(listName))!.totalCount;
-      if (0 > position || position > len) {
-        return false;
-      } else if (position != len) {
-        // TODO: use a transaction instead of a batch
-        final b = batch();
-
-        final entries_ = (await libraryListGetListEntries(listName))!.entries;
-
-        // TODO: create a query to get entries at exact positions.
-        final prevEntry = entries_[position - 1];
-        final nextEntry = entries_[position];
-
-        b
-          ..insert(LibraryListTableNames.libraryListEntry, {
-            'listName': listName,
-            'jmdictEntryId': jmdictEntryId,
-            'kanji': kanji,
-            'prevEntryJmdictEntryId': prevEntry.jmdictEntryId,
-            'prevEntryKanji': prevEntry.kanji,
-          })
-          ..update(
-            LibraryListTableNames.libraryListEntry,
-            {'prevEntryJmdictEntryId': jmdictEntryId, 'prevEntryKanji': kanji},
-            where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
-            whereArgs: [listName, nextEntry.jmdictEntryId, nextEntry.kanji],
-          );
-
-        await b.commit();
-
-        return true;
-      }
+    if (position == null) {
+      await rawInsert(
+        '''
+          INSERT INTO
+            "${LibraryListTableNames.libraryListEntry}" (
+              "listName",
+              "jmdictEntryId",
+              "kanji",
+              "orderNum",
+              "lastModified"
+            )
+          VALUES (
+            ?,
+            ?,
+            ?,
+            (SELECT
+              IIF(
+                MAX("orderNum") IS NULL,
+                0,
+                MAX("orderNum") + ?
+              )
+            FROM "${LibraryListTableNames.libraryListEntry}" WHERE "listName" = ?),
+            strftime('%s', 'now') * 1000
+          )
+        ''',
+        [listName, jmdictEntryId, kanji, basicListOrderNumInterval, listName],
+      );
+    } else {
+      throw UnimplementedError(
+        'Inserting an entry at a specific position is not implemented yet, requires reordering algorithm.',
+      );
     }
-
-    final LibraryListEntry? prevEntry = (await libraryListGetListEntries(
-      listName,
-    ))!.entries.lastOrNull;
-
-    await insert(LibraryListTableNames.libraryListEntry, {
-      'listName': listName,
-      'jmdictEntryId': jmdictEntryId,
-      'kanji': kanji,
-      'prevEntryJmdictEntryId': prevEntry?.jmdictEntryId,
-      'prevEntryKanji': prevEntry?.kanji,
-    });
 
     return true;
   }
 
   /// Append multiple entries into the library list at once.
-  ///
-  /// If you already know the last entry in the list, you can provide it as [prevEntry] to avoid an extra query.
-  /// However be careful when doing this, as providing the wrong entry will put the list into an inconsistent state.
   Future<bool> libraryListInsertEntries(
     final String listName,
-    // TODO: convert this to Iterable<LibraryListEntry>
-    final List<LibraryListEntry> entries, {
-    final LibraryListEntry? prevEntry,
+    final Iterable<LibraryListEntry> entries, {
     final bool throwErrorOnDuplicate = false,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
@@ -582,39 +515,41 @@ extension LibraryListExt on DatabaseExecutor {
       return false;
     }
 
-    final lastEntry =
-        prevEntry ??
-        (await libraryListGetListEntries(listName))!.entries.lastOrNull;
-
-    // TODO: set up lastModified insertion
-
-    final List<Map<String, Object?>> entriesToInsert = entries.indexed.map((
-      final e,
-    ) {
-      final i = e.$1;
-      final entry = e.$2;
-      final prevEntry = i == 0 ? lastEntry : entries[i - 1];
-
-      return {
-        'listName': listName,
-        'jmdictEntryId': entry.jmdictEntryId,
-        'kanji': entry.kanji,
-        'prevEntryJmdictEntryId': prevEntry?.jmdictEntryId,
-        'prevEntryKanji': prevEntry?.kanji,
-      };
-    }).toList();
+    final maxOrderNum =
+        (await rawQuery(
+              '''
+        SELECT IFNULL(MAX("orderNum"), -1) AS "maxOrderNum"
+        FROM "${LibraryListTableNames.libraryListEntry}"
+        WHERE "listName" = ?
+      ''',
+              [listName],
+            )).first['maxOrderNum']
+            as int;
+    final nextOrderNum = maxOrderNum == -1
+        ? 0
+        : maxOrderNum + basicListOrderNumInterval;
 
     final b = batch();
-    for (final entry in entriesToInsert) {
+    for (final entry in entries.indexed) {
+      final i = entry.$1;
+      final e = entry.$2;
+
       b.insert(
         LibraryListTableNames.libraryListEntry,
-        entry,
+        {
+          'listName': listName,
+          'jmdictEntryId': e.jmdictEntryId,
+          'kanji': e.kanji,
+          'orderNum': nextOrderNum + i * basicListOrderNumInterval,
+          'lastModified': DateTime.now().millisecondsSinceEpoch,
+        },
         conflictAlgorithm: throwErrorOnDuplicate
             ? ConflictAlgorithm.abort
             : ConflictAlgorithm.ignore,
       );
     }
-    await b.commit();
+
+    await b.commit(noResult: true);
 
     return true;
   }
@@ -646,51 +581,13 @@ extension LibraryListExt on DatabaseExecutor {
       return false;
     }
 
-    // TODO: these queries might be combined into one
-    final entryQuery = await query(
+    await delete(
       LibraryListTableNames.libraryListEntry,
-      columns: ['prevEntryJmdictEntryId', 'prevEntryKanji'],
-      where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
-      whereArgs: [listName, jmdictEntryId, kanji],
+      where: jmdictEntryId != null
+          ? '"listName" = ? AND "jmdictEntryId" = ?'
+          : '"listName" = ? AND "kanji" = ?',
+      whereArgs: [listName, jmdictEntryId ?? kanji],
     );
-
-    final nextEntryQuery = await query(
-      LibraryListTableNames.libraryListEntry,
-      where:
-          '"listName" = ? AND ("prevEntryJmdictEntryId" = ? OR "prevEntryKanji" = ?)',
-      whereArgs: [listName, jmdictEntryId, kanji],
-    );
-
-    final prevEntryJmdictEntryId =
-        entryQuery.first['prevEntryJmdictEntryId'] as int?;
-    final prevEntryKanji = entryQuery.first['prevEntryKanji'] as String?;
-
-    final LibraryListEntry? nextEntry = nextEntryQuery
-        .map(LibraryListEntry.fromDBMap)
-        .firstOrNull;
-
-    // TODO: use a transaction instead of a batch
-    final b = batch();
-
-    if (nextEntry != null) {
-      b.update(
-        LibraryListTableNames.libraryListEntry,
-        {
-          'prevEntryJmdictEntryId': prevEntryJmdictEntryId,
-          'prevEntryKanji': prevEntryKanji,
-        },
-        where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
-        whereArgs: [listName, nextEntry.jmdictEntryId, nextEntry.kanji],
-      );
-    }
-
-    b
-      ..delete(
-        LibraryListTableNames.libraryListEntry,
-        where: '"listName" = ? AND ("jmdictEntryId" = ? OR "kanji" = ?)',
-        whereArgs: [listName, jmdictEntryId, kanji],
-      )
-      ..commit();
 
     return true;
   }
@@ -711,28 +608,36 @@ extension LibraryListExt on DatabaseExecutor {
 
     assert(position >= 0, 'Position must be a non-negative integer.');
 
-    if (!await libraryListExists(listName)) {
+    final libraryList = await libraryListGetList(listName);
+    if (libraryList == null) {
+      return false;
+    }
+    if (position >= libraryList.totalCount) {
       return false;
     }
 
-    final entries = (await libraryListGetListEntries(
-      listName,
-      page: 0,
-      pageSize: position + 1,
-    ))?.entries;
-    if (entries == null || position >= entries.length) {
-      return false;
-    }
-
-    final entry = entries[position];
-
-    final result = await libraryListDeleteEntry(
-      listName,
-      jmdictEntryId: entry.jmdictEntryId,
-      kanji: entry.kanji,
+    await rawQuery(
+      '''
+        WITH "TargetEntry" AS (
+          SELECT
+            "jmdictEntryId",
+            "kanji"
+          FROM "${LibraryListTableNames.libraryListEntry}"
+          WHERE "listName" = ?
+          ORDER BY "orderNum" ASC
+          LIMIT 1 OFFSET ?
+        )
+        DELETE FROM "${LibraryListTableNames.libraryListEntry}"
+        WHERE "listName" = ?
+          AND (
+            ("jmdictEntryId" IS NOT NULL AND "jmdictEntryId" = (SELECT "jmdictEntryId" FROM "TargetEntry"))
+            OR ("kanji" IS NOT NULL AND "kanji" = (SELECT "kanji" FROM "TargetEntry"))
+          )
+      ''',
+      [listName, position, listName],
     );
 
-    return result;
+    return true;
   }
 
   /// Reorder an entry within the library list.
@@ -774,30 +679,9 @@ extension LibraryListExt on DatabaseExecutor {
       return false;
     }
 
-    final currentPosition = await libraryListEntryPosition(
-      listName,
-      jmdictEntryId: jmdictEntryId,
-      kanji: kanji,
+    throw UnimplementedError(
+      'Reordering an entry within the library list is not implemented yet, requires reordering algorithm.',
     );
-
-    if (currentPosition == newPosition) {
-      return true;
-    }
-
-    await libraryListDeleteEntry(
-      listName,
-      jmdictEntryId: jmdictEntryId,
-      kanji: kanji,
-    );
-
-    await libraryListInsertEntry(
-      listName,
-      jmdictEntryId: jmdictEntryId,
-      kanji: kanji,
-      position: newPosition > currentPosition! ? newPosition - 1 : newPosition,
-    );
-
-    return true;
   }
 
   /// Append an entry to the library list if it's not there already,
@@ -843,15 +727,89 @@ extension LibraryListExt on DatabaseExecutor {
     return shouldToggleOn;
   }
 
-  /// Verify the linked list structure of the list of library lists.
-  Future<bool> libraryListVerifyLists() async {
-    throw UnimplementedError();
+  /// Reindex the `orderNum` on all library lists to have a consistent interval.
+  ///
+  /// This should be done regularly (or after significant reordering operations) to retain
+  /// somewhat even spacing between orderNums.
+  Future<void> libraryListReindexOrderNums() async {
+    await rawQuery(
+      '''
+        WITH "OrderedLists" AS (
+          SELECT
+            "name",
+            ROW_NUMBER() OVER (ORDER BY "prevList" ASC) - 1 AS "newOrderNum"
+          FROM "${LibraryListTableNames.libraryList}"
+        )
+        UPDATE "${LibraryListTableNames.libraryList}" AS "l"
+        SET "orderNum" = ("newOrderNum" * ?)
+        FROM "OrderedLists" AS "ol"
+        WHERE "l"."name" = "ol"."name"
+      ''',
+      [basicListOrderNumInterval],
+    );
   }
 
-  /// Verify the linked list structure of a single library list.
-  Future<bool> libraryListVerifyList(final String listName) async {
+  /// Reindex the `orderNum` on all entries in all library lists to have a consistent interval.
+  ///
+  /// See [libraryListEntryReindexAllOrderNums] for more details.
+  Future<void> libraryListEntryReindexAllOrderNums() async {
+    await rawQuery(
+      '''
+        WITH "OrderedEntries" AS (
+          SELECT
+            "listName",
+            "jmdictEntryId",
+            "kanji",
+            ROW_NUMBER() OVER (PARTITION BY "listName" ORDER BY "orderNum" ASC) - 1 AS "newOrderNum"
+          FROM "${LibraryListTableNames.libraryListEntry}"
+        )
+        UPDATE "${LibraryListTableNames.libraryListEntry}" AS "e"
+        SET "orderNum" = ("newOrderNum" * ?)
+        FROM "OrderedEntries" AS "oe"
+        WHERE
+          "e"."listName" = "oe"."listName"
+          AND (
+            ("e"."jmdictEntryId" IS NOT NULL AND "e"."jmdictEntryId" = "oe"."jmdictEntryId")
+            OR ("e"."kanji" IS NOT NULL AND "e"."kanji" = "oe"."kanji")
+          )
+      ''',
+      [basicListOrderNumInterval],
+    );
+  }
+
+  /// Reindex the `orderNum` on all entries in the library list to have a consistent interval.
+  ///
+  /// This should be done regularly (or after significant reordering operations) to retain
+  /// somewhat even spacing between orderNums.
+  Future<void> libraryListEntryReindexOrderNums(final String listName) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
-    throw UnimplementedError();
+
+    if (!await libraryListExists(listName)) {
+      throw ArgumentError('Library list "$listName" does not exist.');
+    }
+
+    await rawQuery(
+      '''
+        WITH "OrderedEntries" AS (
+          SELECT
+            "jmdictEntryId",
+            "kanji",
+            ROW_NUMBER() OVER (ORDER BY "orderNum" ASC) - 1 AS "newOrderNum"
+          FROM "${LibraryListTableNames.libraryListEntry}"
+          WHERE "listName" = ?
+        )
+        UPDATE "${LibraryListTableNames.libraryListEntry}" AS "e"
+        SET "orderNum" = ("newOrderNum" * ?)
+        FROM "OrderedEntries" AS "oe"
+        WHERE
+          "e"."listName" = ?
+          AND (
+            ("e"."jmdictEntryId" IS NOT NULL AND "e"."jmdictEntryId" = "oe"."jmdictEntryId")
+            OR ("e"."kanji" IS NOT NULL AND "e"."kanji" = "oe"."kanji")
+          )
+      ''',
+      [listName, basicListOrderNumInterval, listName],
+    );
   }
 }
 
@@ -922,6 +880,15 @@ class LibraryListEntry {
   }) : lastModified = lastModified ?? DateTime.now(),
        jmdictEntryId = null,
        wordSearchResult = null;
+
+  @override
+  String toString() {
+    if (jmdictEntryId != null) {
+      return 'LibraryListEntry(jmdictEntryId: $jmdictEntryId, lastModified: $lastModified)';
+    } else {
+      return 'LibraryListEntry(kanji: $kanji, lastModified: $lastModified)';
+    }
+  }
 
   Map<String, Object?> toJson() => {
     'kanji': kanji,

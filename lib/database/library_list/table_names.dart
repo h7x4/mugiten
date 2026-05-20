@@ -1,29 +1,23 @@
 abstract class LibraryListTableNames {
   /// Attributes:
   /// - name TEXT
-  /// - prevList TEXT
+  /// - orderNum INTEGER
   static const String libraryList = 'Mugiten_LibraryList';
 
   /// Attributes:
   /// - listName TEXT
+  /// - orderNum INTEGER
   /// - jmdictEntryId INTEGER
   /// - kanji TEXT
   /// - lastModified TIMESTAMP
-  /// - prevJmdictEntryId INTEGER
-  /// - prevEntryKanji TEXT
   static const String libraryListEntry = 'Mugiten_LibraryListEntry';
 
   ///////////
   // VIEWS //
   ///////////
 
-  /// Attributes:
-  /// - name TEXT
-  static const String libraryListOrdered = 'Mugiten_LibraryList_Ordered';
-
   static Set<String> get allTables => {
     libraryList,
     libraryListEntry,
-    libraryListOrdered,
   };
 }

@@ -18,7 +18,7 @@ part './library_lists.dart';
 
 const int expectedDataFormatVersion = 2;
 const int historyChunkSize = 100;
-const int libraryListChunkSize = 100;
+const int libraryListChunkSize = defaultLibraryListPageSize;
 
 /// Functions and properties that makes up the format of version 2 of the data archive.
 /// This archive is used to back up user data and optionally to transfer data between devices.

@@ -139,7 +139,6 @@ Stream<ArchiveV2StreamEvent> exportLibraryList(
     final entryPage = (await db.libraryListGetListEntries(
       libraryList.name,
       page: i,
-      pageSize: libraryListChunkSize,
     ))!;
 
     final archiveEntries = entryPage.entries
