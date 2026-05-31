@@ -16,6 +16,35 @@ class ArchiveV1HistoryEntry {
          word != null || kanji != null,
          'At least one of word or kanji must be non-null',
        );
+
+  factory ArchiveV1HistoryEntry.fromHistoryEntry(final HistoryEntry entry) {
+    return ArchiveV1HistoryEntry(
+      id: entry.id,
+      timestamps: entry.timestamps,
+      word: entry.word,
+      kanji: entry.kanji,
+    );
+  }
+
+  factory ArchiveV1HistoryEntry.fromJson(final Map<String, Object?> json) {
+    return ArchiveV1HistoryEntry(
+      id: json['id'] as int,
+      timestamps: (json['timestamps'] as List<dynamic>)
+          .map((final ts) => DateTime.fromMillisecondsSinceEpoch(ts as int))
+          .toList(),
+      word: json['word'] as String?,
+      kanji: json['kanji'] as String?,
+    );
+  }
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'timestamps': timestamps
+        .map((final ts) => ts.millisecondsSinceEpoch)
+        .toList(),
+    'word': word,
+    'kanji': kanji,
+  };
 }
 
 Future<void> exportHistoryTo(
@@ -25,6 +54,7 @@ Future<void> exportHistoryTo(
   final file = dir.historyFile..createSync();
 
   final List<Map<String, Object?>> jsonEntries = (await db.historyEntryGetAll())
+      .map(ArchiveV1HistoryEntry.fromHistoryEntry)
       .map((final e) => e.toJson())
       .toList();
 
@@ -33,32 +63,32 @@ Future<void> exportHistoryTo(
 
 Future<void> importHistoryFrom(final Database db, final File file) async {
   final String content = file.readAsStringSync();
-  final List<Map<String, Object?>> json = (jsonDecode(content) as List)
+  final List<ArchiveV1HistoryEntry> entries = (jsonDecode(content) as List)
       .map((final h) => h as Map<String, Object?>)
+      .map(ArchiveV1HistoryEntry.fromJson)
       .toList();
-  // log('Importing ${json.length} entries from ${file.path}');
   await db.transaction(
-    (final txn) => historyEntryInsertManyFromJson(txn, json),
+    (final txn) => historyEntryInsertMany(txn, entries),
   );
 }
 
-Future<void> historyEntryInsertManyFromJson(
+Future<void> historyEntryInsertMany(
   final DatabaseExecutor db,
-  final Iterable<Map<String, Object?>> json,
+  final Iterable<ArchiveV1HistoryEntry> entries,
 ) async {
   final b = db.batch();
-  for (final jsonObject in json) {
-    final bool isKanji = jsonObject['word'] == null;
+  for (final entry in entries) {
+    final bool isKanji = entry.word == null;
     final existingEntry = isKanji
         ? await db.query(
             HistoryTableNames.historyEntryKanji,
             where: 'kanji = ?',
-            whereArgs: [jsonObject['kanji']! as String],
+            whereArgs: [entry.kanji],
           )
         : await db.query(
             HistoryTableNames.historyEntryWord,
             where: 'word = ?',
-            whereArgs: [jsonObject['word']! as String],
+            whereArgs: [entry.word],
           );
 
     late final int id;
@@ -71,19 +101,19 @@ Future<void> historyEntryInsertManyFromJson(
       if (isKanji) {
         b.insert(HistoryTableNames.historyEntryKanji, {
           'entryId': id,
-          'kanji': jsonObject['kanji']! as String,
+          'kanji': entry.kanji,
         });
       } else {
         b.insert(HistoryTableNames.historyEntryWord, {
           'entryId': id,
-          'word': jsonObject['word']! as String,
+          'word': entry.word,
         });
       }
     } else {
       id = existingEntry.first['entryId']! as int;
     }
-    final List<int> timestamps = (jsonObject['timestamps']! as List)
-        .map((final ts) => ts as int)
+    final List<int> timestamps = entry.timestamps
+        .map((final ts) => ts.millisecondsSinceEpoch)
         .toList();
     for (final timestamp in timestamps) {
       b.insert(

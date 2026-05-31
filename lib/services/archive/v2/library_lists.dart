@@ -6,6 +6,12 @@ class ArchiveV2LibraryListMetadata {
 
   const ArchiveV2LibraryListMetadata({required this.name, required this.slug});
 
+  factory ArchiveV2LibraryListMetadata.fromJson(final Map<String, Object?> json) =>
+      ArchiveV2LibraryListMetadata(
+        name: json['name']! as String,
+        slug: json['slug']! as String,
+      );
+
   Map<String, Object?> toJson() => {'name': name, 'slug': slug};
 }
 
@@ -75,12 +81,7 @@ List<ArchiveV2LibraryListMetadata> importLibraryMetadata(
 
   return jsonList
       .map((final e) => e as Map<String, Object?>)
-      .map(
-        (final e) => ArchiveV2LibraryListMetadata(
-          name: e['name']! as String,
-          slug: e['slug']! as String,
-        ),
-      )
+      .map(ArchiveV2LibraryListMetadata.fromJson)
       .toList();
 }
 

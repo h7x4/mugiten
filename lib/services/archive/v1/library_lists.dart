@@ -13,6 +13,30 @@ class ArchiveV1LibraryListEntry {
          jmdictEntryId != null || kanji != null,
          'At least one of jmdictEntryId or kanji must be non-null',
        );
+
+  factory ArchiveV1LibraryListEntry.fromLibraryListEntry(
+    final LibraryListEntry entry,
+  ) {
+    return ArchiveV1LibraryListEntry(
+      lastModified: entry.lastModified,
+      jmdictEntryId: entry.jmdictEntryId,
+      kanji: entry.kanji,
+    );
+  }
+
+  factory ArchiveV1LibraryListEntry.fromJson(final Map<String, Object?> json) {
+    return ArchiveV1LibraryListEntry(
+      lastModified: DateTime.parse(json['lastModified'] as String),
+      jmdictEntryId: json['jmdictEntryId'] as int?,
+      kanji: json['kanji'] as String?,
+    );
+  }
+
+  Map<String, Object?> toJson() => {
+    'lastModified': lastModified.toIso8601String(),
+    'jmdictEntryId': jmdictEntryId,
+    'kanji': kanji,
+  };
 }
 
 Future<void> exportLibraryListsTo(
@@ -41,9 +65,10 @@ Future<void> exportLibraryListTo(
   await file.create();
 
   // TODO: properly null check
-  final entries = (await db.libraryListGetListEntries(
-    libraryName,
-  ))!.entries.map((final e) => e.toJson()).toList();
+  final entries = (await db.libraryListGetListEntries(libraryName))!.entries
+      .map(ArchiveV1LibraryListEntry.fromLibraryListEntry)
+      .map((final e) => e.toJson())
+      .toList();
 
   await file.writeAsString(jsonEncode(entries));
 }
@@ -76,33 +101,37 @@ Future<void> importLibraryListsFrom(
     }
 
     final content = await file.readAsString();
-    final List<Map<String, Object?>> jsonEntries = (jsonDecode(content) as List)
-        .map((final e) => e as Map<String, Object?>)
-        .toList();
+    final List<ArchiveV1LibraryListEntry> entries =
+        (jsonDecode(content) as List)
+            .map((final e) => e as Map<String, Object?>)
+            .map(ArchiveV1LibraryListEntry.fromJson)
+            .toList();
 
-    await libraryListInsertJsonEntriesForSingleList(
-      db,
-      libraryName,
-      jsonEntries,
-    );
+    await libraryListInsertEntriesForSingleList(db, libraryName, entries);
   }
 }
 
 /// Append multiple entries into the library list at once, using a list of JSON objects.
-Future<void> libraryListInsertJsonEntriesForSingleList(
+Future<void> libraryListInsertEntriesForSingleList(
   final DatabaseExecutor db,
   final String listName,
-  final Iterable<Map<String, Object?>> jsonEntries, {
+  final Iterable<ArchiveV1LibraryListEntry> entries, {
   final LibraryListEntry? prevEntry,
   final bool throwErrorOnDuplicate = false,
 }) async {
-  final List<LibraryListEntry> entries = jsonEntries
-      .map(LibraryListEntry.fromJson)
+  final List<LibraryListEntry> entries_ = entries
+      .map(
+        (final e) => LibraryListEntry(
+          lastModified: e.lastModified,
+          jmdictEntryId: e.jmdictEntryId,
+          kanji: e.kanji,
+        ),
+      )
       .toList();
 
   await db.libraryListInsertEntries(
     listName,
-    entries,
+    entries_,
     prevEntry: prevEntry,
     throwErrorOnDuplicate: throwErrorOnDuplicate,
   );
