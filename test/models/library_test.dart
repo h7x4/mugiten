@@ -464,4 +464,118 @@ void main() {
       expect(libraryExists, isTrue);
     });
   });
+
+  group('Reindexing orderNums', () {
+    test('Reindexing is idempotent', () async {
+      await insertTestData(database);
+
+      final listPageBeforeReindex = (await database.libraryListGetListEntries(
+        'Test Library 1',
+        includeOrderNum: true,
+      ))!;
+      expect(listPageBeforeReindex.entries.length, 4);
+      expect(listPageBeforeReindex.entries[0].kanji, '漢');
+      expect(listPageBeforeReindex.entries[0].orderNum, 0);
+      expect(listPageBeforeReindex.entries[1].kanji, '字');
+      expect(listPageBeforeReindex.entries[1].orderNum, 100);
+      expect(listPageBeforeReindex.entries[2].kanji, '学');
+      expect(listPageBeforeReindex.entries[2].orderNum, 200);
+      expect(listPageBeforeReindex.entries[3].kanji, '習');
+      expect(listPageBeforeReindex.entries[3].orderNum, 300);
+
+      await database.libraryListEntryReindexOrderNums('Test Library 1');
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+        includeOrderNum: true,
+      ))!;
+      expect(listPage.entries.length, 4);
+      expect(listPage.entries[0].kanji, '漢');
+      expect(listPage.entries[0].orderNum, 0);
+      expect(listPage.entries[1].kanji, '字');
+      expect(listPage.entries[1].orderNum, 100);
+      expect(listPage.entries[2].kanji, '学');
+      expect(listPage.entries[2].orderNum, 200);
+      expect(listPage.entries[3].kanji, '習');
+      expect(listPage.entries[3].orderNum, 300);
+    });
+
+    test('Correctly reindexes orderNums after deleting an entry', () async {
+      await insertTestData(database);
+
+      final deleteResult = await database.libraryListDeleteEntryByPosition(
+        'Test Library 1',
+        1,
+      );
+      expect(deleteResult, isTrue);
+
+      final listPageBeforeReindex = (await database.libraryListGetListEntries(
+        'Test Library 1',
+        includeOrderNum: true,
+      ))!;
+      expect(listPageBeforeReindex.entries.length, 3);
+      expect(listPageBeforeReindex.entries[0].kanji, '漢');
+      expect(listPageBeforeReindex.entries[0].orderNum, 0);
+      expect(listPageBeforeReindex.entries[1].kanji, '学');
+      expect(listPageBeforeReindex.entries[1].orderNum, 200);
+      expect(listPageBeforeReindex.entries[2].kanji, '習');
+      expect(listPageBeforeReindex.entries[2].orderNum, 300);
+
+      await database.libraryListEntryReindexOrderNums('Test Library 1');
+
+      final listPage = (await database.libraryListGetListEntries(
+        'Test Library 1',
+        includeOrderNum: true,
+      ))!;
+      expect(listPage.entries.length, 3);
+      expect(listPage.entries[0].kanji, '漢');
+      expect(listPage.entries[0].orderNum, 0);
+      expect(listPage.entries[1].kanji, '学');
+      expect(listPage.entries[1].orderNum, 100);
+      expect(listPage.entries[2].kanji, '習');
+      expect(listPage.entries[2].orderNum, 200);
+    });
+
+    test(
+      'Correctly reindexes orderNums inbetween the common interval',
+      () async {
+        await insertTestData(database);
+
+        // TODO: use the static const tablename
+        final updateResult = await database.update(
+          'Mugiten_LibraryListEntry',
+          {'orderNum': 50},
+          where: 'listName = ? AND kanji = ?',
+          whereArgs: ['Test Library 1', '学'],
+        );
+        expect(updateResult, 1);
+
+        final listPageBeforeReindex = (await database.libraryListGetListEntries(
+          'Test Library 1',
+          includeOrderNum: true,
+        ))!;
+        expect(listPageBeforeReindex.entries.length, 4);
+        expect(listPageBeforeReindex.entries[0].kanji, '漢');
+        expect(listPageBeforeReindex.entries[0].orderNum, 0);
+        expect(listPageBeforeReindex.entries[1].kanji, '学');
+        expect(listPageBeforeReindex.entries[1].orderNum, 50);
+        expect(listPageBeforeReindex.entries[2].kanji, '字');
+        expect(listPageBeforeReindex.entries[2].orderNum, 100);
+
+        await database.libraryListEntryReindexOrderNums('Test Library 1');
+
+        final listPage = (await database.libraryListGetListEntries(
+          'Test Library 1',
+          includeOrderNum: true,
+        ))!;
+        expect(listPage.entries.length, 4);
+        expect(listPage.entries[0].kanji, '漢');
+        expect(listPage.entries[0].orderNum, 0);
+        expect(listPage.entries[1].kanji, '学');
+        expect(listPage.entries[1].orderNum, 100);
+        expect(listPage.entries[2].kanji, '字');
+        expect(listPage.entries[2].orderNum, 200);
+      },
+    );
+  });
 }

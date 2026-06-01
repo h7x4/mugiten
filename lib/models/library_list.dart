@@ -93,6 +93,7 @@ extension LibraryListExt on DatabaseExecutor {
     final String listName, {
     final int? page,
     final bool includeSearchResult = false,
+    final bool includeOrderNum = false,
   }) async {
     assert(listName.isNotEmpty, 'Library list name must not be empty.');
     assert(
@@ -119,6 +120,7 @@ extension LibraryListExt on DatabaseExecutor {
           "jmdictEntryId",
           "kanji",
           "lastModified"
+          ${includeOrderNum ? ', "orderNum"' : ''}
         FROM "${LibraryListTableNames.libraryListEntry}"
         WHERE
           "listName" = ?
@@ -154,6 +156,7 @@ extension LibraryListExt on DatabaseExecutor {
           lastModified: DateTime.fromMillisecondsSinceEpoch(
             entry['lastModified'] as int,
           ),
+          orderNum: includeOrderNum ? entry['orderNum'] as int : null,
         );
       } else if (entry['kanji'] != null) {
         return LibraryListEntry.fromKanji(
@@ -162,6 +165,7 @@ extension LibraryListExt on DatabaseExecutor {
           lastModified: DateTime.fromMillisecondsSinceEpoch(
             entry['lastModified'] as int,
           ),
+          orderNum: includeOrderNum ? entry['orderNum'] as int : null,
         );
       } else {
         // TODO: this is not an argument error, fix the error type...
@@ -836,6 +840,7 @@ class LibraryListPage {
 
 class LibraryListEntry {
   DateTime lastModified;
+  final int? orderNum;
 
   final int? jmdictEntryId;
   final WordSearchResult? wordSearchResult;
@@ -849,6 +854,7 @@ class LibraryListEntry {
     this.jmdictEntryId,
     this.kanji,
     this.kanjiSearchResult,
+    this.orderNum,
   }) : lastModified = lastModified ?? DateTime.now(),
        assert(
          kanji != null || jmdictEntryId != null,
@@ -865,20 +871,28 @@ class LibraryListEntry {
        assert(
          wordSearchResult == null || wordSearchResult.entryId == jmdictEntryId,
          "WordSearchResult's jmdictEntryId must match the jmdictEntryId in LibraryListEntry",
+       ),
+       assert(
+         orderNum == null || orderNum >= 0,
+         'Library entry orderNum must be a non-negative integer',
        );
+
 
   LibraryListEntry.fromJmdictId({
     required int this.jmdictEntryId,
     this.wordSearchResult,
     final DateTime? lastModified,
+    this.orderNum,
   }) : lastModified = lastModified ?? DateTime.now(),
        kanji = null,
        kanjiSearchResult = null;
+
 
   LibraryListEntry.fromKanji({
     required String this.kanji,
     this.kanjiSearchResult,
     final DateTime? lastModified,
+    this.orderNum,
   }) : lastModified = lastModified ?? DateTime.now(),
        jmdictEntryId = null,
        wordSearchResult = null;
