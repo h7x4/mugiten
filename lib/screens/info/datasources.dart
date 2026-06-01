@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:jadb/search.dart';
+import 'package:jadb/search/versions.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DataSourcesView extends StatelessWidget {
   const DataSourcesView({super.key});
 
-  static final List<Widget> dataSources = [
+  List<Widget> dataSources(final DatasourceVersions? versions) => [
     const ListTile(
       subtitle: Text(
         'Mugiten is made up of data from various sources, each with their own licenses and copyrights. '
@@ -24,6 +28,9 @@ class DataSourcesView extends StatelessWidget {
       description:
           'The EDRDG\'s Japanese-Multilingual Dictionary (JMdict) is a comprehensive dictionary containing over 200,000 entries. '
           'This is what makes up the base of the word data in this application.',
+      version: versions?.jmdictVersion,
+      date: versions?.jmdictDate,
+      hash: versions?.jmdictHash,
     ),
     DataSource(
       title: 'KANJIDIC2',
@@ -35,6 +42,9 @@ class DataSourcesView extends StatelessWidget {
       description:
           'The EDRDG\'s KANJIDIC2 is a comprehensive kanji dictionary containing over 13,000 entries.'
           'This is what makes up the base of the kanji data in this application.',
+      version: versions?.kanjidic2Version,
+      date: versions?.kanjidic2Date,
+      hash: versions?.kanjidic2Hash,
     ),
     DataSource(
       title: 'RADKFILE/KRADFILE',
@@ -46,6 +56,9 @@ class DataSourcesView extends StatelessWidget {
       description:
           'The EDRDG\'s RADKFILE/KRADFILE is a mapping of kanji to their radicals. '
           'This is used for searching kanji by their radicals.',
+      version: versions?.radkfileVersion,
+      date: versions?.radkfileDate,
+      hash: versions?.radkfileHash,
     ),
     DataSource(
       title: 'Jonathan Waller\'s JLPT resources',
@@ -58,7 +71,12 @@ class DataSourcesView extends StatelessWidget {
           'This is used for the JLPT tags spread throughout the app.'
           '\n\n'
           'Do note that this data was last updated in 2011, so the accuracy of the JLPT tags might have shifted slightly over time.',
+      version: versions?.tanosJlptVersion,
+      date: versions?.tanosJlptDate,
+      hash: versions?.tanosJlptHash,
     ),
+
+    // TODO: provide version, date and hash for this datasource as well.
     DataSource(
       title: 'KanjiVG',
       url: Uri.parse('https://github.com/KanjiVG/kanjivg'),
@@ -77,10 +95,21 @@ class DataSourcesView extends StatelessWidget {
       appBar: AppBar(title: const Text('Datasources')),
       body: Padding(
         padding: const EdgeInsets.all(2.0),
-        child: ListView.separated(
-          itemCount: dataSources.length,
-          itemBuilder: (final context, final index) => dataSources[index],
-          separatorBuilder: (final context, final index) => const Divider(),
+        child: FutureBuilder<DatasourceVersions?>(
+          future: GetIt.instance.get<Database>().jadbGetDatasourceVersions(),
+          builder: (final context, final snapshot) {
+            final List<Widget> dataSources =
+                snapshot.connectionState != ConnectionState.waiting &&
+                    !snapshot.hasError
+                ? this.dataSources(snapshot.data)
+                : this.dataSources(null);
+
+            return ListView.separated(
+              itemCount: dataSources.length,
+              itemBuilder: (final context, final index) => dataSources[index],
+              separatorBuilder: (final context, final index) => const Divider(),
+            );
+          },
         ),
       ),
     );
@@ -95,6 +124,11 @@ class DataSource extends StatelessWidget {
   final String? licenseAssetPath;
   final String copyright;
 
+  // NOTE: these will be provided from the database
+  final String? version;
+  final DateTime? date;
+  final String? hash;
+
   const DataSource({
     super.key,
     required this.title,
@@ -103,6 +137,9 @@ class DataSource extends StatelessWidget {
     required this.copyright,
     this.description,
     this.licenseAssetPath,
+    this.version,
+    this.date,
+    this.hash,
   });
 
   @override
@@ -173,6 +210,33 @@ class DataSource extends StatelessWidget {
               fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
             ),
           ),
+          if (version != null) ...[
+            const SizedBox(height: 15),
+            Text(
+              'Version: $version',
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+              ),
+            ),
+          ],
+          if (date != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Last updated: $date',
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+              ),
+            ),
+          ],
+          if (hash != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Datasource hash: $hash',
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+              ),
+            ),
+          ],
         ],
       ),
     );
