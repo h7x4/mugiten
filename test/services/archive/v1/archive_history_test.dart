@@ -41,7 +41,7 @@ void main() {
 
     GetIt.instance.registerSingleton<Database>(database);
 
-    tmpdir = await test_tmpdir();
+    tmpdir = await testTmpdir();
   });
 
   tearDown(() async {

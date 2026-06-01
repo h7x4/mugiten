@@ -135,5 +135,5 @@ Future<List<HistoryEntry>> createRandomHistoryEntries({
   return result;
 }
 
-Future<Directory> test_tmpdir() =>
+Future<Directory> testTmpdir() =>
     Directory.systemTemp.createTemp('mugiten_test_data_');
