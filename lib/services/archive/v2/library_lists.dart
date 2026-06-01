@@ -53,23 +53,46 @@ class ArchiveV2LibraryListEntry {
       );
 }
 
-/// Exports metadata about library lists, such as their names and order, into the archive.
-Future<void> exportLibraryMetadata(
-  final DatabaseExecutor db,
-  final Directory archiveRoot,
-) async {
-  final libraryLists = await db.libraryListGetLists();
-  final List<ArchiveV2LibraryListMetadata> metadataList = libraryLists
+class ArchiveV2ExportLibraryList {
+  final ArchiveV2LibraryListMetadata metadata;
+  final int totalCount;
+
+  const ArchiveV2ExportLibraryList({
+    required this.metadata,
+    required this.totalCount,
+  });
+}
+
+Future<List<ArchiveV2ExportLibraryList>> _getExportLibraryLists(
+  final DatabaseExecutor db, {
+  required final ArchiveV2ExportAdapter adapter,
+}) async {
+  final metadata = await adapter.libraryListGetLibraryMetadata(db: db);
+  final counts = await adapter.libraryListGetTotalCounts(db: db);
+
+  return metadata
       .map(
-        (final libraryList) => ArchiveV2LibraryListMetadata(
-          name: libraryList.name,
-          slug: slugifyLibraryListFileName(libraryList.name),
+        (final meta) => ArchiveV2ExportLibraryList(
+          metadata: meta,
+          totalCount: counts[meta.name] ?? 0,
         ),
       )
       .toList();
+}
 
+/// Exports metadata about library lists, such as their names and order, into the archive.
+Future<void> exportLibraryMetadata(
+  final Directory archiveRoot,
+  final List<ArchiveV2ExportLibraryList> libraryLists,
+) async {
   final metadataFile = archiveRoot.libraryMetadataFile..createSync();
-  await metadataFile.writeAsString(jsonEncode(metadataList));
+  await metadataFile.writeAsString(
+    jsonEncode(
+      libraryLists
+          .map((final libraryList) => libraryList.metadata.toJson())
+          .toList(),
+    ),
+  );
 }
 
 List<ArchiveV2LibraryListMetadata> importLibraryMetadata(
@@ -89,13 +112,19 @@ List<ArchiveV2LibraryListMetadata> importLibraryMetadata(
 
 /// Calculate the total number of chunks needed to export all library lists,
 /// needed for progress tracking during export.
-Future<int> exportLibraryListChunkCount(final DatabaseExecutor db) async =>
-    (await db.libraryListGetLists())
+Future<int> exportLibraryListChunkCount(
+  final DatabaseExecutor db, {
+  final ArchiveV2ExportAdapter? adapter,
+}) async =>
+    (await _getExportLibraryLists(
+          db,
+          adapter: adapter ?? latestSchemaExportAdapter,
+        ))
         .map(
           (final libraryList) =>
               (libraryList.totalCount / libraryListChunkSize).ceil(),
         )
-        .reduce((final a, final b) => a + b);
+        .sum;
 
 /// Exports all library lists into json files in the given directory.
 ///
@@ -103,13 +132,16 @@ Future<int> exportLibraryListChunkCount(final DatabaseExecutor db) async =>
 /// See also [exportLibraryListChunkCount].
 Stream<ArchiveV2StreamEvent> exportLibraryLists(
   final DatabaseExecutor db,
-  final Directory archiveRoot,
-) async* {
+  final Directory archiveRoot, {
+  final ArchiveV2ExportAdapter? adapter,
+}) async* {
+  final exportAdapter = adapter ?? latestSchemaExportAdapter;
+
   archiveRoot.libraryDir.createSync();
 
-  await exportLibraryMetadata(db, archiveRoot);
+  final libraryLists = await _getExportLibraryLists(db, adapter: exportAdapter);
 
-  final libraryLists = await db.libraryListGetLists();
+  await exportLibraryMetadata(archiveRoot, libraryLists);
 
   for (final (i, libraryList) in libraryLists.indexed) {
     yield* exportLibraryList(
@@ -118,6 +150,7 @@ Stream<ArchiveV2StreamEvent> exportLibraryLists(
       libraryList,
       i + 1,
       libraryLists.length,
+      adapter: exportAdapter,
     );
   }
 }
@@ -128,34 +161,35 @@ Stream<ArchiveV2StreamEvent> exportLibraryLists(
 Stream<ArchiveV2StreamEvent> exportLibraryList(
   final DatabaseExecutor db,
   final Directory archiveRoot,
-  final LibraryList libraryList,
+  final ArchiveV2ExportLibraryList libraryList,
   final int index,
-  final int total,
-) async* {
-  final int totalEntries = libraryList.totalCount;
-  final int chunkCount = (totalEntries / libraryListChunkSize).ceil();
+  final int total, {
+  final ArchiveV2ExportAdapter? adapter,
+}) async* {
+  final exportAdapter = adapter ?? latestSchemaExportAdapter;
+  final listName = libraryList.metadata.name;
+  final int chunkCount = (libraryList.totalCount / libraryListChunkSize).ceil();
 
-  archiveRoot.libraryListDir(libraryList.name).createSync();
+  archiveRoot.libraryListDir(listName).createSync();
 
   for (int i = 0; i < chunkCount; i++) {
-    final entryPage = (await db.libraryListGetListEntries(
-      libraryList.name,
+    final archiveEntries = await exportAdapter.libraryListGetEntries(
+      db: db,
+      listName: listName,
       page: i,
-    ))!;
+    );
 
-    final archiveEntries = entryPage.entries
-        .map(ArchiveV2LibraryListEntry.fromLibraryListEntry)
-        .toList();
-
-    archiveRoot.libraryListChunkFile(libraryList.name, i)
+    archiveRoot.libraryListChunkFile(listName, i)
       ..createSync()
-      ..writeAsStringSync(jsonEncode(archiveEntries));
+      ..writeAsStringSync(
+        jsonEncode(archiveEntries.map((final e) => e.toJson()).toList()),
+      );
 
     yield ArchiveV2StreamEvent(
       type: 'library',
       progress: index,
       total: total,
-      name: libraryList.name,
+      name: listName,
       subProgress: i + 1,
       subTotal: chunkCount,
     );
@@ -210,7 +244,13 @@ Stream<ArchiveV2StreamEvent> importLibraryList(
   final int index,
   final int total,
 ) async* {
-  final chunkFiles = libraryListDir.listSync().whereType<File>();
+  final chunkFiles = libraryListDir.listSync().whereType<File>().sortedBy(
+    (final file) =>
+        int.tryParse(
+          file.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), ''),
+        ) ??
+        0,
+  );
 
   for (final (i, chunkFile) in chunkFiles.indexed) {
     final chunkContent = chunkFile.readAsStringSync();

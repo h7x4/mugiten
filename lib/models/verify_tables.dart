@@ -1,9 +1,10 @@
-import 'package:mugiten/services/database/database.dart';
+import 'package:mugiten/services/database/schemas/v2/table_names.dart';
 import 'package:sqflite/sqflite.dart';
 
 Future<void> verifyMugitenTablesWithDbConnection(
-  final DatabaseExecutor db,
-) async {
+  final DatabaseExecutor db, {
+  final Set<String> expectedTables = allSchemaV2TableNames,
+}) async {
   final Set<String> tables = await db
       .query(
         'sqlite_master',
@@ -14,11 +15,6 @@ Future<void> verifyMugitenTablesWithDbConnection(
       .then((final result) {
         return result.map((final row) => row['name'] as String).toSet();
       });
-
-  final Set<String> expectedTables = {
-    ...HistoryTableNames.allTables,
-    ...LibraryListTableNames.allTables,
-  };
 
   final missingTables = expectedTables.difference(tables);
 

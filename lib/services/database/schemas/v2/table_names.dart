@@ -32,7 +32,7 @@ abstract class HistoryTableNames {
   static const String historyEntryOrderedByTimestamp =
       'Mugiten_HistoryEntry_orderedByTimestamp';
 
-  static Set<String> get allTables => {
+  static const Set<String> allTables = {
     historyEntry,
     historyEntryKanji,
     historyEntryTimestamp,
@@ -59,5 +59,10 @@ abstract class LibraryListTableNames {
   // VIEWS //
   ///////////
 
-  static Set<String> get allTables => {libraryList, libraryListEntry};
+  static const Set<String> allTables = {libraryList, libraryListEntry};
 }
+
+const Set<String> allSchemaV2TableNames = {
+  ...HistoryTableNames.allTables,
+  ...LibraryListTableNames.allTables,
+};

@@ -1,18 +1,21 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
+import 'package:jadb/version.dart';
 import 'package:mugiten/models/verify_tables.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+export 'package:mugiten/services/database/database_reset.dart'
+    show resetDatabase;
 export 'package:mugiten/services/database/schemas/v2/table_names.dart'
     show HistoryTableNames, LibraryListTableNames;
 
-const int expectedDatabaseVersion = 2;
+const int mugitenSchemaVersion = 2;
+const int schemaVersion = mugitenSchemaVersion << 16 | jadbSchemaVersion;
 
 /// Returns the directory where mugiten's database file is stored.
 Future<Directory> _databaseDir() async {
@@ -26,7 +29,10 @@ Future<String> databasePath() async {
   return join((await _databaseDir()).path, 'mugiten.sqlite');
 }
 
-Future<bool> databaseNeedsInitialization() async {
+/// Checks if the database needs to be reset.
+///
+/// This is the case if the database does not yet exist, or if it's using an old schema version.
+Future<bool> databaseNeedsReset() async {
   final String dbPath = await databasePath();
 
   if (!File(dbPath).existsSync()) {
@@ -41,7 +47,7 @@ Future<bool> databaseNeedsInitialization() async {
   final databaseVersion = await database.getVersion();
   await database.close();
 
-  if (databaseVersion < expectedDatabaseVersion) {
+  if (databaseVersion < schemaVersion) {
     return true;
   }
 
@@ -53,76 +59,6 @@ Future<void> quickInitializeDatabase() async {
   await setupDatabase();
 }
 
-// Migration logic and heavy initialization
-
-class DatabaseMigration {
-  final String path;
-  final String content;
-
-  const DatabaseMigration({required this.path, required this.content});
-
-  int get version {
-    final String fileName = basenameWithoutExtension(path);
-    return int.parse(fileName.split('_')[0]);
-  }
-
-  @override
-  String toString() {
-    return 'DatabaseMigration(path: $path, content: ${content.length} chars)';
-  }
-}
-
-Future<List<DatabaseMigration>> readMigrationsFromAssets() async {
-  log('Reading migrations from assets...');
-
-  final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-
-  final List<String> migrations = assetManifest
-      .listAssets()
-      .where(
-        (final assetPath) =>
-            RegExp(r'^migrations\/\d{4}.*\.sql$').hasMatch(assetPath),
-      )
-      .toList();
-
-  assert(migrations.isNotEmpty, 'No migration files found in assets');
-
-  migrations.sort();
-
-  log('Found ${migrations.length} migration files:');
-  for (final migration in migrations) {
-    log(' - $migration');
-  }
-
-  return Future.wait(
-    migrations.map((final migration) async {
-      final content = await rootBundle.loadString(migration, cache: false);
-      return DatabaseMigration(path: migration, content: content);
-    }),
-  );
-}
-
-/// Migrates the database from version `oldVersion` to `newVersion`.
-Future<void> migrate(
-  final Database db,
-  final Iterable<DatabaseMigration> migrations,
-) async {
-  for (final migration in migrations) {
-    log('Running migration ${migration.version} from ${migration.path}');
-    migration.content
-        .split(';')
-        .map(
-          (final s) => s
-              .split('\n')
-              .where((final l) => !l.startsWith(RegExp(r'\s*--')))
-              .join('\n')
-              .trim(),
-        )
-        .where((final s) => s != '')
-        .forEach(db.execute);
-  }
-}
-
 Future<Database> openDatabaseWithoutMigrations(
   final String dbPath, {
   final bool readOnly = false,
@@ -131,7 +67,7 @@ Future<Database> openDatabaseWithoutMigrations(
   log('Opening database at $dbPath');
   final Database database = await openDatabase(
     dbPath,
-    version: expectedDatabaseVersion,
+    version: schemaVersion,
     readOnly: readOnly,
     onConfigure: (final db) async {
       // Enable foreign key constraints
@@ -152,44 +88,6 @@ Future<Database> openDatabaseWithoutMigrations(
   return database;
 }
 
-Future<Database> openAndMigrateDatabase(
-  final String dbPath,
-  final Iterable<DatabaseMigration> migrations,
-) async {
-  log('Opening database at $dbPath');
-  final Database database = await openDatabase(
-    dbPath,
-    version: expectedDatabaseVersion,
-    readOnly: false,
-    onUpgrade: (final db, final oldVersion, final newVersion) async {
-      log('Migrating database from v$oldVersion to v$newVersion...');
-      final migrationsToRun = migrations
-          .where(
-            (final migration) =>
-                migration.version > oldVersion &&
-                migration.version <= newVersion,
-          )
-          .toList();
-
-      await migrate(db, migrationsToRun);
-    },
-    onConfigure: (final db) async {
-      // Enable foreign key constraints
-      await db.execute('PRAGMA foreign_keys=ON');
-    },
-    onOpen: (final db) async {
-      log('Verifying jadb tables...');
-      await db.jadbVerifyTables();
-
-      log('Verifying jadb tables...');
-      await verifyMugitenTablesWithDbConnection(db);
-
-      log('Database tables verified successfully');
-    },
-  );
-  return database;
-}
-
 /// Sets up the database, creating it if it does not exist.
 Future<void> setupDatabase() async {
   log('Setting up database...');
@@ -205,8 +103,8 @@ Future<void> setupDatabase() async {
   );
 
   assert(
-    await database.getVersion() == expectedDatabaseVersion,
-    'Database version should be $expectedDatabaseVersion',
+    await database.getVersion() == schemaVersion,
+    'Database version should be $schemaVersion',
   );
 
   log('Registering database in GetIt...');
@@ -214,7 +112,7 @@ Future<void> setupDatabase() async {
 }
 
 /// Resets the database by closing it, deleting the file, and setting it up again.
-Future<void> resetDatabase() async {
+Future<void> resetGetItDatabase() async {
   log('Closing database...');
   await GetIt.instance.get<Database>().close();
 
@@ -226,15 +124,4 @@ Future<void> resetDatabase() async {
 
   log('Setting up database again...');
   await setupDatabase();
-}
-
-/// Extracts the `jadb.sqlite` file from the assets into a writable directory
-/// and returns its path.
-Future<void> extractJadbFromAssets(final String path) async {
-  final File jadbFile = File(path)..createSync();
-
-  final ByteData data = await rootBundle.load('assets/jadb.sqlite');
-  await jadbFile.writeAsBytes(
-    data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-  );
 }

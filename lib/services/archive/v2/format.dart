@@ -20,6 +20,92 @@ const int expectedDataFormatVersion = 2;
 const int historyChunkSize = 100;
 const int libraryListChunkSize = defaultLibraryListPageSize;
 
+typedef ArchiveV2HistoryEntryCountQuery =
+    Future<int> Function(DatabaseExecutor db);
+
+typedef ArchiveV2HistoryEntryGetAllQuery =
+    Future<List<ArchiveV2HistoryEntry>> Function({
+      required DatabaseExecutor db,
+      required int page,
+      required int pageSize,
+    });
+
+typedef ArchiveV2LibraryListGetLibraryMetadataQuery =
+    Future<List<ArchiveV2LibraryListMetadata>> Function({
+      required DatabaseExecutor db,
+    });
+
+typedef ArchiveV2LibraryListGetTotalCountsQuery =
+    Future<Map<String, int>> Function({required DatabaseExecutor db});
+
+typedef ArchiveV2LibraryListGetEntriesQuery =
+    Future<List<ArchiveV2LibraryListEntry>> Function({
+      required DatabaseExecutor db,
+      required String listName,
+      required int page,
+    });
+
+/// An adapter that provides the necessary functions to export data from the database
+/// in the format expected by version 2 of the data archive.
+class ArchiveV2ExportAdapter {
+  final ArchiveV2HistoryEntryCountQuery historyEntryCount;
+  final ArchiveV2HistoryEntryGetAllQuery historyEntryGetAll;
+  final ArchiveV2LibraryListGetLibraryMetadataQuery
+  libraryListGetLibraryMetadata;
+  final ArchiveV2LibraryListGetTotalCountsQuery libraryListGetTotalCounts;
+  final ArchiveV2LibraryListGetEntriesQuery libraryListGetEntries;
+
+  const ArchiveV2ExportAdapter({
+    required this.historyEntryCount,
+    required this.historyEntryGetAll,
+    required this.libraryListGetLibraryMetadata,
+    required this.libraryListGetTotalCounts,
+    required this.libraryListGetEntries,
+  });
+}
+
+final ArchiveV2ExportAdapter latestSchemaExportAdapter = ArchiveV2ExportAdapter(
+  historyEntryCount: (final db) => db.historyEntryAmount(),
+  historyEntryGetAll:
+      ({
+        required final DatabaseExecutor db,
+        required final int page,
+        required final int pageSize,
+      }) async {
+        return (await db.historyEntryGetAll(
+          page: page,
+          pageSize: pageSize,
+        )).map(ArchiveV2HistoryEntry.fromHistoryEntry).toList();
+      },
+  libraryListGetLibraryMetadata: ({required final DatabaseExecutor db}) async {
+    return (await db.libraryListGetLists())
+        .map((final list) => ArchiveV2LibraryListMetadata(name: list.name))
+        .toList();
+  },
+  libraryListGetTotalCounts: ({required final DatabaseExecutor db}) async {
+    final lists = await db.libraryListGetLists();
+    return {for (final list in lists) list.name: list.totalCount};
+  },
+  libraryListGetEntries:
+      ({
+        required final DatabaseExecutor db,
+        required final String listName,
+        required final int page,
+      }) async {
+        final entryPage = await db.libraryListGetListEntries(
+          listName,
+          page: page,
+        );
+        if (entryPage == null) {
+          return <ArchiveV2LibraryListEntry>[];
+        }
+
+        return entryPage.entries
+            .map(ArchiveV2LibraryListEntry.fromLibraryListEntry)
+            .toList();
+      },
+);
+
 /// Functions and properties that makes up the format of version 2 of the data archive.
 /// This archive is used to back up user data and optionally to transfer data between devices.
 /// The main difference to version 1 is that the data is split into chunks, so that it can be
@@ -77,15 +163,16 @@ extension ArchiveFormatV2 on Directory {
   File get libraryMetadataFile =>
       File(libraryDir.uri.resolve('metadata.json').toFilePath());
 
-  /// The metadata of all library lists
+  /// The metadata of all library lists.
   ///
   /// This is expected to be a list of objects, containing:
   ///  - *order*: implicitly from the order of the json list, the index of the library list
   ///  - name: the original name of the library list
   ///  - slug: the slugified name of the library list, used for the directory name
-  Map<String, Object?> get libraryMetadata =>
-      jsonDecode(libraryMetadataFile.readAsStringSync())
-          as Map<String, Object?>;
+  List<Map<String, Object?>> get libraryMetadata =>
+      (jsonDecode(libraryMetadataFile.readAsStringSync()) as List<dynamic>)
+          .map((final entry) => entry as Map<String, Object?>)
+          .toList();
 
   List<Directory> get libraryListDirs =>
       libraryDir.listSync().whereType<Directory>().toList();
@@ -102,24 +189,36 @@ extension ArchiveFormatV2 on Directory {
       );
 
   List<int> get libraryListEntryCounts => libraryListDirs
-      .map(
-        (final d) =>
-            d.listSync().whereType<File>().length -
-            1, // Subtract 1 for metadata.json
-      )
+      .map((final d) => d.listSync().whereType<File>().length)
       .toList();
 }
 
 String slugifyLibraryListFileName(final String name) =>
     name.toLowerCase().replaceAll(RegExp(r'\s+'), '_');
 
-Future<int> totalAmountOfChunksFromDatabase(final DatabaseExecutor db) async {
-  final historyCount = await db.historyEntryAmount();
-  final libraryListCounts = (await db.libraryListGetLists())
-      .map((final list) => (list.totalCount / libraryListChunkSize).ceil())
+Future<int> totalAmountOfChunksFromDatabase(final DatabaseExecutor db) {
+  return totalAmountOfChunksFromDatabaseWithAdapter(
+    db,
+    adapter: latestSchemaExportAdapter,
+  );
+}
+
+Future<int> totalAmountOfChunksFromDatabaseWithAdapter(
+  final DatabaseExecutor db, {
+  required final ArchiveV2ExportAdapter adapter,
+}) async {
+  final historyCount = await adapter.historyEntryCount(db);
+  final libraryMetadata = await adapter.libraryListGetLibraryMetadata(db: db);
+  final libraryListCounts = await adapter.libraryListGetTotalCounts(db: db);
+
+  final libraryChunks = libraryMetadata
+      .map(
+        (final list) =>
+            ((libraryListCounts[list.name] ?? 0) / libraryListChunkSize).ceil(),
+      )
       .sum;
 
-  return (historyCount / historyChunkSize).ceil() + libraryListCounts;
+  return (historyCount / historyChunkSize).ceil() + libraryChunks;
 }
 
 // TODO: skip counting chunks where the library list already exists
@@ -196,7 +295,19 @@ class ArchiveV2StreamEvent {
 Stream<ArchiveV2StreamEvent> exportData(
   final DatabaseExecutor db,
   final File archiveFile,
-) async* {
+) {
+  return exportDataWithAdapter(
+    db,
+    archiveFile,
+    adapter: latestSchemaExportAdapter,
+  );
+}
+
+Stream<ArchiveV2StreamEvent> exportDataWithAdapter(
+  final DatabaseExecutor db,
+  final File archiveFile, {
+  required final ArchiveV2ExportAdapter adapter,
+}) async* {
   if (!archiveFile.existsSync()) {
     archiveFile.createSync();
   }
@@ -207,8 +318,8 @@ Stream<ArchiveV2StreamEvent> exportData(
     archiveRoot,
   ).versionFile.writeAsString(expectedDataFormatVersion.toString());
 
-  yield* exportHistory(db, archiveRoot);
-  yield* exportLibraryLists(db, archiveRoot);
+  yield* exportHistory(db, archiveRoot, adapter: adapter);
+  yield* exportLibraryLists(db, archiveRoot, adapter: adapter);
 
   await packZip(archiveRoot, outputFile: archiveFile);
 

@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mugiten/services/archive/v2/format.dart';
+import 'package:mugiten/services/archive/archive_dispatcher.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 /// The archive controller is a singleton-like class that keeps track of whether the
@@ -25,7 +25,7 @@ class ArchiveController extends Cubit<ArchiveState> {
 
     final database = GetIt.instance.get<Database>();
 
-    final totalChunks = totalAmountOfChunksFromArchive(archive);
+    final totalChunks = await totalAmountOfChunksFromArchive(archive);
 
     emit(
       ImportingState(
@@ -36,12 +36,11 @@ class ArchiveController extends Cubit<ArchiveState> {
     );
 
     int i = 0;
-    await for (final event in importData(database, archive)) {
+    await for (final event in importBackupArchive(database, archive)) {
       i += 1;
-      final status = switch (event) {
-        ArchiveV2StreamEvent(type: 'history') =>
-          'Importing history: ${event.progress}/${event.total}',
-        ArchiveV2StreamEvent(type: 'library') =>
+      final status = switch (event.type) {
+        'history' => 'Importing history: ${event.progress}/${event.total}',
+        'library' =>
           'Importing library list "${event.name}": ${event.subProgress}/${event.subTotal}',
         _ => 'Importing unknown data: ${event.progress}/${event.total}',
       };
@@ -74,12 +73,11 @@ class ArchiveController extends Cubit<ArchiveState> {
     );
 
     int i = 0;
-    await for (final event in exportData(database, archive)) {
+    await for (final event in exportBackupArchive(database, archive)) {
       i += 1;
-      final status = switch (event) {
-        ArchiveV2StreamEvent(type: 'history') =>
-          'Exporting history: ${event.progress}/${event.total}',
-        ArchiveV2StreamEvent(type: 'library') =>
+      final status = switch (event.type) {
+        'history' => 'Exporting history: ${event.progress}/${event.total}',
+        'library' =>
           'Exporting library list "${event.name}": ${event.subProgress}/${event.subTotal}',
         _ => 'Exporting unknown data: ${event.progress}/${event.total}',
       };

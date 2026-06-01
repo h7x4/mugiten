@@ -91,26 +91,37 @@ class ArchiveV2HistorySearchInstance {
 
 /// Calculate the total number of chunks needed to export the history,
 /// needed for progress tracking during export.
-Future<int> exportHistoryChunkCount(final DatabaseExecutor db) async =>
-    (await db.historyEntryAmount() / historyChunkSize).ceil();
+Future<int> exportHistoryChunkCount(
+  final DatabaseExecutor db, {
+  final ArchiveV2ExportAdapter? adapter,
+}) async =>
+    (await (adapter ?? latestSchemaExportAdapter).historyEntryCount(db) /
+            historyChunkSize)
+        .ceil();
 
 /// Exports the history into json files in the given directory.
 ///
 /// Streams back the number of chunks that have been exported so far.
 Stream<ArchiveV2StreamEvent> exportHistory(
   final DatabaseExecutor db,
-  final Directory archiveRoot,
-) async* {
-  final int chunkCount = await exportHistoryChunkCount(db);
+  final Directory archiveRoot, {
+  final ArchiveV2ExportAdapter? adapter,
+}) async* {
+  final exportAdapter = adapter ?? latestSchemaExportAdapter;
+  final int chunkCount = await exportHistoryChunkCount(
+    db,
+    adapter: exportAdapter,
+  );
 
   archiveRoot.historyDir.createSync();
 
   for (int i = 0; i < chunkCount; i++) {
     final List<Map<String, Object?>> jsonEntries =
-        (await db.historyEntryGetAll(page: i, pageSize: historyChunkSize))
-            .map(ArchiveV2HistoryEntry.fromHistoryEntry)
-            .map((final e) => e.toJson())
-            .toList();
+        (await exportAdapter.historyEntryGetAll(
+          db: db,
+          page: i,
+          pageSize: historyChunkSize,
+        )).map((final e) => e.toJson()).toList();
 
     archiveRoot.historyChunkFile(i)
       ..createSync()

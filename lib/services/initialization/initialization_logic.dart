@@ -15,7 +15,7 @@ Future<bool> needsInitialization() async {
     return true;
   }
 
-  if (await databaseNeedsInitialization()) {
+  if (await databaseNeedsReset()) {
     return true;
   }
 

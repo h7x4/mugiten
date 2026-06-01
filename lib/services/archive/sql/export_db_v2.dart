@@ -1,9 +1,14 @@
 import 'package:mugiten/services/archive/v2/format.dart';
 import 'package:mugiten/services/database/schemas/v2/table_names.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqlite_api.dart';
 
-const int basicListOrderNumInterval = 100;
-const int defaultLibraryListPageSize = 100;
+const archiveExportAdapter = ArchiveV2ExportAdapter(
+  historyEntryCount: historyEntryCount,
+  historyEntryGetAll: historyEntryGetAll,
+  libraryListGetLibraryMetadata: libraryListGetLibraryMetadata,
+  libraryListGetTotalCounts: libraryListGetTotalCounts,
+  libraryListGetEntries: libraryListGetEntries,
+);
 
 Future<int> historyEntryCount(final DatabaseExecutor db) async {
   final result = await db.rawQuery('''
@@ -60,8 +65,9 @@ Future<List<ArchiveV2LibraryListMetadata>> libraryListGetLibraryMetadata({
   final result = await db.query(
     LibraryListTableNames.libraryList,
     columns: ['name'],
-    orderBy: '"name" ASC',
+    orderBy: '"orderNum" ASC',
   );
+
   return result
       .map(
         (final row) =>
@@ -75,13 +81,14 @@ Future<Map<String, int>> libraryListGetTotalCounts({
 }) async {
   final result = await db.rawQuery('''
       SELECT
-        "listName",
+        "lists"."name" AS "listName",
         (
           SELECT COUNT(*)
-          FROM "${LibraryListTableNames.libraryListEntry}"
-          WHERE "${LibraryListTableNames.libraryListEntry}"."listName" = "${LibraryListTableNames.libraryList}"."name"
+          FROM "${LibraryListTableNames.libraryListEntry}" AS "entries"
+          WHERE "entries"."listName" = "lists"."name"
         ) AS "count"
-      FROM "${LibraryListTableNames.libraryList}"
+      FROM "${LibraryListTableNames.libraryList}" AS "lists"
+      ORDER BY "lists"."orderNum" ASC
     ''');
 
   final counts = {
@@ -96,9 +103,8 @@ Future<List<ArchiveV2LibraryListEntry>> libraryListGetEntries({
   required final String listName,
   required final int page,
 }) async {
-  final offset = basicListOrderNumInterval * (basicListOrderNumInterval * page);
-  final limit =
-      offset + (basicListOrderNumInterval * defaultLibraryListPageSize);
+  final offset = libraryListChunkSize * libraryListChunkSize * page;
+  final limit = offset + (libraryListChunkSize * libraryListChunkSize);
 
   final result = await db.rawQuery(
     '''
@@ -118,7 +124,9 @@ Future<List<ArchiveV2LibraryListEntry>> libraryListGetEntries({
   final entries = result
       .map(
         (final entry) => ArchiveV2LibraryListEntry(
-          lastModified: DateTime.parse(entry['lastModified'] as String),
+          lastModified: DateTime.fromMillisecondsSinceEpoch(
+            entry['lastModified'] as int,
+          ),
           jmdictEntryId: entry['jmdictEntryId'] as int?,
           kanji: entry['kanji'] as String?,
         ),

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:jadb/search.dart';
 import 'package:jadb/table_names/jmdict.dart';
 import 'package:jadb/table_names/kanjidic.dart';
-import 'package:mugiten/services/database/database.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
+import 'package:mugiten/services/database/database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 Future<Database> createDatabaseCopy({
@@ -37,10 +37,11 @@ Future<Database> createDatabaseCopy({
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  return await openAndMigrateDatabase(
-    jadbCopyPath,
-    await readMigrationsFromAssets(),
-  );
+  final database = await resetDatabase(jadbCopyPath);
+
+  assert(database.isOpen, 'Failed to open database copy at $jadbCopyPath');
+
+  return database;
 }
 
 Future<List<LibraryListEntry>> createRandomLibraryListEntries({
