@@ -16,8 +16,5 @@ abstract class LibraryListTableNames {
   // VIEWS //
   ///////////
 
-  static Set<String> get allTables => {
-    libraryList,
-    libraryListEntry,
-  };
+  static Set<String> get allTables => {libraryList, libraryListEntry};
 }

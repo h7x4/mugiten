@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jadb/search.dart';
 import 'package:jadb/table_names/jmdict.dart';
 import 'package:jadb/table_names/kanjidic.dart';
-import 'package:mugiten/database/database.dart';
+import 'package:mugiten/services/database/database.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';

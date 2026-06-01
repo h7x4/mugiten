@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart';
-import 'package:mugiten/database/library_list/table_names.dart';
+import 'package:mugiten/services/database/library_list/table_names.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const int basicListOrderNumInterval = 100;
@@ -106,7 +106,9 @@ extension LibraryListExt on DatabaseExecutor {
       return null;
     }
 
-    final offset = page != null ? basicListOrderNumInterval * (basicListOrderNumInterval * page) : null;
+    final offset = page != null
+        ? basicListOrderNumInterval * (basicListOrderNumInterval * page)
+        : null;
     final limit = offset != null
         ? offset + (basicListOrderNumInterval * defaultLibraryListPageSize)
         : null;

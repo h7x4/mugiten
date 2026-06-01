@@ -3,10 +3,10 @@ import 'dart:core';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-import 'package:mugiten/database/history/table_names.dart';
-import 'package:mugiten/database/library_list/table_names.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
+import 'package:mugiten/services/database/history/table_names.dart';
+import 'package:mugiten/services/database/library_list/table_names.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 part './history.dart';

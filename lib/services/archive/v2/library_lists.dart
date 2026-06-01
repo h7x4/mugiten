@@ -4,13 +4,15 @@ class ArchiveV2LibraryListMetadata {
   final String name;
   final String slug;
 
-  const ArchiveV2LibraryListMetadata({required this.name, required this.slug});
+  ArchiveV2LibraryListMetadata({required this.name, final String? slug})
+    : slug = slug ?? slugifyLibraryListFileName(name);
 
-  factory ArchiveV2LibraryListMetadata.fromJson(final Map<String, Object?> json) =>
-      ArchiveV2LibraryListMetadata(
-        name: json['name']! as String,
-        slug: json['slug']! as String,
-      );
+  factory ArchiveV2LibraryListMetadata.fromJson(
+    final Map<String, Object?> json,
+  ) => ArchiveV2LibraryListMetadata(
+    name: json['name']! as String,
+    slug: json['slug']! as String,
+  );
 
   Map<String, Object?> toJson() => {'name': name, 'slug': slug};
 }

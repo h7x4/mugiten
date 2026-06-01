@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
-import 'package:mugiten/database/database.dart'
+import 'package:mugiten/services/archive/v1/format.dart'
+    show exportData, importData;
+import 'package:mugiten/services/database/database.dart'
     show
         DatabaseMigration,
         databaseNeedsInitialization,
@@ -11,8 +13,6 @@ import 'package:mugiten/database/database.dart'
         openAndMigrateDatabase,
         openDatabaseWithoutMigrations,
         readMigrationsFromAssets;
-import 'package:mugiten/services/archive/v1/format.dart'
-    show exportData, importData;
 import 'package:mugiten/services/initialization/initialization_status.dart';
 import 'package:path_provider/path_provider.dart';
 

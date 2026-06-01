@@ -1,5 +1,5 @@
-import 'package:mugiten/database/history/table_names.dart';
-import 'package:mugiten/database/library_list/table_names.dart';
+import 'package:mugiten/services/database/history/table_names.dart';
+import 'package:mugiten/services/database/library_list/table_names.dart';
 import 'package:sqflite/sqflite.dart';
 
 Future<void> verifyMugitenTablesWithDbConnection(

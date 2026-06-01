@@ -67,9 +67,7 @@ Future<void> importHistoryFrom(final Database db, final File file) async {
       .map((final h) => h as Map<String, Object?>)
       .map(ArchiveV1HistoryEntry.fromJson)
       .toList();
-  await db.transaction(
-    (final txn) => historyEntryInsertMany(txn, entries),
-  );
+  await db.transaction((final txn) => historyEntryInsertMany(txn, entries));
 }
 
 Future<void> historyEntryInsertMany(
