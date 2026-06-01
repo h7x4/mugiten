@@ -9,6 +9,9 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+export 'package:mugiten/services/database/schemas/v2/table_names.dart'
+    show HistoryTableNames, LibraryListTableNames;
+
 const int expectedDatabaseVersion = 2;
 
 /// Returns the directory where mugiten's database file is stored.

@@ -1,6 +1,5 @@
 import 'package:mugiten/services/archive/v2/format.dart';
-import 'package:mugiten/services/database/history/table_names.dart';
-import 'package:mugiten/services/database/library_list/table_names.dart';
+import 'package:mugiten/services/database/schemas/v2/table_names.dart';
 import 'package:sqflite/sqflite.dart';
 
 const int basicListOrderNumInterval = 100;

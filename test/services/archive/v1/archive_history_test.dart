@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mugiten/services/database/history/table_names.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/services/archive/v1/format.dart';
+import 'package:mugiten/services/database/database.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import '../../../testutils.dart';

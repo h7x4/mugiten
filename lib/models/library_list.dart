@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart';
-import 'package:mugiten/services/database/library_list/table_names.dart';
+import 'package:mugiten/services/database/database.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 const int basicListOrderNumInterval = 100;

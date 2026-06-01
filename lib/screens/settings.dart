@@ -13,7 +13,7 @@ import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/services/archive/archive_controller.dart';
 import 'package:mugiten/services/archive/v1/format.dart';
-import 'package:mugiten/services/database/history/table_names.dart';
+import 'package:mugiten/services/database/database.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';

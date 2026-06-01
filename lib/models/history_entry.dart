@@ -1,7 +1,7 @@
 import 'package:jadb/models/kanji_search/kanji_search_result.dart';
 import 'package:jadb/models/word_search/word_search_result.dart';
 import 'package:jadb/search.dart';
-import 'package:mugiten/services/database/history/table_names.dart';
+import 'package:mugiten/services/database/database.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 extension HistoryEntryExt on DatabaseExecutor {
