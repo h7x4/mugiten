@@ -24,4 +24,5 @@ result-*
 
 # Database files
 *.sqlite
+*.sqlite-journal
 assets/kanjivg
