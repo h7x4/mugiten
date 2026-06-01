@@ -71,7 +71,8 @@ flutter:
     - assets/kanjivg/kanji/
     - assets/licenses/
     - docs/changelog/
-    - migrations/
+    - lib/services/database/schemas/v1/
+    - lib/services/database/schemas/v2/
 
   fonts:
     - family: Droid Sans Japanese
