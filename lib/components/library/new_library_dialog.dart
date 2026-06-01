@@ -3,17 +3,12 @@ import 'package:get_it/get_it.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-void Function() showNewLibraryDialog(final BuildContext context) => () async {
-  final String? listName = await showDialog<String>(
-    context: context,
-    barrierDismissible: true,
-    builder: (_) => const NewLibraryDialog(),
-  );
-
-  if (listName == null) return;
-
-  await GetIt.instance.get<Database>().libraryListInsertList(listName);
-};
+Future<String?> showNewLibraryDialog(final BuildContext context) =>
+    showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => const NewLibraryDialog(),
+    );
 
 class NewLibraryDialog extends StatefulWidget {
   const NewLibraryDialog({super.key});

@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mugiten/components/common/async_text_form_field.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/routing/routes.dart';
+import 'package:mugiten/services/library_lists_controller.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class LibraryListTile extends StatelessWidget {
@@ -46,7 +47,7 @@ class LibraryListTile extends StatelessWidget {
                       return;
                     }
 
-                    await GetIt.instance.get<Database>().libraryListRenameList(
+                    await GetIt.instance.get<LibraryListsController>().rename(
                       oldName,
                       newName,
                     );
@@ -58,7 +59,7 @@ class LibraryListTile extends StatelessWidget {
                   backgroundColor: Colors.red,
                   icon: Icons.delete,
                   onPressed: (_) async {
-                    await GetIt.instance.get<Database>().libraryListDeleteList(
+                    await GetIt.instance.get<LibraryListsController>().delete(
                       library.name,
                     );
                     onDelete?.call();

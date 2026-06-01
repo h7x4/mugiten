@@ -877,7 +877,6 @@ class LibraryListEntry {
          'Library entry orderNum must be a non-negative integer',
        );
 
-
   LibraryListEntry.fromJmdictId({
     required int this.jmdictEntryId,
     this.wordSearchResult,
@@ -886,7 +885,6 @@ class LibraryListEntry {
   }) : lastModified = lastModified ?? DateTime.now(),
        kanji = null,
        kanjiSearchResult = null;
-
 
   LibraryListEntry.fromKanji({
     required String this.kanji,

@@ -8,7 +8,9 @@ import 'package:mugiten/routing/router.dart';
 import 'package:mugiten/screens/initialization.dart';
 import 'package:mugiten/services/archive/archive_controller.dart';
 import 'package:mugiten/services/initialization/initialization_logic.dart';
+import 'package:mugiten/services/library_lists_controller.dart';
 import 'package:mugiten/theme.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 void runInitializationScreen(final bool deleteDatabase) {
   runApp(
@@ -53,6 +55,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ]),
     );
     GetIt.instance.registerSingleton<ThemeController>(themeController);
+    if (!GetIt.instance.isRegistered<LibraryListsController>()) {
+      GetIt.instance.registerSingleton<LibraryListsController>(
+        LibraryListsController(GetIt.instance.get<Database>()),
+      );
+    }
   }
 
   @override

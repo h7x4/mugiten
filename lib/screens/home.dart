@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mdi/mdi.dart';
 import 'package:mugiten/components/common/denshi_jisho_background.dart';
 import 'package:mugiten/components/library/new_library_dialog.dart';
@@ -9,6 +10,7 @@ import 'package:mugiten/screens/library/library_view.dart';
 import 'package:mugiten/screens/search/kanji_search_view.dart';
 import 'package:mugiten/screens/search/word_search_view.dart';
 import 'package:mugiten/screens/settings.dart';
+import 'package:mugiten/services/library_lists_controller.dart';
 import 'package:mugiten/services/snackbar.dart';
 import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
@@ -116,7 +118,14 @@ class _HomeState extends State<Home> {
       icon: const Icon(Icons.bookmark),
       actions: [
         IconButton(
-          onPressed: showNewLibraryDialog(context),
+          onPressed: () async {
+            final String? listName = await showNewLibraryDialog(context);
+            if (listName == null) {
+              return;
+            }
+
+            await GetIt.instance.get<LibraryListsController>().create(listName);
+          },
           icon: const Icon(Icons.add),
         ),
       ],
