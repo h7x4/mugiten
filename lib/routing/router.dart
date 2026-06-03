@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadb/const_data/radicals.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/screens/home.dart';
@@ -38,7 +39,15 @@ Route<Widget> generateRoute(final RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const KanjiGradeSearch());
 
     case Routes.kanjiSearchRadicals:
-      final prechosenRadical = args as String?;
+      late final RadkfileRadical? prechosenRadical;
+      if (args != null && args is String) {
+        prechosenRadical = radicalsByFormalVariant[args];
+      } else if (args != null && args is RadkfileRadical) {
+        prechosenRadical = args;
+      } else {
+        prechosenRadical = null;
+      }
+
       return MaterialPageRoute(
         builder: (_) => KanjiRadicalSearch(prechosenRadical: prechosenRadical),
       );

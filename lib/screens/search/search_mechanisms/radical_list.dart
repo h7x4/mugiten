@@ -10,7 +10,7 @@ import 'package:mugiten/theme.dart';
 import 'package:sqflite/sqflite.dart';
 
 class KanjiRadicalSearch extends StatefulWidget {
-  final String? prechosenRadical;
+  final RadkfileRadical? prechosenRadical;
 
   const KanjiRadicalSearch({super.key, this.prechosenRadical});
 
@@ -23,12 +23,12 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
 
   List<String> suggestions = [];
 
-  Map<String, bool> radicalToggles = {
-    for (final String r in radicals.values.expand((final l) => l)) r: false,
+  Map<RadkfileRadical, bool> radicalToggles = {
+    for (final r in radicals.values.expand((final l) => l)) r: false,
   };
 
-  Map<String, bool> allowedToggles = {
-    for (final String r in radicals.values.expand((final l) => l)) r: true,
+  Map<RadkfileRadical, bool> allowedToggles = {
+    for (final r in radicals.values.expand((final l) => l)) r: true,
   };
 
   @override
@@ -62,7 +62,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
 
     final jadbConnection = GetIt.instance.get<Database>();
     late final List<String> newSuggestions;
-    late final List<String> newRadicals;
+    late final List<RadkfileRadical> newRadicals;
     await Future.wait([
       jadbConnection.jadbSearchKanjiByRadicals(toggledRadicals).then((
         final value,
@@ -88,7 +88,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
   }
 
   Widget radicalGridElement(
-    final String radical, {
+    final RadkfileRadical radical, {
     final bool isNumber = false,
   }) {
     final foregroundColor = isNumber
@@ -117,7 +117,7 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
           color: backgroundColor,
         ),
         child: Text(
-          radical,
+          radical.informalVariant ?? radical.formalVariant,
           style: TextStyle(color: foregroundColor, fontSize: fontSize),
         ),
       ),
@@ -138,20 +138,28 @@ class _KanjiRadicalSearchState extends State<KanjiRadicalSearch> {
     ...radicals.values
         .expand((final l) => l)
         .where((final k) => radicalToggles[k] ?? false)
-        .map((final k) => radicalGridElement(k.toString())),
+        .map(radicalGridElement),
 
-    ...radicals
+    ...radicals.values
         .map(
-          (final key, final value) => MapEntry(
-            key,
-            value
-                .where((final r) => !radicalToggles[r]! && allowedToggles[r]!)
-                .map(radicalGridElement)
-                .toList()
-              ..insert(0, radicalGridElement(key.toString(), isNumber: true)),
-          ),
+          (final value) =>
+              value
+                  .where((final r) => !radicalToggles[r]! && allowedToggles[r]!)
+                  .map(radicalGridElement)
+                  .toList()
+                ..insert(
+                  0,
+                  radicalGridElement(
+                    // NOTE: this is kinda cheating, but it works for now
+                    RadkfileRadical(
+                      formalVariant: value.first.strokeCount.toString(),
+                      strokeCount: value.first.strokeCount,
+                    ),
+
+                    isNumber: true,
+                  ),
+                ),
         )
-        .values
         .where((final element) => element.length != 1)
         .expand((final l) => l),
   ];
