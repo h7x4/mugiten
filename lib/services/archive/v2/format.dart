@@ -2,16 +2,12 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:collection/collection.dart';
 import 'package:mugiten/models/history_entry.dart';
 import 'package:mugiten/models/library_list.dart';
-import 'package:mugiten/services/archive/v1/format.dart'
-    show tmpdir, packZip, unpackZipToTempDir;
+import 'package:mugiten/services/archive/archive_utils.dart';
 import 'package:sqflite/sqlite_api.dart';
-
-export 'package:mugiten/services/archive/v1/format.dart'
-    show getExportFileNameNoSuffix;
 
 part './history.dart';
 part './library_lists.dart';
@@ -290,6 +286,24 @@ class ArchiveV2StreamEvent {
       return 'ArchiveV2StreamEvent.Library("$name", $progress/$total, $subProgress/$subTotal)';
     }
   }
+}
+
+/// Packs the given directory into a zip file.
+///
+/// If [outputFile] is provided, it will be used as the output file. Otherwise, a new temporary file will be created.
+Future<File> packZip(final Directory dir, {File? outputFile}) async {
+  if (outputFile == null || !outputFile.existsSync()) {
+    final outputDir = await tmpdir();
+    outputFile = File(outputDir.uri.resolve('mugiten_data.zip').toFilePath())
+      ..createSync();
+  }
+
+  final archive = createArchiveFromDirectory(dir, includeDirName: false);
+
+  final outputStream = OutputFileStream(outputFile.path);
+  ZipEncoder().encodeStream(archive, outputStream, autoClose: true);
+
+  return outputFile;
 }
 
 Stream<ArchiveV2StreamEvent> exportData(
