@@ -1,7 +1,7 @@
 part of './format.dart';
 
 class ArchiveV1HistoryEntry {
-  final int id;
+  final int? id;
   final List<DateTime> timestamps;
 
   final String? word;
@@ -28,7 +28,7 @@ class ArchiveV1HistoryEntry {
 
   factory ArchiveV1HistoryEntry.fromJson(final Map<String, Object?> json) {
     return ArchiveV1HistoryEntry(
-      id: json['id'] as int,
+      id: json['id'] as int?,
       timestamps: (json['timestamps'] as List<dynamic>)
           .map((final ts) => DateTime.fromMillisecondsSinceEpoch(ts as int))
           .toList(),
@@ -44,7 +44,7 @@ class ArchiveV1HistoryEntry {
         .toList(),
     'word': word,
     'kanji': kanji,
-  };
+  }..removeWhere((final key, final value) => value == null);
 }
 
 Future<void> exportHistoryTo(

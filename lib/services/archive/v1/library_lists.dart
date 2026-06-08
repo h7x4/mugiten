@@ -26,14 +26,18 @@ class ArchiveV1LibraryListEntry {
 
   factory ArchiveV1LibraryListEntry.fromJson(final Map<String, Object?> json) {
     return ArchiveV1LibraryListEntry(
-      lastModified: DateTime.parse(json['lastModified'] as String),
+      // NOTE: we have been using both ISO8601 and millisecondsSinceEpoch during the lifetime of archive v1,
+      //       unsure when we switched from one to the other, so let's just support importing both.
+      lastModified: json['lastModified'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastModified'] as int)
+          : DateTime.parse(json['lastModified'] as String),
       jmdictEntryId: json['jmdictEntryId'] as int?,
       kanji: json['kanji'] as String?,
     );
   }
 
   Map<String, Object?> toJson() => {
-    'lastModified': lastModified.toIso8601String(),
+    'lastModified': lastModified.millisecondsSinceEpoch,
     'jmdictEntryId': jmdictEntryId,
     'kanji': kanji,
   };
