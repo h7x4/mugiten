@@ -97,9 +97,22 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
     final colors = Theme.of(context).extension<MenuGreyNormalThemeExtension>()!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '"${widget.searchTerm}"',
-          style: japaneseFont.value.textStyle,
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text('"${widget.searchTerm}"', style: japaneseFont.value.textStyle),
+            if (widget.searchMode != SearchMode.auto)
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Text(
+                  '(${widget.searchMode.name})',
+                  style: TextStyle(
+                    fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+          ],
         ),
         actions: [
           if (incognitoModeEnabled.value)
