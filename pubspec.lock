@@ -421,7 +421,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a46d61c335ad47dc5bf276c3bdfce108e8880143
+      resolved-ref: "832a74f9c2390d877af21fb3aac76b96c804a548"
       url: "https://git.pvv.ntnu.no/mugiten/jadb.git"
     source: git
     version: "1.0.0"

@@ -268,7 +268,31 @@ Stream<ArchiveV2StreamEvent> importLibraryList(
         )
         .toList();
 
-    final result = await db.libraryListInsertEntries(libraryListName, entries);
+    final entryExistenceChecks = await db.jadbFilterWordIds(
+      entries
+          .where((final e) => e.jmdictEntryId != null)
+          .map((final e) => e.jmdictEntryId!),
+    );
+
+    final existingEntries = entries.where((final e) {
+      if (e.jmdictEntryId != null) {
+        final result = entryExistenceChecks.contains(e.jmdictEntryId);
+        if (!result) {
+          print(
+            'Warning: Entry with jmdictEntryId ${e.jmdictEntryId} does not exist in the database. Skipping this entry.',
+          );
+        }
+        return result;
+      } else {
+        // If the entry does not have a jmdictEntryId, we assume it exists.
+        return true;
+      }
+    }).toList();
+
+    final result = await db.libraryListInsertEntries(
+      libraryListName,
+      existingEntries,
+    );
     if (!result) {
       throw Exception(
         'Failed to insert entries for library list "$libraryListName" from chunk file "${chunkFile.path}".',

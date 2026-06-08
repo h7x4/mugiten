@@ -107,7 +107,32 @@ Future<void> importLibraryListsFrom(
             .map(ArchiveV1LibraryListEntry.fromJson)
             .toList();
 
-    await libraryListInsertEntriesForSingleList(db, libraryName, entries);
+    final entryExistenceChecks = await db.jadbFilterWordIds(
+      entries
+          .where((final e) => e.jmdictEntryId != null)
+          .map((final e) => e.jmdictEntryId!),
+    );
+
+    final existingEntries = entries.where((final e) {
+      if (e.jmdictEntryId != null) {
+        final result = entryExistenceChecks.contains(e.jmdictEntryId);
+        if (!result) {
+          print(
+            'Warning: Entry with jmdictEntryId ${e.jmdictEntryId} does not exist in the database. Skipping this entry.',
+          );
+        }
+        return result;
+      } else {
+        // If the entry does not have a jmdictEntryId, we assume it exists.
+        return true;
+      }
+    }).toList();
+
+    await libraryListInsertEntriesForSingleList(
+      db,
+      libraryName,
+      existingEntries,
+    );
   }
 }
 
