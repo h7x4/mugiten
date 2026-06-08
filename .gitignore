@@ -26,3 +26,4 @@ result-*
 *.sqlite
 *.sqlite-journal
 assets/kanjivg
+assets/*.so

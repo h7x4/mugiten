@@ -1,6 +1,14 @@
 {
-  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
-  outputs = { self, nixpkgs }: let
+  inputs = {
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+
+    tamerye = {
+      url = "git+https://git.pvv.ntnu.no/Mugiten/tamerye.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, tamerye, nixpkgs }: let
     inherit (nixpkgs) lib;
     systems = [
       "x86_64-linux"
@@ -16,6 +24,9 @@
           android_sdk.accept_license = true;
           allowUnfree = true;
         };
+        overlays = [
+          tamerye.overlays.default
+        ];
       };
       androidPkgs = (pkgs.androidenv.composeAndroidPackages {
         buildToolsVersions = [ "35.0.0" "36.1.0" ];
@@ -37,7 +48,7 @@
           androidPkgs.androidsdk
           jdk'
 
-          pkgs.sqlite-interactive
+          pkgs.tamerye-sqlite-cli
           pkgs.sqldiff
         ];
         env = {
@@ -50,8 +61,9 @@
           ];
           FLUTTER_SDK = "${flutter'}";
           JAVA_HOME = "${jdk'}/lib/openjdk";
-          LIBSQLITE_PATH = "${pkgs.sqlite.out}/lib/libsqlite3.so";
+          LIBSQLITE_PATH = "${pkgs.tamerye-sqlite}/lib/libsqlite3.so";
           JADB_PATH = "./assets/jadb.sqlite";
+          NIX_LIBTAMERYE_PATH = "${pkgs.tamerye-sqlite-android-shared-lib}/lib/libtamerye.so";
         };
       };
     });

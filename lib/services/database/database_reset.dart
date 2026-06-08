@@ -4,9 +4,13 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:jadb/search.dart';
+import 'package:mugiten/libtamerye.dart';
 import 'package:mugiten/services/database/database.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'
+    show databaseFactoryFfi, sqfliteFfiInit;
+import 'package:sqlite3/sqlite3.dart' show sqlite3;
 
 /// Extracts the `jadb.sqlite` file from the assets into a writable directory
 /// and returns its path.
@@ -125,10 +129,20 @@ Future<Database> resetDatabase(final String dbPath) async {
     mugitenSchemaVersion,
   );
 
+  sqfliteFfiInit();
+
+  sqlite3.loadSqliteTameryeExtension();
+
+  databaseFactory = databaseFactoryFfi;
+
   final Database database = await openDatabase(
     dbPath,
     version: schemaVersion,
     readOnly: false,
+    onConfigure: (final db) async {
+      // Enable foreign key constraints
+      await db.execute('PRAGMA foreign_keys=ON');
+    },
     onUpgrade: (final db, final oldVersion, final newVersion) async {
       assert(
         oldVersion == 0,
@@ -139,10 +153,6 @@ Future<Database> resetDatabase(final String dbPath) async {
       await applyMigrations(db, migrations);
       log('Database upgrade complete');
     },
-    onConfigure: (final db) async {
-      // Enable foreign key constraints
-      await db.execute('PRAGMA foreign_keys=ON');
-    },
     onOpen: (final db) async {
       log('Verifying jadb tables...');
       await db.jadbVerifyTables();
@@ -150,6 +160,12 @@ Future<Database> resetDatabase(final String dbPath) async {
       log('Verifying mugiten tables...');
       // TODO: verify mugiten tables for the exact schema version.
       // await verifyMugitenTablesWithDbConnection(db);
+
+      log('Verifying libtamerye has been loaded correctly...');
+      final result = await db.rawQuery("SELECT hiragana_to_katakana('ひらがな')");
+      if (result.isEmpty || result.first.values.first != 'ヒラガナ') {
+        throw Exception('libtamerye does not seem to be loaded correctly');
+      }
 
       log('Database tables verified successfully');
     },

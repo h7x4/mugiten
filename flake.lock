@@ -1,5 +1,42 @@
 {
   "nodes": {
+    "crane": {
+      "locked": {
+        "lastModified": 1780532242,
+        "narHash": "sha256-D+BsdpxmtUwtqGoY0IXPhHgTlmqgcZKCEo1oMyn7ep0=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "59a82a1222dd3b2080b5cc52a1a2e8d5f1b77f37",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
+    "nix-sqlite": {
+      "inputs": {
+        "nixpkgs": [
+          "tamerye",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780571864,
+        "narHash": "sha256-IMCP9CzJc1zCSRoLcNE6qCCiQL/Y7kPCQqZzc89nsA0=",
+        "ref": "main",
+        "rev": "874e22c2e785d32cdd7ddabb5c936227ed2223d3",
+        "revCount": 29,
+        "type": "git",
+        "url": "https://git.pvv.ntnu.no/mugiten/nix-custom-sqlite.git"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://git.pvv.ntnu.no/mugiten/nix-custom-sqlite.git"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1779560665,
@@ -17,7 +54,53 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "tamerye": "tamerye"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "tamerye",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780543271,
+        "narHash": "sha256-oPJ7eJN1sM37v92Rp/eyQL7/rUm0BOvXEBAoq/zN0cM=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "c30ca201c5093540cf792f6982f81ba1aa0f3514",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "tamerye": {
+      "inputs": {
+        "crane": "crane",
+        "nix-sqlite": "nix-sqlite",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1780968337,
+        "narHash": "sha256-uhbUbnXsmNPAtVm9tD3HrWUSjNRV7pK+E/zre0KkFuY=",
+        "ref": "main",
+        "rev": "9adfd813e647c0f5a00a560b985aba2992f3a23a",
+        "revCount": 35,
+        "type": "git",
+        "url": "https://git.pvv.ntnu.no/Mugiten/tamerye.git"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://git.pvv.ntnu.no/Mugiten/tamerye.git"
       }
     }
   },

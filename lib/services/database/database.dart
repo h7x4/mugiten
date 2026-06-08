@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:get_it/get_it.dart';
 import 'package:jadb/search.dart';
 import 'package:jadb/version.dart';
+import 'package:mugiten/libtamerye.dart';
 import 'package:mugiten/models/verify_tables.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' show databaseFactoryFfi, sqfliteFfiInit;
+import 'package:sqlite3/sqlite3.dart' show sqlite3;
 
 export 'package:mugiten/services/database/database_reset.dart'
     show resetDatabase;
@@ -65,6 +68,13 @@ Future<Database> openDatabaseWithoutMigrations(
   final bool verifyTables = true,
 }) async {
   log('Opening database at $dbPath');
+
+  sqfliteFfiInit();
+
+  sqlite3.loadSqliteTameryeExtension();
+
+  databaseFactory = databaseFactoryFfi;
+
   final Database database = await openDatabase(
     dbPath,
     version: schemaVersion,
@@ -80,6 +90,12 @@ Future<Database> openDatabaseWithoutMigrations(
 
         log('Verifying mugiten tables...');
         await verifyMugitenTablesWithDbConnection(db);
+
+        log('Verifying libtamerye has been loaded correctly...');
+        final result = await db.rawQuery("SELECT hiragana_to_katakana('ひらがな')");
+        if (result.isEmpty || result.first.values.first != 'ヒラガナ') {
+          throw Exception('libtamerye does not seem to be loaded correctly');
+        }
 
         log('Database tables verified successfully');
       }
