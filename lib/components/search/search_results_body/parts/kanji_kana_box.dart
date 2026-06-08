@@ -53,7 +53,9 @@ class KanjiKanaBox extends StatelessWidget {
                 ? Text.rich(
                     TextSpan(
                       children:
-                          colorSpanFurigana != null && !romajiEnabled.value && emphasizeMatchSpans.value
+                          colorSpanFurigana != null &&
+                              !romajiEnabled.value &&
+                              emphasizeMatchSpans.value
                           ? [
                               TextSpan(
                                 text: furigana!.substring(
