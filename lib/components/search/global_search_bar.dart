@@ -14,6 +14,8 @@ class GlobalSearchBar extends StatelessWidget {
   void _search(final BuildContext context, final String text) =>
       Navigator.pushNamed(context, Routes.search, arguments: text);
 
+  bool get _searchAllowed => textController.text.trim().isNotEmpty;
+
   @override
   Widget build(final BuildContext context) {
     return Container(
@@ -39,12 +41,18 @@ class GlobalSearchBar extends StatelessWidget {
                 color: mugitenWheatBackground,
                 child: IconButton(
                   onPressed: () {
-                    final text = textController.text.trim();
-                    if (text.isNotEmpty) {
-                      _search(context, text);
+                    if (!_searchAllowed) {
+                      return;
                     }
+                    _search(context, textController.text.trim());
                   },
-                  icon: const Icon(Icons.search, color: Colors.white),
+                  icon: ListenableBuilder(
+                    listenable: textController,
+                    builder: (_, _) => Icon(
+                      Icons.search,
+                      color: _searchAllowed ? Colors.white : Colors.grey,
+                    ),
+                  ),
                 ),
               ),
             ),
