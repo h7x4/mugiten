@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get_it/get_it.dart';
+import 'package:jadb/search/word_search/word_search.dart';
 import 'package:mugiten/components/common/kanji_box.dart';
 import 'package:mugiten/components/search/search_results_body/parts/circle_badge.dart';
 import 'package:mugiten/models/history_entry.dart';
@@ -32,8 +33,12 @@ class HistoryEntryTile extends StatelessWidget {
           Routes.kanjiSearch,
           arguments: entry.kanji,
         )
-      : () =>
-            Navigator.pushNamed(context, Routes.search, arguments: entry.word);
+      : () => Navigator.pushNamed(
+          context,
+          Routes.search,
+          // TODO: store the search mode in the database instead of always using auto
+          arguments: (entry.word, SearchMode.auto),
+        );
 
   /// Copy the kanji/searchword to the clipboard when the entry is long-pressed.
   void Function() _onLongPress(final BuildContext context) =>

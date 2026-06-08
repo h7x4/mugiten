@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadb/search/word_search/word_search.dart';
 import 'package:jadb/util/romaji_transliteration.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/settings.dart';
@@ -44,7 +45,14 @@ class YomiChips extends StatelessWidget {
     final TextStyle? extraTextStyle,
   }) => InkWell(
     onTap: searchable
-        ? () => Navigator.pushNamed(context, Routes.search, arguments: yomi)
+        ? () => Navigator.pushNamed(
+            context,
+            Routes.search,
+            arguments: (
+              yomi,
+              type == YomiType.meaning ? SearchMode.english : SearchMode.kana,
+            ),
+          )
         : null,
     child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 5),

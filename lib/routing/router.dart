@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jadb/const_data/radicals.dart';
+import 'package:jadb/search/word_search/word_search.dart';
 import 'package:mugiten/models/library_list.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/screens/home.dart';
@@ -21,9 +22,16 @@ Route<Widget> generateRoute(final RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const Home());
 
     case Routes.search:
-      final searchTerm = args! as String;
+      final args_ = args is String
+          ? (args, SearchMode.auto)
+          : args is (String, SearchMode)
+          ? args
+          : throw ArgumentError(
+              'Invalid arguments for ${Routes.search}: $args. Expected either a String or a (String, SearchMode) tuple.',
+            );
       return MaterialPageRoute(
-        builder: (_) => WordSearchResultPage(searchTerm: searchTerm),
+        builder: (_) =>
+            WordSearchResultPage(searchTerm: args_.$1, searchMode: args_.$2),
       );
 
     case Routes.kanjiSearch:

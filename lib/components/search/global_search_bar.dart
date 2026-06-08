@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:jadb/search/word_search/word_search.dart';
 import 'package:mugiten/components/drawing_board/drawing_board.dart';
 import 'package:mugiten/components/search/language_selector.dart';
 import 'package:mugiten/routing/routes.dart';
 import 'package:mugiten/settings.dart';
 import 'package:mugiten/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GlobalSearchBar extends StatelessWidget {
   final TextEditingController textController = TextEditingController();
@@ -11,8 +14,24 @@ class GlobalSearchBar extends StatelessWidget {
 
   GlobalSearchBar({super.key});
 
-  void _search(final BuildContext context, final String text) =>
-      Navigator.pushNamed(context, Routes.search, arguments: text);
+  void _search(
+    final BuildContext context,
+    final String text,
+  ) => Navigator.pushNamed(
+    context,
+    Routes.search,
+    arguments: (
+      text,
+      // TODO: fetching the search mode through shared preferences is not ideal,
+      //       please refactor to use some sort of controller.
+      {0: SearchMode.auto, 1: SearchMode.kana, 2: SearchMode.english}[GetIt
+              .instance
+              .get<SharedPreferences>()
+              .getStringList('languageSelectorStatus')
+              ?.indexWhere((final s) => s == '1')] ??
+          SearchMode.auto,
+    ),
+  );
 
   bool get _searchAllowed => textController.text.trim().isNotEmpty;
 
