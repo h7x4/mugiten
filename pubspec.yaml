@@ -70,7 +70,6 @@ flutter:
     - assets/images/components/
     - assets/images/links/
     - assets/images/logo/
-    - assets/kanjivg/kanji/
     - assets/licenses/
     - docs/changelog/
     - lib/services/database/schemas/v1/

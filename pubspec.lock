@@ -421,7 +421,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "8ba7c66e67510835139c92655f8b94995083d780"
+      resolved-ref: bbdb177fa4e936bffcf2be06962347cb3c61f8ef
       url: "https://git.pvv.ntnu.no/mugiten/jadb.git"
     source: git
     version: "1.0.0"
@@ -454,7 +454,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a5a4a3726f40e3311f80f9a26f099bd057d7fc4d
+      resolved-ref: "04c13fd5a0dea094def3df9074123a58fc7b80e8"
       url: "https://git.pvv.ntnu.no/mugiten/kanimaji-dart.git"
     source: git
     version: "0.0.1"
