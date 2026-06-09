@@ -45,6 +45,7 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
         .jadbSearchWord(
           widget.searchTerm,
           searchMode: widget.searchMode,
+          fuzzyKana: fuzzyKanaSearch.value,
           page: pageKey - 1,
           pageSize: pageSize,
         )
@@ -159,7 +160,10 @@ class _WordSearchResultPageState extends State<WordSearchResultPage> {
       body: FutureBuilder(
         future: GetIt.instance
             .get<Database>()
-            .jadbSearchWordCount(widget.searchTerm)
+            .jadbSearchWordCount(
+              widget.searchTerm,
+              fuzzyKana: fuzzyKanaSearch.value,
+            )
             .then((final v) => v ?? 0),
         builder: (final context, final snapshot) {
           if (snapshot.hasError) return ErrorWidget(snapshot.error!);

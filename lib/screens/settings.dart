@@ -224,7 +224,16 @@ class _SettingsViewState extends State<SettingsView> {
           //     'Which font to use for japanese text. This might be useful if your phone shows kanji with a Chinese font.',
           // subtitleMaxLines: 3,
         ),
-
+        SettingsTile.switchTile(
+          title: const Text('Fuzzy kana search'),
+          description: const Text(
+            'Allow hiragana and katakana to match each other in search queries.',
+          ),
+          leading: const Icon(Icons.emergency),
+          onToggle: (final b) => setState(() => fuzzyKanaSearch.value = b),
+          initialValue: fuzzyKanaSearch.value,
+          activeSwitchColor: mugitenWheatBackground,
+        ),
         SettingsTile.switchTile(
           title: const Text('Emphasize search matches'),
           description: const Text(

@@ -129,6 +129,13 @@ class EmphasizeMatchSpans extends SharedPrefItem<bool> {
 
 final emphasizeMatchSpans = EmphasizeMatchSpans();
 
+/// Whether to fuzzily match kana in search queries.
+class FuzzyKanaSearch extends SharedPrefItem<bool> {
+  FuzzyKanaSearch() : super('fuzzyKanaSearch', true);
+}
+
+final fuzzyKanaSearch = FuzzyKanaSearch();
+
 /// Whether to reduce the size of the kanji drawing board.
 ///
 /// This is a workaround for an issue where it's easy to activate the 'go back' gesture when
