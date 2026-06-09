@@ -41,6 +41,8 @@ class SearchResultCard extends StatefulWidget {
 }
 
 class _SearchResultCardState extends State<SearchResultCard> {
+  final ExpansibleController expansionController = ExpansibleController();
+
   bool get hasAttribution =>
       widget.result.sources.jmdict || widget.result.sources.jmnedict;
 
@@ -113,12 +115,47 @@ class _SearchResultCardState extends State<SearchResultCard> {
             ],
           ),
           Expanded(
-            child: JapaneseHeader(
-              baseWord: widget.result.japanese[0].base,
-              furigana: widget.result.japanese[0].furigana,
-              dimBase: widget.result.hasUnusualKanji,
-              colorSpanBase: colorSpanBase,
-              colorSpanFurigana: colorSpanFurigana,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => expansionController.isExpanded
+                  ? expansionController.collapse()
+                  : expansionController.expand(),
+              onLongPress: () => copyToClipboard(
+                context,
+                widget.result.japanese.firstOrNull?.base,
+              ),
+              onDoubleTap: widget.allowQuickAddLibraryList
+                  ? () {
+                      if (isQuickListed && quickAddLibraryList.value != null) {
+                        unawaited(
+                          GetIt.instance
+                              .get<Database>()
+                              .libraryListDeleteEntry(
+                                quickAddLibraryList.value!,
+                                jmdictEntryId: widget.result.entryId,
+                              )
+                              .then((_) => fetchFavouriteAndQuickListStatus()),
+                        );
+                      } else {
+                        unawaited(
+                          GetIt.instance
+                              .get<Database>()
+                              .libraryListInsertEntry(
+                                quickAddLibraryList.value!,
+                                jmdictEntryId: widget.result.entryId,
+                              )
+                              .then((_) => fetchFavouriteAndQuickListStatus()),
+                        );
+                      }
+                    }
+                  : null,
+              child: JapaneseHeader(
+                baseWord: widget.result.japanese[0].base,
+                furigana: widget.result.japanese[0].furigana,
+                dimBase: widget.result.hasUnusualKanji,
+                colorSpanBase: colorSpanBase,
+                colorSpanFurigana: colorSpanFurigana,
+              ),
             ),
           ),
           Row(
@@ -170,72 +207,43 @@ class _SearchResultCardState extends State<SearchResultCard> {
     final backgroundColor =
         widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
 
-    return GestureDetector(
-      onLongPress: () =>
-          copyToClipboard(context, widget.result.japanese.firstOrNull?.base),
-      onDoubleTap: () {
-        if (isQuickListed && quickAddLibraryList.value != null) {
-          unawaited(
-            GetIt.instance
-                .get<Database>()
-                .libraryListDeleteEntry(
-                  quickAddLibraryList.value!,
+    return Slidable(
+      key: ValueKey('slidable-${widget.result.entryId}'),
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        children:
+            widget.slidableActions ??
+            [
+              SlidableAction(
+                backgroundColor: Colors.yellow,
+                icon: Icons.star,
+                onPressed: (_) => GetIt.instance
+                    .get<Database>()
+                    .libraryListToggleEntry(
+                      'favourites',
+                      jmdictEntryId: widget.result.entryId,
+                    )
+                    .then((_) => setState(() => isFavourited = !isFavourited)),
+              ),
+              SlidableAction(
+                backgroundColor: Colors.blue,
+                icon: Icons.bookmark,
+                onPressed: (final context) => showAddToLibraryDialog(
+                  context: context,
                   jmdictEntryId: widget.result.entryId,
-                )
-                .then((_) => fetchFavouriteAndQuickListStatus()),
-          );
-        } else {
-          unawaited(
-            GetIt.instance
-                .get<Database>()
-                .libraryListInsertEntry(
-                  quickAddLibraryList.value!,
-                  jmdictEntryId: widget.result.entryId,
-                )
-                .then((_) => fetchFavouriteAndQuickListStatus()),
-          );
-        }
-      },
-      child: Slidable(
-        key: ValueKey('slidable-${widget.result.entryId}'),
-        endActionPane: ActionPane(
-          motion: const ScrollMotion(),
-          children:
-              widget.slidableActions ??
-              [
-                SlidableAction(
-                  backgroundColor: Colors.yellow,
-                  icon: Icons.star,
-                  onPressed: (_) => GetIt.instance
-                      .get<Database>()
-                      .libraryListToggleEntry(
-                        'favourites',
-                        jmdictEntryId: widget.result.entryId,
-                      )
-                      .then(
-                        (_) => setState(() => isFavourited = !isFavourited),
-                      ),
-                ),
-                SlidableAction(
-                  backgroundColor: Colors.blue,
-                  icon: Icons.bookmark,
-                  onPressed: (final context) => showAddToLibraryDialog(
-                    context: context,
-                    jmdictEntryId: widget.result.entryId,
-                    kanji: null,
-                  ).then((_) => fetchFavouriteAndQuickListStatus()),
-                ),
-              ],
-        ),
-        child: ExpansionTile(
-          leading: widget.leading,
-          collapsedBackgroundColor: backgroundColor,
-          backgroundColor: backgroundColor,
-          initiallyExpanded: widget.initiallyExpanded,
-          // onExpansionChanged: (b) async { },
-          title: _header,
-          children: [_body()],
-        ),
+                  kanji: null,
+                ).then((_) => fetchFavouriteAndQuickListStatus()),
+              ),
+            ],
+      ),
+      child: ExpansionTile(
+        controller: expansionController,
+        leading: widget.leading,
+        collapsedBackgroundColor: backgroundColor,
+        backgroundColor: backgroundColor,
+        initiallyExpanded: widget.initiallyExpanded,
+        title: _header,
+        children: [_body()],
       ),
     );
   }
