@@ -120,7 +120,7 @@ class _SettingsViewState extends State<SettingsView> {
 
     final saveFile = await FilePicker.saveFile(
       dialogTitle: 'Export data',
-      fileName: getExportFileNameNoSuffix(),
+      fileName: '${getExportFileNameNoSuffix()}.zip',
       type: FileType.custom,
       allowedExtensions: ['zip'],
       bytes: tmpfile.readAsBytesSync(),
