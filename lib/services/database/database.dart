@@ -43,13 +43,26 @@ Future<bool> databaseNeedsReset() async {
     return true;
   }
 
-  final Database database = await openDatabase(
-    dbPath,
-    readOnly: true,
-    singleInstance: true,
-  );
-  final databaseVersion = await database.getVersion();
-  await database.close();
+  bool result = false;
+
+  Database? database;
+  late final int databaseVersion;
+  try {
+    database = await openDatabase(dbPath, readOnly: true, singleInstance: true);
+    databaseVersion = await database.getVersion();
+  } catch (e, stackTrace) {
+    await database?.close();
+    log(
+      'Failed to open database at $dbPath and get its version, assuming reset is needed.',
+      error: e,
+      stackTrace: stackTrace,
+    );
+    result = true;
+  }
+
+  if (result) {
+    return true;
+  }
 
   final mugitenVersion = databaseVersion >> 16;
   final jadbVersion = databaseVersion & 0xFFFF;
@@ -62,7 +75,7 @@ Future<bool> databaseNeedsReset() async {
   );
 
   if (databaseVersion < schemaVersion) {
-    print('Database reset needed');
+    print('Schema version is older than expected, database reset needed');
     return true;
   }
 
