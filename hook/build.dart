@@ -4,25 +4,25 @@ import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
 
 void main(final List<String> args) {
-  build(args, (input, output) async {
-    // final targetOS = input.config.code.targetOS;
-    // final arch = input.config.code.targetArchitecture;
-
-    // final (osName, fileName) = switch (targetOS) {
-    //   OS.linux => ('linux', 'vec0.so'),
-    //   OS.macOS => ('macos', 'vec0.dylib'),
-    //   OS.windows => ('windows', 'vec0.dll'),
-    //   _ => throw UnsupportedError('Unsupported target os $targetOS'),
-    // };
-    // final archName = switch (arch) {
+  // ignore: discarded_futures
+  build(args, (final input, final output) async {
+    // final archName = switch (input.config.code.targetArchitecture) {
     //   Architecture.x64 => 'x86_64',
     //   Architecture.arm64 => 'aarch64',
     //   _ => throw UnsupportedError('Unsupported target architecture $arch'),
     // };
+    //
 
-    final libtameryePath = Platform.environment['NIX_LIBTAMERYE_PATH'] ?? 'assets/libtamerye.so';
+    final libtameryePath = switch (input.config.code.targetOS) {
+      OS.android => Platform.environment['NIX_ANDROID_LIBTAMERYE_PATH']!,
+      OS.linux => Platform.environment['NIX_NATIVE_LIBTAMERYE_PATH']!,
+      _ => throw UnsupportedError(
+        'Unsupported target os ${input.config.code.targetOS}',
+      ),
+    };
+
     if (!File(libtameryePath).existsSync()) {
-      throw Exception('Could not find libtamerye at path: $libtameryePath. Please set the NIX_LIBTAMERYE_PATH environment variable to the correct path.');
+      throw Exception('Could not find libtamerye at path: $libtameryePath.');
     }
 
     final targetFilePath = input.outputDirectory.resolve('libtamerye.so');

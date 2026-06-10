@@ -89,11 +89,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1780969606,
-        "narHash": "sha256-NuZKL9igkDCnvQwF6U2llK6ajpmGkWfPsamRORi8jYc=",
+        "lastModified": 1781057569,
+        "narHash": "sha256-Sw5LrhJQCev5JACigE057HCWGGAYtcR3fWKCDF+kKsM=",
         "ref": "main",
-        "rev": "99788794312472b46a5c65eabb45969adb14e9ce",
-        "revCount": 36,
+        "rev": "9655a18da1b891fd458d618f1d83cc6ffd0094b6",
+        "revCount": 37,
         "type": "git",
         "url": "https://git.pvv.ntnu.no/Mugiten/tamerye.git"
       },

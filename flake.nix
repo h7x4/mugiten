@@ -63,7 +63,8 @@
           JAVA_HOME = "${jdk'}/lib/openjdk";
           LIBSQLITE_PATH = "${pkgs.tamerye-sqlite}/lib/libsqlite3.so";
           JADB_PATH = "./assets/jadb.sqlite";
-          NIX_LIBTAMERYE_PATH = "${pkgs.tamerye-sqlite-android-shared-lib}/lib/libtamerye.so";
+          NIX_NATIVE_LIBTAMERYE_PATH = "${pkgs.tamerye-sqlite-shared-lib}/lib/libtamerye.so";
+          NIX_ANDROID_LIBTAMERYE_PATH = "${pkgs.tamerye-sqlite-android-shared-lib}/lib/libtamerye.so";
         };
       };
     });
