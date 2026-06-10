@@ -7,7 +7,7 @@ import 'package:mugiten/services/archive/archive_dispatcher.dart'
 import 'package:mugiten/services/database/database.dart'
     show databaseNeedsReset, databasePath, resetDatabase;
 import 'package:mugiten/services/initialization/initialization_status.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:mugiten/services/initialization/pending_user_data_backup.dart';
 import 'package:sqflite/sqflite.dart';
 
 class InitializationCubit extends Cubit<InitializationStatus> {
@@ -40,6 +40,26 @@ class InitializationCubit extends Cubit<InitializationStatus> {
     }
 
     emit(BackupUserData(progress: total, total: total));
+  }
+
+  Future<PendingUserDataBackup> _createPendingUserDataBackup(
+    final Database database,
+  ) async {
+    final backup = await PendingUserDataBackup.locate();
+    await backup.clear();
+    await backup.ensureDirectoryExists();
+
+    try {
+      await _backupUserData(database, backup.temporaryArchiveFile);
+      await backup.temporaryArchiveFile.rename(backup.archiveFile.path);
+      await backup.markReady();
+      return backup;
+    } catch (_) {
+      if (backup.temporaryArchiveFile.existsSync()) {
+        await backup.temporaryArchiveFile.delete();
+      }
+      rethrow;
+    }
   }
 
   Future<void> _restoreUserData(
@@ -84,28 +104,26 @@ class InitializationCubit extends Cubit<InitializationStatus> {
     emit(FinishDownloadMLKitDigitalInkModel());
 
     emit(CheckDatabase());
-    if (deleteDatabase || await databaseNeedsReset()) {
+    PendingUserDataBackup? backup = await getPendingUserDataBackup();
+    final bool needsDatabaseReset =
+        deleteDatabase || backup != null || await databaseNeedsReset();
+    if (needsDatabaseReset) {
       final String dbPath = await databasePath();
       final bool databaseAlreadyExists = File(dbPath).existsSync();
 
-      File? backupArchive;
       Database? migratedDatabase;
 
       try {
-        if (databaseAlreadyExists) {
-          final tempDir = await getTemporaryDirectory();
-          backupArchive = File('${tempDir.path}/mugiten_data_backup.zip');
-          if (backupArchive.existsSync()) {
-            await backupArchive.delete();
-          }
-
+        if (backup != null) {
+          await archive_dispatcher.detectArchiveVersion(backup.archiveFile);
+        } else if (databaseAlreadyExists) {
           final existingDatabase = await openDatabase(
             dbPath,
             readOnly: true,
             singleInstance: false,
           );
           try {
-            await _backupUserData(existingDatabase, backupArchive);
+            backup = await _createPendingUserDataBackup(existingDatabase);
           } finally {
             await existingDatabase.close();
           }
@@ -115,16 +133,13 @@ class InitializationCubit extends Cubit<InitializationStatus> {
         migratedDatabase = await resetDatabase(dbPath);
         emit(MigrateDatabase(total: 2, progress: 2));
 
-        if (databaseAlreadyExists) {
-          await _restoreUserData(migratedDatabase, backupArchive!);
+        if (backup != null) {
+          await _restoreUserData(migratedDatabase, backup.archiveFile);
+          await backup.clear();
         }
       } finally {
         if (migratedDatabase != null) {
           await migratedDatabase.close();
-        }
-
-        if (backupArchive != null && backupArchive.existsSync()) {
-          await backupArchive.delete();
         }
       }
     }

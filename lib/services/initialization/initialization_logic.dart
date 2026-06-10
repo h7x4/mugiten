@@ -5,11 +5,16 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:get_it/get_it.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:mugiten/services/database/database.dart';
+import 'package:mugiten/services/initialization/pending_user_data_backup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Determine whether the application needs to show the initialization screen.
 Future<bool> needsInitialization() async {
+  if (await hasPendingUserDataBackup()) {
+    return true;
+  }
+
   final modelManager = DigitalInkRecognizerModelManager();
   if (!await modelManager.isModelDownloaded('ja')) {
     return true;
