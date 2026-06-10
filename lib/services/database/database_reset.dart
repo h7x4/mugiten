@@ -108,6 +108,23 @@ Future<void> applyMigrations(
   }
 }
 
+Future<void> deleteDatabaseFiles(final String dbPath) async {
+  for (final path in [
+    dbPath,
+    '$dbPath-wal',
+    '$dbPath-shm',
+    '$dbPath-journal',
+  ]) {
+    final file = File(path);
+    if (!file.existsSync()) {
+      continue;
+    }
+
+    await file.delete();
+    log('Deleted database file at $path');
+  }
+}
+
 /// Resets the database at the given path by:
 ///
 /// - Deleting the database file (if it exists)
@@ -116,11 +133,7 @@ Future<void> applyMigrations(
 Future<Database> resetDatabase(final String dbPath) async {
   log('Resetting database at $dbPath...');
 
-  final File dbFile = File(dbPath);
-  if (dbFile.existsSync()) {
-    dbFile.delete();
-    log('Deleted existing database file at $dbPath');
-  }
+  await deleteDatabaseFiles(dbPath);
 
   await extractJadbFromAssets(dbPath);
   log('Extracted jadb.sqlite to $dbPath');
