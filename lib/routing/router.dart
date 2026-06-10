@@ -84,7 +84,7 @@ Route<Widget> generateRoute(final RouteSettings settings) {
             title: const Text('Error'),
             backgroundColor: Colors.red,
           ),
-          body: Center(child: ErrorWidget('Some kind of error occured')),
+          body: Center(child: ErrorWidget('Some kind of error occurred')),
         ),
       );
   }
