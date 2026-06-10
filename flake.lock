@@ -66,11 +66,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780888890,
-        "narHash": "sha256-MUQPFiskEENaJ2N82TRIqpKlHXGXJJkPfKH6W788oQo=",
+        "lastModified": 1780975129,
+        "narHash": "sha256-428T1pLXnbVeUgZx2wWEkbvl3ZORjras34ANZ3ACp5A=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "7d5f8d75fc195a236b46633d7679139698aeb35f",
+        "rev": "fe64e6b409dc513274d2941f8da13bbd0fdcf44e",
         "type": "github"
       },
       "original": {
@@ -89,11 +89,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1781057569,
-        "narHash": "sha256-Sw5LrhJQCev5JACigE057HCWGGAYtcR3fWKCDF+kKsM=",
+        "lastModified": 1781059814,
+        "narHash": "sha256-rUZHtddRp/roiyi+FAgMsKESF7bqW5wUNvD9R3OE600=",
         "ref": "main",
-        "rev": "9655a18da1b891fd458d618f1d83cc6ffd0094b6",
-        "revCount": 37,
+        "rev": "903f990fddf77992ac0abb688f8c245e1aaeac38",
+        "revCount": 38,
         "type": "git",
         "url": "https://git.pvv.ntnu.no/Mugiten/tamerye.git"
       },
